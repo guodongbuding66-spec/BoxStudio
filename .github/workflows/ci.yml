@@ -78,3 +78,6 @@ jobs:
 
       - name: V0.25 Bezier clip, Smart Guide and LUT16 DeviceLink tests
         run: node tests/v25.mjs
+
+      - name: V0.26 persistent guides, numeric clips and native cubic PDF tests
+        run: node tests/v26.mjs
