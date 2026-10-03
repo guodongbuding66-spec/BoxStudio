@@ -1,110 +1,142 @@
-# BoxStudio V0.22
+# BoxStudio V0.23
 
 BoxStudio 是浏览器内运行的纸盒结构设计、2D 刀版、唛头编辑、客户规则、Excel 批量订单、3D 折叠、印前检查、生产审批与生产文件导出原型。
 
-当前主线：**参数化结构 + 唛头变量 + Customer / Packaging Rule + Master Template + Batch Worker + Recoverable Artifacts + Production Approval + Project Persistence + Granular Remote Merge + Folded Artwork Texture Proof + SVG Appearance + Cross-panel Artwork + Native SVG Gradient + Native PDF Gradient/Soft-mask Proof + Object Z-order + Multi-select/Snap + Shared Transform + Editable Clip Polygon**。
+当前主线：**参数化结构 + 唛头变量 + Customer / Packaging Rule + Master Template + Batch Worker + Recoverable Artifacts + Production Approval + Project Persistence + Granular Remote Merge + Folded Artwork Texture Proof + SVG Appearance + Cross-panel Artwork + Native SVG Gradient + Integrated Native PDF Gradient/Soft Mask + Object Z-order + Multi-select/Snap + Shared Transform + Graphical Clip Editing + Smart Spacing + Verified ICC DeviceLink Subset**。
 
-## V0.22 新增
+## V0.23 新增
 
-### 1. Native PDF Gradient Soft-mask Proof
+### 1. Native Gradient / Soft Mask 已进入完整 Production PDF
 
-新增 `src/nativePdfV22.js`。
+新增 `src/productionPdfV23.js`。
 
-V0.22 在 V0.21 Native PDF Shading Proof 基础上继续支持：
+V0.23 新的 Production PDF 不再把 Native Gradient 只放在独立 Proof 文档里。当前单一 PDF serializer 同时包含：
 
-- Linear Gradient → PDF `/ShadingType 2`
-- Radial Gradient → PDF `/ShadingType 3`
-- Multi-stop Gradient → Type 3 Stitching Function
-- Uniform Alpha → `ExtGState`
-- **Varying Gradient Stop Opacity → PDF Luminosity Soft Mask**
-- `/SMask << /S /Luminosity ... >>`
-- DeviceGray transparency Form XObject
-- Panel Clip / Cross-panel Clip
+- CUT / CREASE / PERF / GLUE
+- Spot Separation / Overprint
+- SKU / N.W. / G.W. / Package Meas / CRN / Contract No.
+- Barcode + QR
+- Shipping Icons
+- Text / Notice / Shape / Line
+- Technical Vector Text / User TTF Outline
+- Panel-local SVG Outline
+- Cross-panel SVG Outline Fragment
+- PDF `/ShadingType 2` Linear Gradient
+- PDF `/ShadingType 3` Radial Gradient
+- Multi-stop Stitching Function
+- Uniform Alpha `ExtGState`
+- Varying Gradient Stop Alpha `/SMask`
+- Editable Cross-panel Clip
+- Object Z-order
+- PDF/X-4 Candidate OutputIntent / XMP / TrimBox / BleedBox 路线
 
-导出文件：
+主导出：
 
 ```text
-boxstudio-v22-native-gradient-softmask-proof.pdf
+boxstudio-v0.23-production-native.pdf
 ```
 
-这仍是 Native Appearance Proof / Serializer Validation 路线，不会错误替换现有完整生产 PDF。Production PDF 继续保留已回归验证的 V0.19 appearance-aware serializer。
+V0.19 Tessellation Production PDF 仍保留为兼容回退。
 
-### 2. Cross-panel Shared Transform
+### 2. 第一条可验证 ICC Artwork Conversion 路线
+
+新增 `src/iccDeviceLinkV23.js`。
+
+V0.23 不再把“加载了 CMYK OutputIntent”误写成“已经进行了 RGB→CMYK 转换”。真正转换只在加载并验证通过的 ICC DeviceLink 下启用。
+
+当前支持范围严格限定为：
+
+```text
+Profile Class: link
+Input: RGB
+Output: CMYK
+A2B0: LUT8 / mft1
+Channels: 3 -> 4
+```
+
+实现包含：
+
+- ICC Header / Tag Table 校验
+- A2B0 查找
+- LUT8 Input Tables
+- 3×3 Matrix
+- 3D CLUT Trilinear Interpolation
+- Output Tables
+- Native SVG Solid / Gradient RGB → CMYK
+- PDF Native Shading `/DeviceCMYK`
+
+普通 CMYK printer profile 仍然只是 OutputIntent，不会被静默当成转换引擎。
+
+当前没有宣称支持 LUT16、mAB/mBA、任意 Source Profile + Output Profile CMM chaining、Black Point Compensation 或完整商业 CMM 行为。
+
+### 3. 2D Canvas 可直接拖 Clip Points
 
 新增：
 
-- `src/crossPanelTransformV22.js`
-- `src/v22CanvasOverlay.js`
+- `src/clipEditorV23.js`
+- `src/v23CanvasOverlay.js`
 
-多选 Cross-panel Artwork 现在支持：
-
-- Shared Group Resize
-- Shared Group Rotation
-- Common Transform Origin
-- Rotation Snap
-- Group Selection Bounds
-- 单对象 Resize / Rotate 继续保留
-- Shift-click Add / Remove Selection
-- Group Move + Panel/Grid Snap 继续保留
-
-### 3. Align / Distribute
-
-V0.22 Workspace 新增：
-
-- Align Left
-- Center X
-- Align Right
-- Align Top
-- Center Y
-- Align Bottom
-- Distribute X
-- Distribute Y
-
-Distribution 使用当前选择范围内的等间距 Gap。
-
-### 4. Editable Cross-panel Clip Polygon
-
-Cross-panel Artwork 新增 `crossClip`。
-
-Clip Polygon 使用归一化对象坐标，例如：
-
-```text
-0,0 1,0 1,1 0,1
-```
+选中一个带 `crossClip` 的 Cross-panel Artwork 后，Design 画布会显示青色 Clip Handles。
 
 支持：
 
-- 自定义 Polygon Clip
-- 10% Inset Preset
-- Clear Clip
-- 随对象 Scale
-- 随对象 Rotate
-- Fill Fragment Clip
-- SVG Outline Segment Clip
-- Panel Clip 之前执行
-- Folded 3D Panel Artwork Atlas 同步使用
-- Native SVG Export 同步保留 editable clipPath
+- 直接拖动 Clip Point
+- Document → Object Local 逆旋转
+- 0..1 Normalized Coordinate 回写
+- Rotated Artwork Clip 编辑
+- Full Rect Clip 初始化
+- 10% Inset Clip 初始化
 
-这是几何 Clip，不等同 RIP Trapping 或完整 SVG Luminance Mask Editor。
+Clip 继续同步进入：
 
-### 5. V0.22 Workspace
+```text
+2D Artwork
+→ Production Materialization
+→ Native SVG
+→ V0.23 Production PDF
+→ Panel Artwork Atlas
+→ Folded 3D Texture Proof
+```
+
+### 4. Drag-time Smart Spacing
+
+新增 `src/smartSpacingV23.js`。
+
+Cross-panel Artwork 拖动时现在可以识别：
+
+- 左右等间距
+- 上下等间距
+
+接近配置容差时自动吸附，并显示橙色 Equal-gap Guide 和 mm 数值。
+
+默认：
+
+```text
+Smart Spacing = true
+Spacing Tolerance = 3 mm
+```
+
+原有 Panel Edge / Panel Center / Grid Snap 继续保留。按住 `Alt` 可以临时绕过 Snap。
+
+### 5. V0.23 Workspace
 
 新增：
 
-- `src/v22Ui.js`
-- `src/v22Ui.css`
+- `src/v23Ui.js`
+- `src/v23Ui.css`
 
 提供：
 
-- Export V0.22 Soft-mask Proof PDF
-- Export Native Gradient SVG
-- Stable V0.19 Production PDF
-- Axial / Radial / Soft-mask / Alpha 统计
-- Shared Transform / Align / Distribution
-- Editable Clip Polygon
-- 当前 Cross-panel Selection / Clip 状态
-
-V0.21 / V0.20 Workspace 在 V0.22 下隐藏，Folded 3D Artwork Proof 继续保留。
+- Export V0.23 Integrated Production PDF
+- V0.22 Native Appearance Proof PDF
+- Native Gradient SVG
+- V0.19 Tessellation Fallback
+- Native Axial / Radial / Soft-mask 统计
+- 当前 Native Appearance PDF 色彩空间
+- ICC DeviceLink 文件加载 / 校验
+- Smart Spacing 设置
+- Graphical Clip 初始化
+- PDF/X / ICC 能力边界提示
 
 ## 已有核心能力
 
@@ -137,14 +169,15 @@ V0.21 / V0.20 Workspace 在 V0.22 下隐藏，Folded 3D Artwork Proof 继续保�
 - Custom Mark Template / Mark Asset
 - Panel-local mm Layout Editor
 - Safe SVG Import
-- SVG Fill / Gradient / Clip / Mask Proof Subset
-- V0.19 Appearance Production Materialization
+- SVG Fill / Gradient / Clip / Mask Safe Subset
 - Cross-panel Artwork
 - Native SVG Gradient
 - Object Z-order
-- Native PDF Gradient / Soft-mask Proof
-- Cross-panel Shared Transform
-- Editable Clip Polygon
+- Native PDF Gradient / Soft Mask
+- Shared Transform
+- Align / Distribute
+- Graphical Clip Points
+- Live Smart Spacing
 
 ### 3D / Proof
 
@@ -174,6 +207,8 @@ V0.21 / V0.20 Workspace 在 V0.22 下隐藏，Folded 3D Artwork Proof 继续保�
 - Viewer / Operator / Approver / Admin
 - Approved Production PDF Gate
 
+V0.23 单项目 Production PDF 已使用新 integrated native serializer；Batch Worker 仍使用现有批量生产 serializer，尚未切换到 V0.23 native PDF。
+
 ### Project / Collaboration Foundation
 
 - Local Project Library
@@ -185,6 +220,27 @@ V0.21 / V0.20 Workspace 在 V0.22 下隐藏，Folded 3D Artwork Proof 继续保�
 - Object / Field-level Merge
 
 当前仓库仍不包含真正托管的 BoxStudio Backend、Auth/SSO 或不可篡改服务器端 Audit。
+
+## PDF/X 与 ICC 边界
+
+### PDF/X
+
+当前仍叫：
+
+```text
+PDF/X-4 Candidate
+```
+
+它不是 Acrobat Preflight、callas pdfToolbox 或印厂 RIP 的第三方认证结果。
+
+### ICC
+
+存在两条不同路径：
+
+1. **CMYK OutputIntent**：用于 PDF/X Candidate 输出条件描述；
+2. **RGB→CMYK DeviceLink LUT8**：用于 V0.23 Native SVG Appearance 的实际颜色数值转换。
+
+两者不会混为一谈。
 
 ## 运行
 
@@ -221,35 +277,37 @@ node tests/v19.mjs
 node tests/v20.mjs
 node tests/v21.mjs
 node tests/v22.mjs
+node tests/v23.mjs
 ```
 
-V0.22 Regression 覆盖：
+V0.23 Regression 覆盖：
 
-- Gradient Stop Opacity → PDF Soft Mask
-- `/S /Luminosity`
-- DeviceGray Transparency Form
-- Shared Multi-object Scale
-- Shared Rotation Snap
-- Align
-- Equal-gap Distribution
-- Normalized Clip Parsing
-- Cross-panel Clip Materialization
-- Clip Area Reduction
-- Clip Diagnostics
+- Integrated Production PDF 1.7
+- Native Axial Shading
+- Gradient Alpha Soft Mask
+- Production Spot Separation
+- 普通变量文字 + Native Appearance 同文档
+- Synthetic ICC RGB→CMYK LUT8 DeviceLink
+- Trilinear CLUT Conversion
+- Invalid ICC Class Rejection
+- DeviceCMYK Native Shading
+- Rotated Clip Point Coordinate Round-trip
+- Clip Drag Persistence
+- Live Equal-gap Smart Spacing
 
 详细报告：
 
 ```text
-docs/V0.22_TEST_REPORT.md
+docs/V0.23_TEST_REPORT.md
 ```
 
 ## 数据存储
 
 ```text
-boxstudio-mvp-v22
+boxstudio-mvp-v23
 ```
 
-V0.21 及更早版本继续作为迁移来源。
+V0.22 及更早版本继续作为迁移来源。
 
 附加存储保持：
 
@@ -259,30 +317,34 @@ boxstudio-remote-base-v1:<projectId>
 IndexedDB: boxstudio-artifacts-v1
 ```
 
-## V0.22 关键新增文件
+ICC DeviceLink 当前只保存在页面会话内，不写入 Project JSON / LocalStorage。
+
+## V0.23 关键新增文件
 
 ```text
 src/
-  nativePdfV22.js
-  crossPanelTransformV22.js
-  v22CanvasOverlay.js
-  v22Ui.js
-  v22Ui.css
+  productionPdfV23.js
+  iccDeviceLinkV23.js
+  clipEditorV23.js
+  smartSpacingV23.js
+  v23CanvasOverlay.js
+  v23Ui.js
+  v23Ui.css
 
 tests/
-  v22.mjs
+  v23.mjs
 
 docs/
-  V0.22_TEST_REPORT.md
+  V0.23_TEST_REPORT.md
 ```
 
 ## 当前边界 / 下一阶段
 
-- 将 Native PDF Shading + Soft Mask 真正并入完整 Production PDF Serializer
-- 真正的 ICC RGB → CMYK Artwork Conversion Engine
-- Arbitrary SVG Luminance Mask
-- 2D Canvas Graphical Clip-point Editing
-- Drag-time Smart Spacing Guides
+- 将 V0.23 Native Production PDF 接入 Batch Worker / Approval Export Gate
+- 扩展 ICC LUT16 / mAB/mBA 与更完整 CMM 路线
+- Clip Segment Insert / Delete / Bezier Handles
+- 更完整 Illustrator-style Smart Guides
+- Arbitrary SVG Luminance Mask / Pattern / Blend Mode
 - Board Thickness / Bend Radius / Print Stretch Simulation
 - Hosted Backend + Auth / SSO
 - Server-side Immutable Audit / Approval Signatures
