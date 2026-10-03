@@ -1,5 +1,6 @@
 const DEFAULT_OBJECT_MERGE_DOMAINS=['elements','masterTemplates','productionJobs'];
 const DEFAULT_MAP_MERGE_DOMAINS=['customCustomerProfiles','customPackagingRules','customMarkTemplates','customMarkAssets'];
+const DEFAULT_ATOMIC_MERGE_DOMAINS=['projectName','structure','variables','hiddenGroups','lockedGroups','lockedVariables','customerProfileId','packagingRuleProfileId','markTemplateId','exportOptions','repairTolerance','activeProductionJobId','batch'];
 
 function clone(v){return structuredClone(v)}
 function stable(v){if(Array.isArray(v))return v.map(stable);if(v&&typeof v==='object')return Object.fromEntries(Object.keys(v).sort().map(k=>[k,stable(v[k])]));return v}
@@ -47,9 +48,10 @@ function mergeMapDomain(path,base={},local={},remote={},hasBase,conflicts){
   }return out;
 }
 
-export function analyzeObjectLevelMerge({baseState=null,localState={},remoteState={},objectDomains=DEFAULT_OBJECT_MERGE_DOMAINS,mapDomains=DEFAULT_MAP_MERGE_DOMAINS}={}){
+export function analyzeObjectLevelMerge({baseState=null,localState={},remoteState={},objectDomains=DEFAULT_OBJECT_MERGE_DOMAINS,mapDomains=DEFAULT_MAP_MERGE_DOMAINS,atomicDomains=DEFAULT_ATOMIC_MERGE_DOMAINS}={}){
   const hasBase=Boolean(baseState&&typeof baseState==='object'),merged=clone(localState||{}),conflicts=[],summaries=[];
-  for(const path of objectDomains){const b=baseState?.[path]||[],l=localState?.[path]||[],r=remoteState?.[path]||[];if(!keyedArray(l)||!keyedArray(r)||!keyedArray(b)){merged[path]=mergeLeaf(path,b,l,r,hasBase,conflicts);summaries.push({path,mode:'atomic'});continue;}const before=conflicts.length;merged[path]=mergeKeyedArray(path,b,l,r,hasBase,conflicts);summaries.push({path,mode:'id+field',conflicts:conflicts.length-before,count:merged[path].length});}
+  for(const path of atomicDomains){const before=conflicts.length;merged[path]=mergeLeaf(path,baseState?.[path],localState?.[path],remoteState?.[path],hasBase,conflicts);summaries.push({path,mode:'atomic',conflicts:conflicts.length-before});}
+  for(const path of objectDomains){const b=baseState?.[path]||[],l=localState?.[path]||[],r=remoteState?.[path]||[];if(!keyedArray(l)||!keyedArray(r)||!keyedArray(b)){const before=conflicts.length;merged[path]=mergeLeaf(path,b,l,r,hasBase,conflicts);summaries.push({path,mode:'atomic',conflicts:conflicts.length-before});continue;}const before=conflicts.length;merged[path]=mergeKeyedArray(path,b,l,r,hasBase,conflicts);summaries.push({path,mode:'id+field',conflicts:conflicts.length-before,count:merged[path].length});}
   for(const path of mapDomains){const before=conflicts.length;merged[path]=mergeMapDomain(path,baseState?.[path]||{},localState?.[path]||{},remoteState?.[path]||{},hasBase,conflicts);summaries.push({path,mode:'key+field',conflicts:conflicts.length-before,count:Object.keys(merged[path]||{}).length});}
   return{hasBase,merged,conflicts,summaries,autoMergeable:conflicts.length===0};
 }
@@ -67,4 +69,4 @@ export function applyObjectLevelResolutions(analysis,resolutions={}){
 }
 
 export function objectMergeSummary(analysis){return{conflicts:analysis?.conflicts?.length||0,domains:analysis?.summaries?.length||0,autoMergeable:Boolean(analysis?.autoMergeable),fieldLevel:(analysis?.summaries||[]).filter(s=>s.mode!=='atomic').length};}
-export {DEFAULT_OBJECT_MERGE_DOMAINS,DEFAULT_MAP_MERGE_DOMAINS};
+export {DEFAULT_OBJECT_MERGE_DOMAINS,DEFAULT_MAP_MERGE_DOMAINS,DEFAULT_ATOMIC_MERGE_DOMAINS};
