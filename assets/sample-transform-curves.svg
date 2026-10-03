@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360mm" height="220mm" viewBox="0 0 360 220">
+  <g transform="translate(20 20)">
+    <g id="CUT" stroke="#111" fill="none" stroke-width="1">
+      <path d="M 0 0 H 140 V 180 H 0 Z"/>
+      <path d="M 140 0 H 280 V 180 H 140 Z"/>
+      <path d="M 20 180 C 55 205 85 205 120 180"/>
+      <path d="M 160 180 Q 210 215 260 180"/>
+    </g>
+    <g id="CREASE" stroke="#ff0000" fill="none" stroke-width="1">
+      <path d="M 140 0 V 180"/>
+    </g>
+  </g>
+</svg>

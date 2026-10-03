@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320mm" height="180mm" viewBox="0 0 320 180">
+  <g id="CUT" stroke="#111" fill="none" stroke-width="1">
+    <rect x="10" y="10" width="300" height="160"/>
+  </g>
+  <g id="CREASE" stroke="#ff0000" fill="none" stroke-width="1" stroke-dasharray="6 4">
+    <line x1="110" y1="10" x2="110" y2="170"/>
+    <line x1="210" y1="10" x2="210" y2="170"/>
+  </g>
+</svg>
