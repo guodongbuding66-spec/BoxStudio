@@ -32,7 +32,7 @@ export function pathToLines(d='',curveSteps=18){
     else if(u==='H'){let nx=next();if(rel)nx+=x;out.push(line(x,y,nx,y));x=nx;}
     else if(u==='V'){let ny=next();if(rel)ny+=y;out.push(line(x,y,x,ny));y=ny;}
     else if(u==='C'){let c1x=next(),c1y=next(),c2x=next(),c2y=next(),nx=next(),ny=next();if(rel){c1x+=x;c1y+=y;c2x+=x;c2y+=y;nx+=x;ny+=y;}let px=x,py=y;for(let k=1;k<=curveSteps;k++){const q=k/curveSteps,xx=cubic(x,c1x,c2x,nx,q),yy=cubic(y,c1y,c2y,ny,q);out.push(line(px,py,xx,yy));px=xx;py=yy;}x=nx;y=ny;}
-    else if(u==='Q'){let cx=next(),cy=next(),nx=next(),ny=next();if(rel){cx+=x;cy+=y;nx+=x;ny+=y;}let px=x,py=y;for(let k=1;k<=curveSteps;k++){const q=k/curveSteps,xx=quad(x,cx,nx,q),yy=quad(y,cy,nx,q);out.push(line(px,py,xx,yy));px=xx;py=yy;}x=nx;y=ny;}
+    else if(u==='Q'){let cx=next(),cy=next(),nx=next(),ny=next();if(rel){cx+=x;cy+=y;nx+=x;ny+=y;}let px=x,py=y;for(let k=1;k<=curveSteps;k++){const q=k/curveSteps,xx=quad(x,cx,nx,q),yy=quad(y,cy,ny,q);out.push(line(px,py,xx,yy));px=xx;py=yy;}x=nx;y=ny;}
     else if(u==='A'){let rx=next(),ry=next(),rot=next(),large=next(),sweep=next(),nx=next(),ny=next();if(rel){nx+=x;ny+=y;}out.push(...sampleArc(x,y,rx,ry,rot,large,sweep,nx,ny,Math.max(16,curveSteps*2)));x=nx;y=ny;}
     else if(u==='Z'){out.push(line(x,y,sx,sy));x=sx;y=sy;cmd='';}
     else{while(i<t.length&&!isCmd(t[i]))i++;cmd='';}
