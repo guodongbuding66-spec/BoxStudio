@@ -1,101 +1,154 @@
-# BoxStudio V0.18
+# BoxStudio V0.19
 
 BoxStudio 是浏览器内运行的纸盒结构设计、2D 刀版、唛头编辑、客户规则、Excel 批量订单、3D 折叠、印前检查、生产审批与生产文件导出原型。
 
-当前主线：**参数化结构 + 唛头变量 + Customer / Packaging Rule + Master Template + Batch Worker + Recoverable Artifacts + Production Approval + Project Persistence + Granular Remote Merge + Folded Artwork Texture Proof + SVG Appearance / Fold Bleed Diagnostics**。
+当前主线：**参数化结构 + 唛头变量 + Customer / Packaging Rule + Master Template + Batch Worker + Recoverable Artifacts + Production Approval + Project Persistence + Granular Remote Merge + Folded Artwork Texture Proof + SVG Appearance + Cross-panel Production Artwork**。
 
-## V0.18 新增
+## V0.19 新增
 
-### 1. SVG Appearance Safe Subset
+### 1. SVG Appearance 正式进入 Production Export
 
-新增 `src/svgAppearance.js`，安全 SVG Mark 不再只有黑色轮廓预览。
-
-V0.18 的 Panel Texture / Folded 3D Proof 已支持以下显式 SVG 外观：
-
-- Solid Fill
-- Linear Gradient
-- Radial Gradient
-- 基础 `clipPath`
-- 基础几何 Mask（当前按 binary mask 处理）
-- `opacity` / `fill-opacity`
-- Group / Element Transform
-- Rect / Polygon / Circle / Ellipse
-- 简单 M/L/H/V/Z Closed Path Fill
-
-现有安全边界继续保留：`script`、`foreignObject`、`iframe`、`object`、`embed`、`image`、`use`、外部 URL、data/javascript 引用均不进入安全 SVG Mark。
-
-V0.18 不伪装成完整 Illustrator Appearance：
-
-- `<style>` CSS selector 不解析；
-- Complex Curved Filled Path 仍按 outline 路线处理并给出 warning；
-- `gradientTransform` 尚未完整实现；
-- Mask 不是完整 alpha/luminance SVG Mask；
-- Filter / Pattern / Blend Mode / Raster Image 尚未实现；
-- Production SVG/PDF 仍采用原有 outline-safe materialization，不宣称填充外观已经完整进入生产 PDF。
-
-### 2. Appearance → Panel Texture → Folded 3D
-
-`src/panelArtwork.js` 新增 `svg-appearance` command。
-
-现在安全 SVG 的显式 Fill / Gradient / Clip / Mask 会进入统一 Panel Artwork Atlas，然后继续进入 V0.17 建立的 Folded Artwork Texture Proof。
-
-`buildArtworkAtlas()` 还会统计：
-
-- Appearance Commands
-- Panel Commands
-- Out-of-panel Commands
-
-这使 SVG 外观不再只是孤立的 2D 导入信息，而是进入同一 3D 包装校样链路。
-
-### 3. Fold Bleed Continuity Diagnostics
-
-新增 `src/bleedContinuity.js`。
-
-BoxStudio 会针对每条 Fold Graph Edge 检查折线两侧的 Artwork Band。默认 Band 使用当前结构的 Bleed mm。
-
-状态分为：
-
-- `two-sided`：折线两侧都有 artwork；
-- `one-sided`：只有一侧有 artwork，需要人工检查；
-- `empty`：折线附近没有 artwork；
-- `missing`：Panel / Hinge 几何缺失。
-
-这是一套生产检查工具，不会把“看起来接近折线”错误地当作已经自动跨面连续。真正的 Cross-panel Artwork Object / Automatic Panel Clipping 仍属于后续开发。
-
-### 4. V0.18 Proof Workspace
+V0.18 的安全 SVG Appearance 不再只用于 3D Proof。
 
 新增：
 
-- `src/v18Ui.js`
-- `src/v18Ui.css`
+- `src/productionAppearance.js`
+- `src/exportV19.js`
 
-界面现在集中显示：
+V0.19 Production Path 支持：
 
-- Folded 3D Artwork Texture Proof
-- SVG Fill Primitive Count
-- Gradient / Clip / Mask Count
-- SVG Appearance Warnings
-- Fold Bleed Continuity Table
-- Output ICC Metadata
-- Fold 0–100%
-- Orbit / Zoom / Reset / Rebuild Proof
+- Solid Fill → Vector Polygon
+- Linear Gradient → Vector Triangle Tessellation
+- Radial Gradient → Vector Triangle Tessellation
+- Basic Geometric `clipPath`
+- Basic Binary Geometric Mask
+- `opacity / fill-opacity` 的当前生产近似
+- Imported SVG Outline Vector
 
-V0.18 启用后会隐藏旧的 V0.17 重复 Proof 面板。
+Gradient 仍保持纯矢量输出，但当前 PDF serializer 使用确定性的 flat-color triangle tessellation，而不是 native PDF shading。
 
-### 5. Display Color Pipeline Boundary
+当前透明度在这一 serializer 中预混到白底，不是 PDF transparency group。
 
-如果当前页面已加载用户 ICC，V0.18 会显示：
+### 2. V0.19 Production SVG / PDF
 
-- Profile Name
-- Color Space
-- PCS
-- ICC Version
+新增独立的：
 
-但当前 Folded Proof 仍通过浏览器 Canvas / sRGB 显示。
+- `Export V0.19 Production PDF`
+- `Export V0.19 Production SVG`
 
-**V0.18 不宣称已经完成 ICC Device → PCS → Monitor 的真实色彩转换，也不宣称 monitor-calibrated soft proof。**
+V0.19 Production Path 保留：
 
-## V0.17 / V0.16 能力继续保留
+- CUT / CREASE / PERF / GLUE
+- Existing Spot / Overprint Path
+- Text / Technical Vector Text
+- User TTF Outline
+- Barcode + QR
+- Shipping Symbols
+- Imported SVG Outline
+- V0.19 Supported Appearance Fill
+- Cross-panel Clipped Artwork
+
+Batch Worker 也已经切换到 `buildProductionPdfV19()`，因此批量 PDF 与 V0.19 单张生产 PDF 使用同一 appearance-aware serializer。
+
+> Imported SVG fill 当前以 DeviceRGB vector fill 进入 V0.19 PDF。即使加载了 CMYK ICC OutputIntent，V0.19 也不宣称已经完成 SVG RGB → Output CMYK 的 ICC 色彩转换。
+
+### 3. Cross-panel Artwork Object
+
+新增：
+
+- `src/crossPanelArtwork.js`
+
+Panel-local SVG Mark 可以提升为 document-global：
+
+```text
+cross-panel-artwork
+```
+
+Production Materialization 时会：
+
+1. 将 artwork 放到整个展开图坐标系；
+2. 生成 fill / gradient approximation / outline；
+3. 与所有相交 Panel 求交；
+4. Fill 自动切成 Panel-local vector fragments；
+5. Outline 在线框边界处自动裁切；
+6. 各 fragment 再进入 SVG / PDF 输出。
+
+V0.19 Workspace 允许调整：
+
+- X
+- Y
+- W
+- H
+
+并显示：
+
+- Touched Panels
+- Fill Fragments
+- Outline Fragments
+- `cross-panel / single-panel / outside`
+
+这是真正的显式跨 Panel Artwork Object，与 V0.18 仅检查折线两侧 artwork 的 Bleed Continuity Diagnostic 不同。
+
+### 4. Gradient Percentage Regression Fix
+
+生产 Gradient Materializer 已修复百分比坐标解析：
+
+```text
+0% → 100%
+```
+
+现在会按 painted primitive bounds 正确解析，不会因为百分号导致 gradient axis 退化。
+
+自动测试会验证同一 gradient 最终生成多个不同 vector fill colors。
+
+### 5. V0.19 Production Workspace
+
+新增：
+
+- `src/v19Ui.js`
+- `src/v19Ui.css`
+
+显示：
+
+- SVG Appearance Mark Count
+- Fill Primitive Count
+- Gradient Source Count
+- Production Polygon Count
+- Cross-panel Artwork Count
+- Appearance Warning Count
+- V0.19 SVG / PDF Export
+- SVG → Cross-panel Promotion
+- Cross-panel Bounds Editor
+- Fragment Diagnostics
+
+V0.18 Folded Artwork Proof 继续保留，不会因为 V0.19 Production Workspace 被隐藏。
+
+## V0.18 / V0.17 能力继续保留
+
+### SVG Appearance Proof
+
+- Solid Fill
+- Linear / Radial Gradient
+- Basic ClipPath
+- Binary Geometric Mask
+- Opacity / Fill Opacity
+- Rect / Polygon / Circle / Ellipse
+- Simple M/L/H/V/Z Closed Path Fill
+- Safe warning collection
+
+安全 SVG Import 继续拒绝：
+
+- `script`
+- `foreignObject`
+- `iframe`
+- `object`
+- `embed`
+- `image`
+- `use`
+- External URL
+- data/javascript references
+
+当前仍不是完整 Illustrator Appearance：CSS selector cascade、complex curved filled path、gradientTransform、real luminance mask、pattern/filter/blend/raster fidelity 尚未完整实现。
 
 ### Folded Artwork Texture Proof
 
@@ -108,25 +161,9 @@ V0.18 启用后会隐藏旧的 V0.17 重复 Proof 面板。
 - Wheel Zoom
 - Depth Sorting
 - Panel Wireframe
+- Fold Bleed Continuity Diagnostics
 
-### Worker TTF / ICC Binary Transfer
-
-- Worker 启动时一次性传输当前用户 TTF / ICC binary
-- User TTF Outline 可进入 Worker
-- PDF/X Candidate 有 ICC 时可进入 Worker
-- 缺少必要资源时明确阻止，不静默降级
-- Queue / Pause / Resume / Cancel / IndexedDB Artifact / Recovered ZIP
-
-### Object-Level Remote Merge
-
-高冲突域使用对象/字段级三方合并：
-
-- `elements`: `id + field`
-- `masterTemplates`: `id + field`
-- `productionJobs`: `id + field`
-- Custom Customer / Packaging Rule / Mark Template / Mark Asset: `key + field`
-
-当前不是 CRDT / OT 实时多人协同系统。
+浏览器 3D Proof 仍走 Canvas / sRGB 显示路径，不宣称 ICC PCS display conversion 或 monitor-calibrated soft proof。
 
 ## 已有核心能力
 
@@ -142,6 +179,7 @@ V0.18 启用后会隐藏旧的 V0.17 重复 Proof 面板。
 - CREASE → Fold Candidate
 - CUT Crossing / Polygon Self-intersection 检查
 - Bleed / Safe Area
+- Topology Repair
 
 工厂压线补偿、刀模板补偿和设备公差只接受已验证生产数据，不自动编造。
 
@@ -158,7 +196,9 @@ V0.18 启用后会隐藏旧的 V0.17 重复 Proof 面板。
 - Custom Mark Template / Mark Asset
 - Panel-local mm Layout Editor
 - Safe SVG Logo / Mark Import
-- V0.18 Safe SVG Appearance Proof Subset
+- V0.18 Appearance Proof
+- V0.19 Appearance Production Export
+- V0.19 Cross-panel Artwork
 
 ### Customer / Rule / Master
 
@@ -170,6 +210,7 @@ V0.18 启用后会隐藏旧的 V0.17 重复 Proof 面板。
 - Master Template V2
 - Rename / Duplicate / Revision / Restore
 - JSON Import / Export
+- Workspace Bundle
 - Batch 先套 Master 再写入订单变量
 
 ### Excel / CSV Batch
@@ -186,6 +227,7 @@ V0.18 启用后会隐藏旧的 V0.17 重复 Proof 面板。
 - Recovered ZIP
 - Module Web Worker PDF Generation
 - User TTF / ICC Worker Transfer
+- V0.19 Appearance-aware Batch PDF Serializer
 
 ### Production Approval
 
@@ -210,7 +252,7 @@ Approved PDF 必须同时满足：Approved Job、0 Preflight Error、Fingerprint
 - `If-Match` Revision Protection
 - Remote Base
 - Domain Merge
-- Object / Field-level Merge
+- Object / Field-level Three-way Merge
 
 REST 约定：
 
@@ -236,8 +278,10 @@ DELETE /projects/:id
 - CMYK ICC OutputIntent
 - PDF/X-4 Candidate Gate
 - SVG Outline Materialization
+- V0.19 Vector Appearance Materialization
+- V0.19 Cross-panel Clipping
 
-`PDF/X-4 Candidate` 不等同 Acrobat Preflight、callas pdfToolbox 或印厂 RIP 的第三方认证。
+`PDF/X-4 Candidate` 不等同 Acrobat Preflight、callas pdfToolbox 或印厂 RIP 第三方认证。
 
 ## 运行
 
@@ -270,33 +314,37 @@ node tests/v15.mjs
 node tests/v16.mjs
 node tests/v17.mjs
 node tests/v18.mjs
+node tests/v19.mjs
 ```
 
-V0.18 回归覆盖：
+V0.19 Regression 覆盖：
 
-- Solid Fill Parsing
-- Linear Gradient + Stops
-- clipPath
-- Binary Mask Geometry
-- SVG Mark Appearance Retention
-- Panel Artwork `svg-appearance` Command
-- Appearance Command Count
-- Quadratic Path Endpoint Regression
-- One-sided Fold Artwork Detection
-- Two-sided Fold Artwork Detection
-- Bleed Continuity Summary
+- Gradient → Vector Production Polygon
+- 0%→100% Gradient Percentage Coordinates
+- Multiple Gradient Output Colors
+- Cross-panel Placement Across Adjacent Panels
+- Polygon Fragment Clipping
+- Outline Segment Clipping
+- Cross-panel Diagnostics
+- Raw SVG/Cross-panel Object Materialization
+- V0.19 PDF Header / RGB Fill Operators
+- Batch Worker V0.19 Serializer
 
-详细报告：`docs/V0.18_TEST_REPORT.md`。
+详细报告：
+
+```text
+docs/V0.19_TEST_REPORT.md
+```
 
 ## 数据存储
 
 Browser project state：
 
 ```text
-boxstudio-mvp-v18
+boxstudio-mvp-v19
 ```
 
-V0.17 和更早版本继续作为迁移来源。
+V0.18 和更早版本继续作为迁移来源。
 
 附加存储：
 
@@ -306,48 +354,21 @@ boxstudio-remote-base-v1:<projectId>
 IndexedDB: boxstudio-artifacts-v1
 ```
 
-## 关键目录
+## V0.19 关键新增文件
 
 ```text
 src/
-  geometry.js
-  foldgraph.js
-  importDieline.js
-  pdfAiImport.js
-  barcode.js
-  qrcode.js
-  svgMark.js
-  svgAppearance.js
-  panelArtwork.js
-  bleedContinuity.js
-  threeArtworkProof.js
-  batch.js
-  batchTemplates.js
-  batchWorkerCore.js
-  batchPdf.worker.js
-  workerAssets.js
-  artifactStore.js
-  persistentBatch.js
-  projectStore.js
-  projectMerge.js
-  projectMergeV2.js
-  productionJobs.js
-  permissions.js
-  rules.js
-  masterTemplates.js
-  preflight.js
-  export.js
-  threePreview.js
-  v17Ui.js
-  v18Ui.js
-  ...
+  productionAppearance.js
+  crossPanelArtwork.js
+  exportV19.js
+  v19Ui.js
+  v19Ui.css
 
 tests/
-  smoke.mjs
-  v10.mjs ... v18.mjs
+  v19.mjs
 
 docs/
-  V0.10_TEST_REPORT.md ... V0.18_TEST_REPORT.md
+  V0.19_TEST_REPORT.md
 ```
 
 ## 参考源边界
@@ -356,13 +377,14 @@ docs/
 
 ## 下一阶段
 
-- Filled SVG Appearance → Production SVG/PDF
-- Full Curved Filled Path Geometry
-- gradientTransform / CSS Cascade / Real Alpha Mask
-- Explicit Cross-panel Artwork Objects + Automatic Panel Clipping
-- True ICC Display Conversion for 3D Proof
+- Native SVG/PDF Gradient Objects
+- ICC-managed RGB → CMYK Artwork Conversion
+- PDF Transparency Group / Alpha / Luminance Mask
+- Cross-panel Artwork 直接进入主 2D Canvas 编辑
+- Cross-panel Artwork 直接进入 Folded 3D Texture Atlas
+- Per-object Z-order / Clip-path Editor
 - Board Thickness / Bend Radius / Print Stretch Simulation
 - Hosted BoxStudio Backend + Auth / SSO
 - Server-side Immutable Audit / Approval Signatures
 - Cloud Resumable Artifact / Object Storage
-- Factory Compensation Profiles（仅使用已验证生产参数）
+- Factory Compensation Profiles（只使用已验证生产参数）
