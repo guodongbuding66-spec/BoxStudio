@@ -58,8 +58,9 @@ function install(){
       if(!master) throw new Error('请选择一个 Master Template。');
       const next=applyMasterTemplate(current,master,{preserveVariables:true});
       next.masterTemplates=current.masterTemplates||[];
-      next.customCustomerProfiles=current.customCustomerProfiles||{};
-      next.customPackagingRules=current.customPackagingRules||{};
+      next.customCustomerProfiles={...(current.customCustomerProfiles||{}),...(next.customCustomerProfiles||{})};
+      next.customPackagingRules={...(current.customPackagingRules||{}),...(next.customPackagingRules||{})};
+      next.customMarkTemplates={...(current.customMarkTemplates||{}),...(next.customMarkTemplates||{})};
       next.batch={...current.batch,masterTemplateId:id};
       writeState(next);location.reload();
     }catch(err){alert(err?.message||err)}
