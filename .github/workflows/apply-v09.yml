@@ -17,11 +17,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Apply V0.9 overlay
+      - name: Reassemble and apply V0.9 overlay
         shell: bash
         run: |
           set -euo pipefail
-          tar -xJf .sync/boxstudio-v09-patch.tar.xz -C .
+          cat .sync/v09.part00 .sync/v09.part01 .sync/v09.part02 > /tmp/boxstudio-v09-patch.tar.xz
+          echo "14e7f565ba4367e472e08916af04ce0c865d39f0ed0a08348059edbe17a0e790  /tmp/boxstudio-v09-patch.tar.xz" | sha256sum -c -
+          tar -xJf /tmp/boxstudio-v09-patch.tar.xz -C .
           rm -rf .sync
           rm -f .github/workflows/apply-v09.yml
 
