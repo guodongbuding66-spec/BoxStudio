@@ -57,3 +57,6 @@ jobs:
 
       - name: V0.18 SVG appearance and fold bleed tests
         run: node tests/v18.mjs
+
+      - name: V0.19 production appearance and cross-panel tests
+        run: node tests/v19.mjs
