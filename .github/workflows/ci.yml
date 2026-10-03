@@ -63,3 +63,6 @@ jobs:
 
       - name: V0.20 native SVG, atlas and z-order tests
         run: node tests/v20.mjs
+
+      - name: V0.21 native PDF shading and transform tests
+        run: node tests/v21.mjs
