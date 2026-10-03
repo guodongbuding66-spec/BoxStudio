@@ -1,190 +1,195 @@
-# BoxStudio V0.24
+# BoxStudio V0.25
 
-BoxStudio 是浏览器内运行的纸盒结构设计、2D 刀版、唛头编辑、客户规则、Excel 批量订单、3D 折叠、印前检查、生产审批与生产文件导出原型。
+BoxStudio 是浏览器内运行的纸盒结构设计、2D 刀版、唛头编辑、Cross-panel Artwork、3D 折叠校样、Excel 批量生产、印前检查、生产审批和生产文件导出原型。
 
-当前主线：**参数化结构 + 唛头变量 + Customer / Packaging Rule + Master Template + Web Worker Batch + Recoverable Artifacts + Production Approval + Project Persistence + Folded Artwork Texture Proof + SVG Appearance + Cross-panel Artwork + Native SVG Gradient + Integrated Native PDF Gradient/Soft Mask + Graphical Clip Editing + Smart Spacing + Verified ICC DeviceLink Subset + Deterministic Batch Context + Approved-output Color Binding**。
+当前主线：**参数化结构 + Master Template + Customer / Packaging Rules + Native SVG/PDF Appearance + Cross-panel Artwork + Folded 3D Texture Proof + Recoverable Web Worker Batch + Production Approval + Project Persistence + ICC DeviceLink Color Conversion + Bezier Clip Direct Selection + Smart Guides**。
 
-## V0.24 新增
+## V0.25 新增
 
-### 1. V0.23 Integrated Native Production PDF 已接入 Batch Worker
+### 1. Cross-panel Clip 升级为 Bezier Direct Selection
 
-V0.24 批量生产不再固定走旧的 V0.19 tessellation serializer。
-
-V0.24 Native Batch 会使用：
+新增：
 
 ```text
-V0.23 Integrated Native Production PDF
-+ V0.24 DeviceLink Binding
-+ V0.24 Frozen Batch Context
+src/clipPathV25.js
+src/v25CanvasOverlay.js
 ```
 
-每个批量 PDF 可继续包含：
+Cross-panel Clip 现在支持：
 
-- CUT / CREASE / PERF / GLUE
-- Spot Separation / Overprint
-- 唛头变量
+- Bezier Anchor Node
+- Incoming / Outgoing Tangent Handles
+- Smooth / Corner Node
+- 直接拖 Anchor
+- 直接拖 Bezier Handle
+- Alt 拖 Handle 打破镜像对称
+- 点击橙色 Segment Diamond 插入节点
+- Alt + Click Anchor 删除节点
+- 最少 3 节点保护
+- Rotated Artwork 坐标转换
+
+插入节点不是简单加一个点，而是通过 **De Casteljau subdivision** 拆分原来的 Cubic Segment，保持原曲线形状。
+
+生产输出时 Bezier Clip 会确定性 Flatten 为 Polygon，然后继续进入：
+
+```text
+Object Clip
+→ Panel Intersection
+→ Production Fill / Outline Fragments
+→ Native Production PDF
+→ Panel Artwork Atlas / Folded Proof
+```
+
+V0.25 没有把它描述成 Native PDF Cubic Clip；生产裁切阶段仍是矢量多边形近似。
+
+### 2. Illustrator-style Object Smart Guides
+
+新增：
+
+```text
+src/smartGuidesV25.js
+```
+
+移动 Cross-panel Artwork 时新增对象之间的：
+
+```text
+Left / Center / Right
+Top / Middle / Bottom
+```
+
+互相吸附。
+
+Resize 时增加：
+
+- Match Width
+- Match Height
+- Aspect-lock size match
+
+Guide 颜色：
+
+```text
+Magenta = Object Alignment / Size Match
+Orange  = Equal Gap
+Green   = Panel / Grid Snap
+```
+
+默认：
+
+```text
+objectGuides = true
+objectGuideToleranceMm = 3
+smartSpacing = true
+spacingToleranceMm = 3
+```
+
+按住 `Alt` 可以临时绕过 Smart Snap。
+
+### 3. ICC DeviceLink 增加 LUT16 / mft2
+
+`src/iccDeviceLinkV23.js` 的公开 API 保持兼容，但 V0.25 已扩展支持：
+
+```text
+A2B0 LUT8  / mft1 / 8-bit
+A2B0 LUT16 / mft2 / 16-bit
+```
+
+仍严格要求：
+
+```text
+Profile Class = link
+Input          = RGB
+Output         = CMYK
+Channels       = 3 -> 4
+```
+
+LUT16 路线实际解析：
+
+- s15Fixed16 3×3 Matrix
+- Input Table Entry Count
+- Output Table Entry Count
+- 16-bit Input Tables
+- 16-bit 3D CLUT
+- 16-bit Output Tables
+- Trilinear CLUT Interpolation
+
+项目 DeviceLink Binding 现在同时保留：
+
+```text
+tagType
+precision
+gridPoints
+inputTableEntries
+outputTableEntries
+fingerprint
+```
+
+普通 CMYK Printer Profile 仍然只是 OutputIntent，不会被静默当成 RGB→CMYK 转换器。
+
+### 4. V0.25 Production Output
+
+新增：
+
+```text
+src/productionPdfV25.js
+```
+
+V0.25 Production PDF 继续复用 V0.24 已验证的：
+
+- Approval Gate
+- DeviceLink Binding
+- Native Axial / Radial Shading
+- Gradient Soft Mask
+- Spot Dielines / Overprint
 - Barcode + QR
-- Shipping Icons
-- Technical Vector / User TTF Outline
-- Panel-local / Cross-panel SVG
-- Native Linear / Radial Gradient
-- Multi-stop Gradient
-- Uniform Alpha
-- Varying Gradient Alpha Soft Mask
-- Cross-panel Clip
-- Object Z-order
-- PDF/X-4 Candidate OutputIntent 路线
+- Text Outline / TTF Outline
+- Cross-panel Native Appearance
 
-旧版 Worker serializer 仍保留，旧 V0.19 回归不会被破坏；只有明确标记为 V0.24 Native Batch 的冻结任务才切换新 pipeline。
+并通过共享模块获得：
 
-### 2. Deterministic Batch Run Context
+- Bezier Clip Flattening
+- LUT16 RGB→CMYK DeviceLink
+
+Diagnostic Serializer：
+
+```text
+v0.25-native-production
+```
+
+单项目主导出：
+
+```text
+boxstudio-v0.25-production-native.pdf
+```
+
+Approved V0.25 Export 继续进入生产 Audit Event。
+
+### 5. V0.25 Workspace
 
 新增：
 
 ```text
-src/batchRunV24.js
-```
-
-批量开始时冻结 Base Production State。
-
-队列记录：
-
-```text
-serializer
-createdAt
-rowCount
-rowsFingerprint
-masterTemplateId
-deviceLinkRef
-baseState
-```
-
-之后即使用户修改当前项目，已经开始的批次不会在后续订单里偷偷混入新配置。
-
-如果 Excel / CSV 行数据发生变化，BoxStudio 会检测 `rowsFingerprint` 不一致并阻止继续，需要 Restart，而不是静默继续。
-
-### 3. DeviceLink 正式进入 Worker Binary Asset Pipeline
-
-新增：
-
-```text
-src/workerAssetsV24.js
-```
-
-Worker 启动时可一次性传输：
-
-```text
-User TTF
-CMYK OutputIntent ICC
-RGB -> CMYK DeviceLink ICC
-```
-
-如果项目声明了 DeviceLink，但 Worker 没有对应二进制文件，或者内容指纹不一致，批量生成会被阻止。
-
-### 4. DeviceLink Project Binding
-
-`iccDeviceLinkV23.js` 现在会为加载的 DeviceLink 生成确定性的 64-bit FNV-1a 内容指纹，并保留一份 session source bytes 用于 Worker Transfer。
-
-项目可以记录：
-
-```text
-exportOptions.deviceLinkRef
+src/v25Ui.js
+src/v25Ui.css
 ```
 
 包含：
 
-```text
-name
-size
-fingerprint
-inputColorSpace
-outputColorSpace
-tagType
-gridPoints
-```
+- Bezier Clip Diagnostics
+- Convert / Create Bezier Clip
+- Make Smooth / Make Corner
+- Delete Selected Node
+- Object Smart Guide Settings
+- Equal-gap Settings
+- LUT8 / LUT16 DeviceLink Loader
+- RGB → CMYK 数值测试
+- V0.25 Production PDF
+- Approved V0.25 Production PDF
 
-规则变为：
-
-- 项目没有声明 DeviceLink → Native Appearance 保持 RGB；
-- 项目声明 DeviceLink，但当前未加载 → 阻止 Production Export；
-- 加载的 DeviceLink 指纹不一致 → 阻止 Production Export；
-- 指纹完全一致 → 允许使用该 RGB→CMYK 转换。
-
-这个指纹用于**确定性变更检测**，不是数字签名，也不是安全认证。
-
-### 5. Approved Production Export 也绑定颜色转换资产
-
-新增：
-
-```text
-src/productionOutputV24.js
-src/productionPdfV24.js
-```
-
-Approved Production PDF 现在同时检查：
-
-```text
-Approved Job
-Production Fingerprint
-Preflight State
-Role Permission
-Declared DeviceLink Identity
-Loaded DeviceLink Identity
-```
-
-当成功导出 Approved PDF 后，会新增 `exported` Audit Event，记录：
-
-```text
-revision
-actor
-role
-fileName
-format
-serializer
-```
-
-当前 Audit 仍是浏览器本地数据，不宣称服务器不可篡改审计。
-
-### 6. Recoverable Batch Artifact Metadata
-
-IndexedDB Artifact 现在额外保留：
-
-```text
-serializer
-colorSpace
-deviceLinkFingerprint
-productionJobId
-```
-
-Recovered ZIP Manifest 也会写入当前 Serializer、Rows Fingerprint 与 DeviceLink 信息。
-
-### 7. V0.24 Workspace
-
-新增：
-
-```text
-src/v24Ui.js
-src/v24Ui.css
-```
-
-功能包括：
-
-- Export V0.24 Production PDF
-- Export Approved V0.24 PDF
-- Load & Bind DeviceLink
-- Unload DeviceLink Session
-- Remove DeviceLink Binding
-- Binding / Approval Gate Diagnostics
-- Start / Restart Native Batch
-- Pause / Resume / Cancel
-- Retry Failed / Cancelled
-- IndexedDB Recovered ZIP
-- Artifact Serializer / Color Space 信息
-- Frozen Batch Context 状态
+V0.24 Native Batch Workspace 继续保留，因为其 Frozen Context / Web Worker / IndexedDB Artifact Pipeline 仍是当前批量生产主线。
 
 ## 现有主要能力
 
-### 结构 / 刀版
+### Structure / Dieline
 
 - Side-Seal / RSC 参数化结构
 - Mailer 150010
@@ -197,25 +202,22 @@ src/v24Ui.css
 - Bleed / Safe Area
 - Topology Repair
 
-### 唛头 / Artwork
+### Marks / Artwork
 
 - SKU / N.W. / G.W. / Package Meas / CRN / Contract No.
-- Origin / Destination / Package No.
-- Multi-package Notice
+- Origin / Destination / Package Notice
 - Code 39 / EAN-13 / UPC-A / ITF-14 / GS1-128
 - QR Code
 - Barcode + QR Locked Group
-- 250×80 / 200×64 mm Presets
-- This Side Up / Fragile / Keep Dry
-- Custom Mark Templates / Assets
+- Shipping Icons
 - Safe SVG Import
-- SVG Fill / Gradient / Clip Safe Subset
+- SVG Fill / Gradient / Clip / Mask Safe Subset
 - Cross-panel Artwork
-- Native SVG Gradient
-- Native PDF Gradient / Soft Mask
-- Shared Transform / Align / Distribute
-- Graphical Clip Points
-- Live Equal-gap Smart Spacing
+- Object Z-order
+- Multi-select / Align / Distribute
+- Shared Transform
+- Bezier Cross Clip
+- Smart Guides / Equal-gap Guides
 
 ### 3D / Proof
 
@@ -226,18 +228,19 @@ src/v24Ui.css
 - Fold Seam UV Diagnostics
 - Fold Bleed Continuity Diagnostics
 
-Folded 3D 仍属于浏览器几何 / 印刷位置 Proof，不宣称校色显示器级 ICC Soft Proof。
+Folded Proof 仍是浏览器几何和印刷位置核对，不宣称校色显示器级 ICC Soft Proof。
 
 ### Batch / Production
 
 - `.xlsx` / `.csv` / `.tsv`
 - Multi-sheet / Mapping
 - Batch Preflight
-- Combined PDF / ZIP
 - Pause / Resume / Cancel / Retry
-- IndexedDB Recoverable Artifacts
+- Frozen Batch Context
 - Web Worker PDF
-- User TTF / ICC / DeviceLink Worker Transfer
+- IndexedDB Recoverable Artifacts
+- Recovered ZIP
+- User TTF / Output ICC / DeviceLink Worker Transfer
 - Production Job / Revision / Approval / Reject
 - Viewer / Operator / Approver / Admin
 - Approved Production PDF Gate
@@ -246,20 +249,16 @@ Folded 3D 仍属于浏览器几何 / 印刷位置 Proof，不宣称校色显示�
 ### Project / Collaboration Foundation
 
 - Local Project Library
-- Project Revision Envelope
+- Revision Envelope
 - JSON Import / Export
 - REST Adapter
 - `If-Match` Revision Protection
 - Three-way Remote Merge
 - Object / Field-level Merge
 
-仓库当前仍不包含真正托管的 BoxStudio Backend、Auth/SSO 或不可篡改服务器端 Audit。
-
 ## PDF/X 与 ICC 边界
 
-### PDF/X
-
-当前仍明确叫：
+PDF/X 当前仍明确叫：
 
 ```text
 PDF/X-4 Candidate
@@ -267,24 +266,26 @@ PDF/X-4 Candidate
 
 不是 Acrobat Preflight、callas pdfToolbox 或印厂 RIP 的第三方认证结果。
 
-### ICC
+ICC 当前区分：
 
-当前有两条不同用途：
+1. **CMYK OutputIntent ICC**：描述 PDF/X Candidate 输出条件；
+2. **RGB→CMYK DeviceLink**：真正执行 Native SVG Appearance 的颜色数值转换。
 
-1. **CMYK OutputIntent ICC**：描述 PDF/X Candidate 的输出条件；
-2. **RGB→CMYK DeviceLink LUT8**：实际转换 Native SVG Appearance 的 RGB 数值。
-
-当前 DeviceLink 支持范围：
+当前 DeviceLink 支持：
 
 ```text
-Profile Class: link
-Input: RGB
-Output: CMYK
-A2B0: LUT8 / mft1
-Channels: 3 -> 4
+RGB -> CMYK LUT8  / mft1
+RGB -> CMYK LUT16 / mft2
 ```
 
-尚未宣称支持 LUT16、mAB/mBA、任意 Source ICC + Destination ICC 的完整 CMM chaining、Black Point Compensation 或商业 CMM 等价行为。
+当前仍未宣称支持：
+
+- mAB / mBA
+- 任意 Source ICC + Destination ICC 的完整 CMM Linking
+- Black Point Compensation
+- 任意 Rendering Intent Pipeline
+- RIP Trapping
+- Calibrated Monitor Soft Proof
 
 ## 运行
 
@@ -302,58 +303,45 @@ http://localhost:8080
 
 ## 自动测试
 
-GitHub Actions 当前执行：
+GitHub Actions 当前执行 Syntax、Smoke，以及 V0.10 → V0.25 全部 Regression：
 
 ```bash
 node --check src/*.js
 node --check tests/*.mjs
 node tests/smoke.mjs
 node tests/v10.mjs
-node tests/v11.mjs
-node tests/v12.mjs
-node tests/v13.mjs
-node tests/v14.mjs
-node tests/v15.mjs
-node tests/v16.mjs
-node tests/v17.mjs
-node tests/v18.mjs
-node tests/v19.mjs
-node tests/v20.mjs
-node tests/v21.mjs
-node tests/v22.mjs
-node tests/v23.mjs
+...
 node tests/v24.mjs
+node tests/v25.mjs
 ```
 
-V0.24 Regression 覆盖：
+V0.25 新测试覆盖：
 
-- DeviceLink deterministic identity
-- DeviceLink Worker transfer / hydration
-- Worker exact-asset eligibility
-- Frozen Batch Base State
-- Row mutation detection
-- Legacy V0.19 Worker compatibility
-- V0.24 Native Worker routing
-- Integrated PDF bytes
-- Artifact serializer/color metadata
-- Approved-output DeviceLink gate
-- Missing DeviceLink block
-- DeviceLink re-bind
-- Approved export audit event
+- Synthetic LUT16 / mft2 Parsing
+- 16-bit CLUT Conversion
+- DeviceLink Precision Binding
+- Legacy Polygon → Bezier Clip
+- Smooth / Mirrored Handles
+- De Casteljau Node Insertion
+- Node Deletion
+- Bezier Production Materialization
+- Object Alignment Snap
+- Width / Height Match
+- V0.25 Production PDF
 
 详细报告：
 
 ```text
-docs/V0.24_TEST_REPORT.md
+docs/V0.25_TEST_REPORT.md
 ```
 
 ## 数据存储
 
 ```text
-boxstudio-mvp-v24
+boxstudio-mvp-v25
 ```
 
-V0.23 及更早版本继续作为迁移来源。
+V0.24 及之前版本继续作为迁移来源。
 
 附加存储保持：
 
@@ -363,40 +351,12 @@ boxstudio-remote-base-v1:<projectId>
 IndexedDB: boxstudio-artifacts-v1
 ```
 
-DeviceLink ICC 二进制当前只保存在页面会话内；项目持久化的是轻量 `deviceLinkRef` 身份信息，不保存 ICC 文件本体。
-
-## V0.24 关键新增 / 更新文件
-
-```text
-src/
-  productionPdfV24.js
-  productionOutputV24.js
-  batchRunV24.js
-  workerAssetsV24.js
-  v24Ui.js
-  v24Ui.css
-  batchWorkerCore.js
-  batchPdf.worker.js
-  artifactStore.js
-  productionJobs.js
-  iccDeviceLinkV23.js
-
-tests/
-  v24.mjs
-
-docs/
-  V0.24_TEST_REPORT.md
-```
-
 ## 当前边界 / 下一阶段
 
-- ICC LUT16 / mAB / mBA
-- Source Profile + Destination Profile CMM Pipeline
-- Clip Point Insert / Delete / Bezier Handles
-- 更完整 Illustrator-style Smart Guides
-- Arbitrary SVG Luminance Mask / Pattern / Blend Mode
-- Board Thickness / Bend Radius / Print Stretch Simulation
-- Hosted Backend + Auth / SSO
-- Server-side Immutable Audit / Approval Signatures
-- Cloud Resumable Artifact / Object Storage
-- Factory Compensation Profiles（只接受已验证生产参数）
+- Browser Interaction E2E 仍未纳入 CI
+- Bezier Clip Production 目前是确定性 Polygon Flattening
+- ICC mAB/mBA / General CMM 尚未实现
+- Smart Guides 还可以继续增加 Text Baseline、Rotation Axis、Persistent User Guides
+- Server-side Immutable Audit / Auth / SSO 未实现
+- PDF/X 仍是 Candidate
+- Board Thickness / Bend Radius / Verified Print Stretch 仍属于后续生产物理模型阶段
