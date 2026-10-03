@@ -1,7 +1,7 @@
 import { defaultStructure, defaultsForTemplate } from './geometry.js';
 
-export const STORAGE_KEY = 'boxstudio-mvp-v17';
-export const LEGACY_STORAGE_KEYS = ['boxstudio-mvp-v16','boxstudio-mvp-v15','boxstudio-mvp-v14','boxstudio-mvp-v13','boxstudio-mvp-v12','boxstudio-mvp-v11','boxstudio-mvp-v10','boxstudio-mvp-v9','boxstudio-mvp-v8','boxstudio-mvp-v7','boxstudio-mvp-v6','boxstudio-mvp-v5','boxstudio-mvp-v4','boxstudio-mvp-v3','boxstudio-mvp-v2','boxstudio-mvp'];
+export const STORAGE_KEY = 'boxstudio-mvp-v18';
+export const LEGACY_STORAGE_KEYS = ['boxstudio-mvp-v17','boxstudio-mvp-v16','boxstudio-mvp-v15','boxstudio-mvp-v14','boxstudio-mvp-v13','boxstudio-mvp-v12','boxstudio-mvp-v11','boxstudio-mvp-v10','boxstudio-mvp-v9','boxstudio-mvp-v8','boxstudio-mvp-v7','boxstudio-mvp-v6','boxstudio-mvp-v5','boxstudio-mvp-v4','boxstudio-mvp-v3','boxstudio-mvp-v2','boxstudio-mvp'];
 
 export const defaultVariables = {
   sku:'KF210215US-02PM-001',nw:'74.1',gw:'80.7',length:'47.24',width:'23.62',height:'7.87',dimensionUnit:'INCH',weightUnit:'LBS',crn:'3203960FM4',contractNo:'HT24010213',originCountry:'China',destinationCountry:'US',packageIndex:'1',packageCount:'3',qrValue:'KF210215US-02PM-001',
