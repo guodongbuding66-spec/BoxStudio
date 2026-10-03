@@ -69,3 +69,6 @@ jobs:
 
       - name: V0.22 soft-mask, clip and shared-transform tests
         run: node tests/v22.mjs
+
+      - name: V0.23 integrated PDF, ICC DeviceLink, clip-point and spacing tests
+        run: node tests/v23.mjs
