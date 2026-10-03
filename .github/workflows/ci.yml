@@ -54,3 +54,6 @@ jobs:
 
       - name: V0.17 folded artwork texture proof tests
         run: node tests/v17.mjs
+
+      - name: V0.18 SVG appearance and fold bleed tests
+        run: node tests/v18.mjs
