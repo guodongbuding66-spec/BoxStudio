@@ -76,6 +76,11 @@ export function approvalGate(state,job){
   return {ok:true,reason:'Approved production revision matches current project.',fingerprint};
 }
 
+export function recordProductionExport(job,{actor='local-user',role='operator',format='pdf',fileName='',serializer='',note=''}={}){
+  const normalizedRole=assertProductionPermission(role,'export-approved');assertStatus(job,['approved'],'Export');
+  const next=clone(job);next.updatedAt=nowIso();next.audit=[...(next.audit||[]),audit('exported',actor,note,{revision:next.revision,format:String(format||'pdf'),fileName:String(fileName||''),serializer:String(serializer||''),...roleMeta(normalizedRole)})];return next;
+}
+
 export function upsertProductionJob(state,job,{activate=true}={}){
   const next=clone(state||{}),jobs=Array.isArray(next.productionJobs)?next.productionJobs:[],index=jobs.findIndex(item=>item?.id===job?.id);
   if(index>=0) jobs[index]=clone(job);else jobs.push(clone(job));next.productionJobs=jobs;if(activate)next.activeProductionJobId=job.id;return next;
