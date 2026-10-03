@@ -14,6 +14,7 @@ export function createBatchJobQueue(rows=[], {
     masterTemplateId:masterTemplateId||null,
     status:list.length?'ready':'empty',
     cancelRequested:false,
+    pauseRequested:false,
     createdAt,
     updatedAt:createdAt,
     total:list.length,
@@ -31,6 +32,7 @@ export function normalizeBatchJobQueue(queue, rows=[]){
   next.items=next.items.map((item,index)=>({index,status:['pending','running','completed','failed','cancelled'].includes(item?.status)?item.status:'pending',startedAt:item?.startedAt||null,finishedAt:item?.finishedAt||null,error:item?.error||null,fileName:item?.fileName||null}));
   if(next.items.some(item=>item.status==='running')) next.items=next.items.map(item=>item.status==='running'?{...item,status:'pending',startedAt:null}:item);
   next.cancelRequested=Boolean(next.cancelRequested);
+  next.pauseRequested=Boolean(next.pauseRequested);
   next.status=next.status||'ready';
   next.updatedAt=next.updatedAt||nowIso();
   return next;
@@ -46,12 +48,14 @@ export function queueProgress(queue){
     completed,failed,cancelled,running,pending,processed,
     percent:items.length?Math.round((processed/items.length)*100):0,
     done:items.length>0 && pending===0 && running===0,
+    paused:Boolean(queue?.pauseRequested)||queue?.status==='paused',
   };
 }
 
 export function claimNextJob(queue){
   const next=clone(queue);
   if(next.cancelRequested) return {queue:next,item:null};
+  if(next.pauseRequested){next.status='paused';next.updatedAt=nowIso();return {queue:next,item:null};}
   const item=next.items?.find(entry=>entry.status==='pending');
   if(!item){
     next.status=queueProgress(next).done?'completed':'idle';
@@ -76,7 +80,7 @@ function settle(queue,index,status,{error=null,fileName=null}={}){
   item.error=error?String(error):null;
   item.fileName=fileName||item.fileName||null;
   const p=queueProgress(next);
-  next.status=p.done?(p.failed?'completed-with-errors':'completed'):'running';
+  next.status=p.done?(p.failed?'completed-with-errors':'completed'):(next.pauseRequested?'paused':'running');
   next.updatedAt=nowIso();
   return next;
 }
@@ -84,9 +88,38 @@ function settle(queue,index,status,{error=null,fileName=null}={}){
 export function completeJob(queue,index,meta={}){ return settle(queue,index,'completed',meta); }
 export function failJob(queue,index,error){ return settle(queue,index,'failed',{error}); }
 
+export function requestQueuePause(queue){
+  const next=clone(queue);
+  if(!next || !Array.isArray(next.items)) return next;
+  if(queueProgress(next).done) return next;
+  next.pauseRequested=true;
+  next.status=next.items.some(item=>item.status==='running')?'pausing':'paused';
+  next.updatedAt=nowIso();
+  return next;
+}
+
+export function finalizeQueuePause(queue){
+  const next=clone(queue);
+  next.pauseRequested=true;
+  next.status='paused';
+  next.updatedAt=nowIso();
+  return next;
+}
+
+export function resumeQueue(queue){
+  const next=clone(queue);
+  next.pauseRequested=false;
+  next.cancelRequested=false;
+  const p=queueProgress(next);
+  next.status=p.done?(p.failed?'completed-with-errors':'completed'):(p.pending?'ready':'idle');
+  next.updatedAt=nowIso();
+  return next;
+}
+
 export function requestQueueCancel(queue){
   const next=clone(queue);
   next.cancelRequested=true;
+  next.pauseRequested=false;
   next.status='cancelling';
   next.updatedAt=nowIso();
   return next;
@@ -97,6 +130,7 @@ export function finalizeQueueCancel(queue){
   next.items=(next.items||[]).map(item=>item.status==='pending'||item.status==='running'?{...item,status:'cancelled',finishedAt:nowIso()}:item);
   next.status='cancelled';
   next.cancelRequested=true;
+  next.pauseRequested=false;
   next.updatedAt=nowIso();
   return next;
 }
@@ -105,6 +139,7 @@ export function retryFailedJobs(queue){
   const next=clone(queue);
   next.items=(next.items||[]).map(item=>item.status==='failed'||item.status==='cancelled'?{...item,status:'pending',startedAt:null,finishedAt:null,error:null,fileName:null}:item);
   next.cancelRequested=false;
+  next.pauseRequested=false;
   next.status=next.items.some(item=>item.status==='pending')?'ready':'completed';
   next.updatedAt=nowIso();
   return next;
