@@ -1,66 +1,22 @@
-# BoxStudio V0.16
+# BoxStudio V0.17
 
 BoxStudio 是浏览器内运行的纸盒结构设计、2D 刀版、唛头编辑、客户规则、Excel 批量订单、3D 折叠、印前检查、生产审批与生产文件导出原型。
 
-当前主线：**参数化结构 + 唛头变量 + Customer / Packaging Rule + Master Template + Batch Worker + Recoverable Artifacts + Production Approval + Project Persistence + Granular Remote Merge + Panel Artwork Texture Atlas**。
+当前主线：**参数化结构 + 唛头变量 + Customer / Packaging Rule + Master Template + Batch Worker + Recoverable Artifacts + Production Approval + Project Persistence + Granular Remote Merge + Folded Artwork Texture Proof**。
 
-## V0.16 新增
+## V0.17 新增
 
-### 1. Worker TTF / ICC Binary Transfer
+### 1. Folded Artwork Texture Proof
 
-V0.15 的 PDF Worker 会主动阻止依赖会话二进制资源的输出。V0.16 补上了这条生产链：
+V0.16 的 `Panel Artwork Texture Atlas` 现在已经真正进入折叠 3D 预览链路。
 
-- `src/workerAssets.js`
-- `fontRegistry.js` 保留用户上传 TTF 的原始 bytes
-- `iccRegistry.js` 暴露当前 ICC 原始 bytes
-- Worker 启动时一次性传输 TTF / ICC
-- Worker 内重新建立字体 / ICC Registry
-- 同一个 Worker 后续批量订单复用这些 Registry
+新增：
 
-现在：
+- `src/threeArtworkProof.js`
+- `src/v17Ui.js`
+- `src/v17Ui.css`
 
-- Technical Vector Text → 可直接走 Worker
-- User TTF Outline → 有 TTF binary 才允许 Worker
-- PDF/X Candidate → 有 ICC binary 才允许 Worker
-- 缺少生产资源 → 明确阻止，不静默降级
-
-主线程仍负责 Queue、Pause / Resume / Cancel、IndexedDB Artifact、Recovered ZIP 和 UI。
-
-### 2. Object-Level Remote Merge
-
-新增 `src/projectMergeV2.js`。
-
-以下高冲突域不再整块覆盖：
-
-- `elements`：按 `id` + field 合并
-- `masterTemplates`：按 `id` + field 合并
-- `productionJobs`：按 `id` + field 合并
-- Custom Customer / Packaging Rule / Mark Template / Mark Asset：按 key + field 合并
-
-例如同一个 `sku` 元素：
-
-```text
-Local  修改 x
-Remote 修改 y
-```
-
-可以自动合并。
-
-如果双方都修改：
-
-```text
-elements[sku].x
-```
-
-且结果不同，则生成字段级冲突，必须明确选择 `Keep Local` 或 `Use Remote`。
-
-删除/新增冲突也会显式报告。
-
-其余 Structure、Variables、Export Options、Batch 等域仍采用保守原子三方比较。当前不是 CRDT / OT 实时协同系统。
-
-### 3. Panel Artwork Texture Atlas
-
-新增 `src/panelArtwork.js`，把不同唛头元素归一成 Panel-local artwork commands：
+统一 Artwork Atlas 中的内容会先按 Panel 渲染成局部纹理，再映射到折叠后的 Panel 表面，包括：
 
 - Text / Package Notice
 - Shipping Icons
@@ -68,16 +24,75 @@ elements[sku].x
 - Barcode + QR
 - Imported SVG Symbol
 
-V0.16 Workspace 可直接查看每个 Panel 的 Canvas Texture Preview，并统计：
+V0.17 的 Texture Proof 支持：
 
-- Panel Count
-- Artwork Element Count
-- Texture Command Count
-- Out-of-panel Commands
+- Fold 0–100%
+- Pointer Drag Orbit
+- Mouse-wheel Zoom
+- Rebuild Artwork Textures
+- Reset View
+- Depth-sorted Panel Rendering
+- Panel Boundary Wireframe
 
-这套 Atlas 是后续 Folded 3D 材质与 UV Mapping 的统一数据源基础。
+这一条 3D 预览使用 Canvas 2D 三角纹理映射实现，不依赖额外 Three.js bundle，因此在没有 Three.js runtime 时也可以显示真正的 Panel Artwork Texture。
 
-> V0.16 仍不宣称现有折叠 3D 已达到印厂级 UV Soft Proof。Polygon UV、接缝连续性、色彩管理与印刷形变模拟仍需继续开发。
+> 这仍是结构与印刷位置核对预览，不等同印厂 RIP 色彩软打样，也不模拟纸板弯曲半径、印刷拉伸、网点、陷印或基材光学属性。
+
+### 2. Polygon Panel UV Mapping
+
+V0.17 新增 Simple Polygon Ear-clipping Triangulation。
+
+每个 Panel 会执行：
+
+1. 取得 Panel Polygon；
+2. 生成 Panel-local UV；
+3. Polygon Triangulation；
+4. 将纹理三角形仿射映射到折叠后的屏幕三角形。
+
+矩形 Panel 使用 2 个 UV Triangle。
+
+简单凹多边形会通过 Ear Clipping 处理；如果遇到无法可靠三角化的异常几何，会显式退回 Fan Triangulation，并在 V0.17 UI 中显示警告，不会把异常几何隐藏起来。
+
+### 3. Fold Seam UV Diagnostics
+
+每条 Fold Graph Edge 都会生成 UV / Hinge Diagnostics：
+
+- From Panel
+- To Panel
+- Fold Label
+- Hinge Length
+- From UV Endpoints
+- To UV Endpoints
+- Fallback Hinge Status
+- mapped / warning
+
+检查目标是确认同一折线端点能够进入两个连接 Panel 的纹理坐标域。
+
+这不等于“自动把一张跨面图片无缝延续到多个 Panel”。Cross-panel Artwork Continuity 仍然属于后续独立功能。
+
+## V0.16 能力继续保留
+
+### Worker TTF / ICC Binary Transfer
+
+- Worker 启动时一次性传输当前用户 TTF / ICC binary
+- Worker 内重新建立 Font / ICC Registry
+- User TTF Outline 可进入 Worker
+- PDF/X Candidate 有 ICC 时可进入 Worker
+- 缺少必要资源时明确阻止，不静默降级
+- 主线程继续负责 Queue、Pause / Resume / Cancel、IndexedDB Artifact 与 Recovered ZIP
+
+### Object-Level Remote Merge
+
+高冲突域继续使用对象/字段级三方合并：
+
+- `elements`：`id + field`
+- `masterTemplates`：`id + field`
+- `productionJobs`：`id + field`
+- Custom Customer / Packaging Rule / Mark Template / Mark Asset：`key + field`
+
+不同字段的 Local / Remote 修改可自动合并；同字段不同结果才要求 `Keep Local` 或 `Use Remote`。
+
+当前仍不是 CRDT / OT 实时多人协同系统。
 
 ## 已有核心能力
 
@@ -137,7 +152,7 @@ SVG 目前仍是安全矢量轮廓子集，不等同完整 Illustrator Appearanc
 - IndexedDB Persistent Artifact Cache
 - Recovered ZIP
 - Module Web Worker PDF Generation
-- V0.16 User TTF / ICC Worker Transfer
+- User TTF / ICC Worker Transfer
 
 ### Production Approval
 
@@ -161,8 +176,8 @@ Approved PDF 必须同时满足：Approved Job、0 Preflight Error、Fingerprint
 - REST Adapter
 - `If-Match` Revision Protection
 - Remote Base
-- V0.15 Domain Merge
-- V0.16 Object / Field-level Merge
+- Domain Merge
+- Object / Field-level Merge
 
 REST 约定：
 
@@ -179,12 +194,15 @@ DELETE /projects/:id
 
 - Panel / Fold Graph
 - Hinge-pivot Fold 0–100%
-- Three.js Path
-- Offline Canvas Fallback
-- 矩形 Panel 基础 Texture
-- V0.16 Panel Artwork Texture Atlas
+- Existing Three.js Path
+- Existing Offline Canvas Fallback
+- Panel Artwork Texture Atlas
+- V0.17 Folded Artwork Texture Proof
+- Rectangular UV Mapping
+- Polygon Ear-clipping UV Triangulation
+- Fold Seam UV Diagnostics
 
-当前不宣称 Polygon UV、复杂 SVG Appearance、色彩管理和印刷变形模拟已经完成。
+当前仍不宣称具备 ICC-aware Display Conversion、印刷形变模拟或 RIP 级 Soft Proof。
 
 ### Production Export
 
@@ -231,21 +249,31 @@ node tests/v13.mjs
 node tests/v14.mjs
 node tests/v15.mjs
 node tests/v16.mjs
+node tests/v17.mjs
 ```
 
-V0.16 回归覆盖 TTF/ICC Worker Asset Eligibility、ICC transferable payload、Object-level Merge、field conflict resolution、Custom Profile field merge、SVG artwork commands、Barcode/QR texture commands、Panel bounds 与 Artwork Atlas。
+V0.17 回归覆盖：
 
-详细报告：`docs/V0.16_TEST_REPORT.md`。
+- Concave Polygon Ear-clipping
+- Rect Panel UV Generation
+- UV Bounds
+- Default RSC Fold Hinge UV Mapping
+- Folded Artwork Proof Model
+- Artwork Command Presence
+- UV Triangle Count
+- Fold 0% / 100% Transform Change
+
+详细报告：`docs/V0.17_TEST_REPORT.md`。
 
 ## 数据存储
 
 Browser project state：
 
 ```text
-boxstudio-mvp-v16
+boxstudio-mvp-v17
 ```
 
-旧版本 key 继续作为迁移来源。
+V0.16 和更早版本继续作为迁移来源。
 
 附加存储：
 
@@ -267,6 +295,7 @@ src/
   qrcode.js
   svgMark.js
   panelArtwork.js
+  threeArtworkProof.js
   batch.js
   batchTemplates.js
   batchWorkerCore.js
@@ -287,14 +316,15 @@ src/
   v14Ui.js
   v15Ui.js
   v16Ui.js
+  v17Ui.js
   ...
 
 tests/
   smoke.mjs
-  v10.mjs ... v16.mjs
+  v10.mjs ... v17.mjs
 
 docs/
-  V0.10_TEST_REPORT.md ... V0.16_TEST_REPORT.md
+  V0.10_TEST_REPORT.md ... V0.17_TEST_REPORT.md
 ```
 
 ## 参考源边界
@@ -303,11 +333,12 @@ docs/
 
 ## 下一阶段
 
+- SVG Solid Fill / Gradient / Clip / Mask Production Rendering
+- Cross-panel Artwork Continuity / Bleed across folds
+- ICC-aware Display Conversion for 3D Preview
+- Board Thickness / Bend Radius / Print Stretch Simulation
 - Hosted BoxStudio Backend + Auth / SSO
 - Server-side Immutable Audit / Approval Signatures
 - Cloud Resumable Artifact / Object Storage
-- SVG Fill / Gradient / Clip / Mask Production Rendering
 - Per-object Ordering / Collaborative Merge
-- Panel Artwork Atlas → Folded 3D Material Integration
-- Polygon UV / Seam Continuity / Color-managed 3D Soft Proof
 - Factory Compensation Profiles（仅使用已验证生产参数）
