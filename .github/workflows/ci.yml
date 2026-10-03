@@ -45,3 +45,6 @@ jobs:
 
       - name: V0.14 persistence, artifacts and role tests
         run: node tests/v14.mjs
+
+      - name: V0.15 SVG, worker PDF and merge tests
+        run: node tests/v15.mjs
