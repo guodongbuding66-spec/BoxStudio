@@ -1,4 +1,4 @@
-import { buildWorkerPdfTask } from './batchWorkerCore.js';
+import { buildWorkerPdfTask, buildWorkerPdfTaskV24 } from './batchWorkerCore.js';
 import { hydrateWorkerAssetsV24, workerAssetAvailabilityV24 } from './workerAssetsV24.js';
 
 let sessionAvailability={hasTtf:false,hasIcc:false,hasDeviceLink:false,ttfName:'',iccName:'',deviceLinkName:'',deviceLinkFingerprint:''};
@@ -18,7 +18,8 @@ self.onmessage = (event) => {
       hydrateWorkerAssetsV24(data.workerAssets);
       sessionAvailability=workerAssetAvailabilityV24(data.workerAssets);
     }
-    const result = buildWorkerPdfTask(data.baseState, data.row, index, {assets: sessionAvailability});
+    const builder=data.pipeline==='v24-native'?buildWorkerPdfTaskV24:buildWorkerPdfTask;
+    const result = builder(data.baseState, data.row, index, {assets: sessionAvailability});
     if (result.ok && result.bytes instanceof Uint8Array) {
       const bytes = result.bytes;
       const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
