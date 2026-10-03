@@ -1,6 +1,6 @@
 import { STORAGE_KEY, defaultState } from './model.js';
 import { getCustomerProfileCatalog, applyCustomerProfile, saveCustomCustomerProfile, deleteCustomCustomerProfile } from './customerProfiles.js';
-import { MARK_TEMPLATES, applyMarkTemplate } from './markTemplates.js';
+import { getMarkTemplateCatalog, applyMarkTemplate, createMarkTemplateFromState, saveCustomMarkTemplate, deleteCustomMarkTemplate } from './markTemplates.js';
 import { getPackagingRuleCatalog, saveCustomPackagingRule, deleteCustomPackagingRule } from './rules.js';
 import {
   createMasterTemplate,
@@ -32,7 +32,7 @@ function writeState(state){
 }
 
 function esc(value=''){
-  return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[ch]));
+  return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
 
 function downloadText(name, text){
@@ -87,8 +87,10 @@ function renderDrawer(){
   const masters = Array.isArray(state.masterTemplates) ? state.masterTemplates : [];
   const customerCatalog = getCustomerProfileCatalog(state);
   const ruleCatalog = getPackagingRuleCatalog(state);
+  const markCatalog = getMarkTemplateCatalog(state);
   const customCustomers = Object.values(state.customCustomerProfiles || {});
   const customRules = Object.values(state.customPackagingRules || {});
+  const customMarks = Object.values(state.customMarkTemplates || {});
   const root = document.createElement('div');
   root.id = DRAWER_ID;
   root.className = 'profile-manager-backdrop';
@@ -105,7 +107,7 @@ function renderDrawer(){
           <div class="profile-grid-2">
             <label><span>Customer Profile</span><select id="profileCustomer">${profileOptions(customerCatalog,state.customerProfileId)}</select></label>
             <label><span>Packaging Rule</span><select id="profileRule">${profileOptions(ruleCatalog,state.packagingRuleProfileId)}</select></label>
-            <label><span>Mark Template</span><select id="profileMark">${Object.values(MARK_TEMPLATES).map(p=>`<option value="${esc(p.id)}" ${state.markTemplateId===p.id?'selected':''}>${esc(p.label)}</option>`).join('')}</select></label>
+            <label><span>Mark Template</span><select id="profileMark">${profileOptions(markCatalog,state.markTemplateId)}</select></label>
           </div>
           <div class="profile-inline"><button type="button" class="profile-primary" data-apply-customer>Apply Customer Profile</button><button type="button" data-apply-rules>Apply Rule + Mark Template</button></div>
         </div>
@@ -116,7 +118,7 @@ function renderDrawer(){
             <label><span>Name</span><input id="customCustomerLabel" placeholder="Example: Retailer A US"></label>
             <label><span>Profile ID</span><input id="customCustomerId" placeholder="retailer-a-us"></label>
             <label><span>Packaging Rule</span><select id="customCustomerRule">${profileOptions(ruleCatalog,'generic')}</select></label>
-            <label><span>Preferred Mark Template</span><select id="customCustomerMark"><option value="">None</option>${Object.values(MARK_TEMPLATES).map(p=>`<option value="${esc(p.id)}">${esc(p.label)}</option>`).join('')}</select></label>
+            <label><span>Preferred Mark Template</span><select id="customCustomerMark"><option value="">None</option>${Object.values(markCatalog).map(p=>`<option value="${esc(p.id)}">${esc(p.label)}${p.custom?' · Custom':''}</option>`).join('')}</select></label>
             <label><span>Origin Country</span><input id="customOrigin" value="China"></label>
             <label><span>Destination Country</span><input id="customDestination" value="US"></label>
             <label><span>Dimension Unit</span><select id="customDimensionUnit"><option>INCH</option><option>MM</option><option>CM</option></select></label>
@@ -141,6 +143,17 @@ function renderDrawer(){
           <label class="profile-stack"><span>Fixed variables · one key=value per line</span><textarea id="customFixedVariables" placeholder="destinationCountry=US"></textarea></label>
           <button type="button" class="profile-primary" data-save-rule>Save Custom Packaging Rule</button>
           ${customRules.length?`<div class="custom-profile-list">${customRules.map(p=>`<div><span><b>${esc(p.label)}</b><small>${esc(p.id)}</small></span><button type="button" class="danger" data-delete-rule="${esc(p.id)}">Delete</button></div>`).join('')}</div>`:''}
+        </details>
+
+        <details class="profile-section v11-builder">
+          <summary><b>Mark Template Builder</b> · 保存当前唛头元素、位置、变量绑定和 Barcode+QR 规格</summary>
+          <div class="profile-grid-2">
+            <label><span>Name</span><input id="customMarkLabel" placeholder="Example: Retailer A Marks"></label>
+            <label><span>Template ID</span><input id="customMarkId" placeholder="retailer-a-marks"></label>
+          </div>
+          <label class="profile-stack"><span>Description</span><input id="customMarkDescription" placeholder="Customer-approved shipping-mark layout"></label>
+          <button type="button" class="profile-primary" data-save-mark>Save Current Marks as Template</button>
+          ${customMarks.length?`<div class="custom-profile-list">${customMarks.map(p=>`<div><span><b>${esc(p.label)}</b><small>${esc(p.id)} · ${p.elements?.length||0} elements</small></span><button type="button" class="danger" data-delete-mark="${esc(p.id)}">Delete</button></div>`).join('')}</div>`:''}
         </details>
 
         <div class="profile-section">
@@ -222,6 +235,20 @@ function renderDrawer(){
     }catch(err){ alert(err?.message || err); }
   };
 
+  root.querySelector('[data-save-mark]').onclick = () => {
+    try{
+      let next=readState();
+      const label=root.querySelector('#customMarkLabel').value.trim();
+      if(!label) throw new Error('Mark template name is required.');
+      const mark=createMarkTemplateFromState(next,{
+        id:root.querySelector('#customMarkId').value.trim()||label,
+        label,
+        description:root.querySelector('#customMarkDescription').value.trim(),
+      });
+      next=saveCustomMarkTemplate(next,mark);writeState(next);renderDrawer();
+    }catch(err){alert(err?.message||err)}
+  };
+
   root.querySelectorAll('[data-delete-customer]').forEach(button => button.onclick = () => {
     if(!confirm('Delete this custom customer profile?')) return;
     try{ writeState(deleteCustomCustomerProfile(readState(), button.dataset.deleteCustomer)); renderDrawer(); }catch(err){ alert(err?.message||err); }
@@ -229,6 +256,10 @@ function renderDrawer(){
   root.querySelectorAll('[data-delete-rule]').forEach(button => button.onclick = () => {
     if(!confirm('Delete this custom packaging rule?')) return;
     try{ writeState(deleteCustomPackagingRule(readState(), button.dataset.deleteRule)); renderDrawer(); }catch(err){ alert(err?.message||err); }
+  });
+  root.querySelectorAll('[data-delete-mark]').forEach(button => button.onclick = () => {
+    if(!confirm('Delete this custom mark template?')) return;
+    try{ writeState(deleteCustomMarkTemplate(readState(), button.dataset.deleteMark)); renderDrawer(); }catch(err){ alert(err?.message||err); }
   });
 
   root.querySelector('[data-save-master]').onclick = () => {
@@ -263,6 +294,7 @@ function renderDrawer(){
     next.masterTemplates = current.masterTemplates;
     next.customCustomerProfiles = current.customCustomerProfiles || {};
     next.customPackagingRules = current.customPackagingRules || {};
+    next.customMarkTemplates = current.customMarkTemplates || {};
     next.batch = current.batch || next.batch;
     writeState(next);
     location.reload();
@@ -338,7 +370,7 @@ function installButton(){
   button.type = 'button';
   button.className = 'profile-manager-trigger';
   button.textContent = 'Profiles';
-  button.title = 'Customer Profiles, Packaging Rules & Master Templates';
+  button.title = 'Customer Profiles, Packaging Rules, Mark Templates & Master Templates';
   button.onclick = renderDrawer;
   const exportButton = topbar.querySelector('#quickExport');
   if(exportButton) topbar.insertBefore(button, exportButton); else topbar.appendChild(button);
