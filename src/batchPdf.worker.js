@@ -1,7 +1,7 @@
 import { buildWorkerPdfTask } from './batchWorkerCore.js';
-import { hydrateWorkerAssets, workerAssetAvailability } from './workerAssets.js';
+import { hydrateWorkerAssetsV24, workerAssetAvailabilityV24 } from './workerAssetsV24.js';
 
-let sessionAvailability={hasTtf:false,hasIcc:false,ttfName:'',iccName:''};
+let sessionAvailability={hasTtf:false,hasIcc:false,hasDeviceLink:false,ttfName:'',iccName:'',deviceLinkName:'',deviceLinkFingerprint:''};
 
 self.onmessage = (event) => {
   const data = event.data || {};
@@ -9,14 +9,14 @@ self.onmessage = (event) => {
   const index = data.index;
   try {
     if(data.type==='init-assets'){
-      if(data.workerAssets)hydrateWorkerAssets(data.workerAssets);
-      sessionAvailability=workerAssetAvailability(data.workerAssets||{});
+      if(data.workerAssets)hydrateWorkerAssetsV24(data.workerAssets);
+      sessionAvailability=workerAssetAvailabilityV24(data.workerAssets||{});
       self.postMessage({ok:true,type:'assets-ready',requestId,availability:sessionAvailability});
       return;
     }
     if (data.workerAssets) {
-      hydrateWorkerAssets(data.workerAssets);
-      sessionAvailability=workerAssetAvailability(data.workerAssets);
+      hydrateWorkerAssetsV24(data.workerAssets);
+      sessionAvailability=workerAssetAvailabilityV24(data.workerAssets);
     }
     const result = buildWorkerPdfTask(data.baseState, data.row, index, {assets: sessionAvailability});
     if (result.ok && result.bytes instanceof Uint8Array) {
