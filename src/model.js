@@ -1,7 +1,7 @@
 import { defaultStructure, defaultsForTemplate } from './geometry.js';
 
-export const STORAGE_KEY = 'boxstudio-mvp-v10';
-export const LEGACY_STORAGE_KEYS = ['boxstudio-mvp-v9','boxstudio-mvp-v8','boxstudio-mvp-v7','boxstudio-mvp-v6','boxstudio-mvp-v5','boxstudio-mvp-v4','boxstudio-mvp-v3','boxstudio-mvp-v2','boxstudio-mvp'];
+export const STORAGE_KEY = 'boxstudio-mvp-v11';
+export const LEGACY_STORAGE_KEYS = ['boxstudio-mvp-v10','boxstudio-mvp-v9','boxstudio-mvp-v8','boxstudio-mvp-v7','boxstudio-mvp-v6','boxstudio-mvp-v5','boxstudio-mvp-v4','boxstudio-mvp-v3','boxstudio-mvp-v2','boxstudio-mvp'];
 
 export const defaultVariables = {
   sku: 'KF210215US-02PM-001',
@@ -73,6 +73,8 @@ export const defaultState = {
   packagingRuleProfileId: 'us-side-seal',
   markTemplateId: 'us-side-seal-master',
   masterTemplates: [],
+  customCustomerProfiles: {},
+  customPackagingRules: {},
   selectedId: 'sku',
   zoom: 100,
   grid: true,
@@ -83,7 +85,7 @@ export const defaultState = {
   showRulers: true,
   syncDimensions: true,
   foldProgress: 100,
-  batch: { fileName:'', rows:[], selectedIndex:0, columns:[], sheets:[], sheetIndex:0, mapping:{} },
+  batch: { fileName:'', rows:[], selectedIndex:0, columns:[], sheets:[], sheetIndex:0, mapping:{}, masterTemplateId:'' },
   dielineEdit: { kind:'CUT', index:0 },
   curveEdit: { kind:'CUT', index:0 },
   panelEdit: { selected:[], splitOrientation:'vertical', splitRatio:0.5, polygonPoints:'20,20 110,20 130,65 80,100 20,80' },
