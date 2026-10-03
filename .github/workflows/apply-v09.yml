@@ -1,0 +1,45 @@
+name: Apply BoxStudio V0.9
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: ${{ !contains(github.event.head_commit.message, '[v09-applied]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply V0.9 overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar -xJf .sync/boxstudio-v09-patch.tar.xz -C .
+          rm -rf .sync
+          rm -f .github/workflows/apply-v09.yml
+
+      - name: Validate V0.9
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '# BoxStudio V0.9' README.md
+          grep -q '"version": "0.9.0"' package.json
+          for f in src/*.js tests/smoke.mjs; do node --check "$f"; done
+          node tests/smoke.mjs
+
+      - name: Commit V0.9
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: upgrade BoxStudio to V0.9 [v09-applied]"
+          git push origin HEAD:main
