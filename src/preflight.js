@@ -8,11 +8,29 @@ import { analyzeImportedGeometry } from './repair.js';
 import { userTtfInfo } from './fontRegistry.js';
 import { outputIccInfo } from './iccRegistry.js';
 import { spotNameFor } from './printProfiles.js';
+import { validatePackagingRuleState } from './rules.js';
+import { validateCustomerProfile } from './customerProfiles.js';
+import { validateMarkTemplate } from './markTemplates.js';
 
 export function runPreflight(state) {
   const r = [];
   const v = state.variables || {};
   const geo = generateGeometry(state.structure);
+
+  r.push(...validatePackagingRuleState(state));
+  const customerValidation = validateCustomerProfile(state);
+  r.push({
+    severity: customerValidation.ok ? 'pass' : 'error',
+    title: 'Customer Profile',
+    detail: customerValidation.ok ? customerValidation.profile.label : customerValidation.issues.join(' '),
+  });
+  const markValidation = validateMarkTemplate(state);
+  r.push({
+    severity: markValidation.ok ? 'pass' : 'warning',
+    title: 'Mark Template',
+    detail: markValidation.ok ? markValidation.template.label : `Missing: ${markValidation.missing.join(', ') || 'none'} · preset ${markValidation.presetOk ? 'ok' : 'mismatch'}`,
+  });
+
   const required = [
     ['sku','SKU'],['nw','N.W.'],['gw','G.W.'],['crn','CRN'],['contractNo','Contract No.']
   ];
@@ -82,10 +100,10 @@ export function runPreflight(state) {
     r.push({severity:confirmed.length?'pass':'warning',title:'Imported Fold Confirmation',detail:`推断 ${candidates.length} 条 crease adjacency · 已确认 ${confirmed.length} 条 · graph ${graph.edges.length} hinges`});
     r.push({severity:'pass',title:'Native Curve Preservation',detail:`${curves.length} 条 Bezier / Arc 以原生控制点保存；DXF/PDF 输出会按生产兼容方式离散。`});
   }
-  r.push({ severity:'warning', title:'结构补偿状态', detail:s.template==='imported'?`当前为导入 ${geo.structure?.importedGeometry?.source||'Vector'} 刀版。V0.7 支持 SVG/DXF/PDF/PDF-compatible AI、原生曲线、Fold 人工确认、自由 Polygon Panel 和拓扑检查；仍须核对折叠方向和工厂补偿。`:s.template==='mailer-150010'?'Mailer 150010 当前按公开参考尺寸校准设计区与基础几何；不同纸板/设备的压线与锁扣补偿仍需包装工程师确认。':'当前为基础参数化侧封箱/RSC 补偿模型。源 PDF 未提供完整压线补偿表，正式刀模需由包装工程师确认。' });
+  r.push({ severity:'warning', title:'结构补偿状态', detail:s.template==='imported'?`当前为导入 ${geo.structure?.importedGeometry?.source||'Vector'} 刀版。支持 SVG/DXF/PDF/PDF-compatible AI、原生曲线、Fold 人工确认、自由 Polygon Panel 和拓扑检查；仍须核对折叠方向和工厂补偿。`:s.template==='mailer-150010'?'Mailer 150010 当前按公开参考尺寸校准设计区与基础几何；不同纸板/设备的压线与锁扣补偿仍需包装工程师确认。':'当前为基础参数化侧封箱/RSC 补偿模型。源 PDF 未提供完整压线补偿表，正式刀模需由包装工程师确认。' });
 
   const rotated = visibleElements.filter(e=>Math.abs(Number(e.r)||0) > 0.001);
-  r.push({ severity:rotated.length?'warning':'pass', title:'PDF 旋转兼容', detail:rotated.length?`V0.8 Production PDF 暂不应用对象旋转：${rotated.map(x=>x.id).join(', ')}；SVG/PNG 会保留旋转。`:'当前无旋转对象，PDF 与 SVG 几何一致' });
+  r.push({ severity:rotated.length?'warning':'pass', title:'PDF 旋转兼容', detail:rotated.length?`Production PDF 暂不应用对象旋转：${rotated.map(x=>x.id).join(', ')}；SVG/PNG 会保留旋转。`:'当前无旋转对象，PDF 与 SVG 几何一致' });
 
   const renderedText=visibleElements.filter(e=>e.template).map(e=>String(e.template).replace(/{{\s*(\w+)\s*}}/g,(_,k)=>String(v[k]??'')));
   const vectorUnsupported=renderedText.filter(t=>!supportsVectorText(t));
@@ -105,7 +123,7 @@ export function runPreflight(state) {
     const blockers=[];if(!icc)blockers.push('未加载 ICC');else if(!icc.isCmyk)blockers.push(`ICC=${icc.colorSpace||'Unknown'}，不是 CMYK`);if(!state.exportOptions?.outlineText)blockers.push('文字未转曲');if(rotated.length)blockers.push('存在 PDF 未实现旋转对象');
     r.push({severity:blockers.length?'error':'pass',title:'PDF/X-4 Candidate Gate',detail:blockers.length?`阻断：${blockers.join('；')}`:`已具备 CMYK ICC OutputIntent、XMP / GTS_PDFXVersion、TrimBox/BleedBox 与文字转曲条件。ICC: ${icc.name} · ${icc.colorSpace} · ${icc.size} bytes。仍建议使用专业 preflight 工具验证，不宣称第三方认证。`});
   }else{
-    r.push({severity:'warning',title:'PDF/X readiness',detail:'当前为普通 Production PDF。V0.8 可切换 PDF/X-4 Candidate，并嵌入用户提供的 CMYK ICC OutputIntent + XMP；未开启时不写 PDF/X 标识。'});
+    r.push({severity:'warning',title:'PDF/X readiness',detail:'当前为普通 Production PDF。可切换 PDF/X-4 Candidate，并嵌入用户提供的 CMYK ICC OutputIntent + XMP；未开启时不写 PDF/X 标识。'});
   }
   if(s.template==='imported'){
     const a=analyzeImportedGeometry(s.importedGeometry||{},Number(state.repairTolerance)||.5);
