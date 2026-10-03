@@ -1,10 +1,71 @@
-# BoxStudio V0.11
+# BoxStudio V0.12
 
-浏览器内运行的纸盒结构设计、2D 刀版、唛头编辑、批量订单、3D 折叠、印前检查与生产文件导出原型。
+浏览器内运行的纸盒结构设计、2D 刀版、唛头编辑、客户规则、批量订单、3D 折叠、印前检查与生产文件导出原型。
 
-当前主线目标是把 **参数化纸盒结构 + 唛头变量 + 客户规则 + Master Template + Excel 批量生成 + Preflight** 做成一套可复用的包装生产工作流。
+当前主线是把 **参数化纸盒结构 + 唛头变量 + Customer Profile + Packaging Rule + Master Template + Excel 批量生成 + Preflight + 可追溯生产配置** 做成一套可复用工作流。
 
-## 当前能力
+## V0.12 新增
+
+### Large Batch Queue
+
+V0.12 不再把大批量 PDF 当成一次不可中断的长循环。
+
+新增：
+
+- PDF ZIP Job Queue
+- 每行 `pending / running / completed / failed / cancelled`
+- 实时进度百分比
+- completed / failed / pending 统计
+- 行与行之间让出浏览器主线程
+- 安全边界取消
+- 取消后只打包已经真实生成完成的 partial ZIP
+- Preflight Error 行标记为 failed，不伪装成成功文件
+- failed / cancelled 队列状态支持重置重跑
+
+注意：队列元数据可进入项目状态，但生成中的 PDF 二进制不会写入 `localStorage`。页面刷新后需要重新开始导出。
+
+### Workspace Bundle
+
+新增可携带的 Workspace Bundle JSON，可一次性导入/导出：
+
+- Custom Customer Profiles
+- Custom Packaging Rules
+- Packaging Rule revision history
+- Custom Mark Templates
+- Custom Mark Assets
+- Master Templates
+- Active Customer / Rule / Mark Template IDs
+
+这样客户模板、工厂规则和 Master 不再只能留在当前浏览器里手工重建。
+
+### Mark Asset Library
+
+新增唛头素材库：
+
+- Built-in `This Side Up`
+- Built-in `Fragile`
+- Built-in `Keep Dry`
+- 当前选中的 mark-layer 元素可以保存为自定义 Asset
+- 插入 Asset 时生成新的元素 ID
+- Asset 去除原项目专属 x / y / panel 绑定后再复用
+- 自定义 Asset 可删除
+
+当前 Asset Library 面向 BoxStudio 已支持的元素类型；还不是任意 SVG 图标编辑器。
+
+### Packaging Rule Version History
+
+自定义 Packaging Rule 现在支持版本历史：
+
+- `revision`
+- `revisionNote`
+- `createdAt`
+- `updatedAt`
+- `versions[]`
+- 同 ID 再次保存时自动创建新 revision
+- Restore 旧版本时生成新的当前 revision，不破坏历史
+- Built-in Rule 继续保持只读
+
+## 现有核心能力
 
 ### 结构 / 刀版
 
@@ -16,24 +77,27 @@
 - Polygon Panel
 - Panel / Fold Graph
 - CREASE → Fold Candidate 人工确认
-- 基础拓扑修复、交叉线和自交检查
+- 基础拓扑修复
+- CUT crossing / Polygon self-intersection 检查
 - Bleed / Safe Area
 
 > 工厂压线补偿、刀模板补偿和设备公差必须来自已验证生产数据。BoxStudio 不自动编造这些参数。
 
 ### 唛头 / 条码
 
-- 变量文本：SKU、N.W.、G.W.、Package Meas、CRN、Contract No.、Origin、Destination、Package No.
+- SKU、N.W.、G.W.、Package Meas、CRN、Contract No.、Origin、Destination、Package No.
 - 多包裹英文提示条件
 - Code 39 / EAN-13 / UPC-A / ITF-14 / GS1-128
 - QR Code
 - Barcode + QR 锁定组合
 - 250×80 mm / 200×64 mm 组合规格
-- This Side Up / Fragile / Keep Dry 等运输标识
+- This Side Up / Fragile / Keep Dry
+- Custom Mark Template
+- Custom Mark Asset Library
 
 ### Customer Profile / Packaging Rule
 
-V0.11 增加可编辑生产 Profile：
+支持：
 
 - 客户默认变量
 - 客户锁定变量
@@ -42,16 +106,10 @@ V0.11 增加可编辑生产 Profile：
 - 自定义必填字段
 - 固定变量 `key=value`
 - CRN 重复绑定数量
-- Package index/count 规则
-- Multi-package notice 规则
-- Barcode+QR preset / ratio / aspect-lock 规则
-
-### Mark Template
-
-- 内置 US Side-Seal Master / Compact Marks
-- 将当前唛头层保存为自定义 Mark Template
-- 保存元素位置、尺寸、变量绑定、运输图标和 Barcode+QR 设置
-- 自定义模板可重新应用到项目
+- Package index/count
+- Multi-package notice
+- Barcode+QR preset / ratio / aspect-lock
+- 自定义 Packaging Rule revision history
 
 ### Master Template V2
 
@@ -67,7 +125,7 @@ Master Template 保存：
 - 非订单变量默认值
 - 自定义 Profile 快照
 
-V0.11 支持：
+支持：
 
 - Rename
 - Duplicate
@@ -89,6 +147,7 @@ V0.11 支持：
 - Batch-wide Preflight
 - Master Combined PDF
 - Master PDF ZIP
+- V0.12 Large Batch PDF Queue
 
 批量 Master 的执行顺序：
 
@@ -97,7 +156,8 @@ V0.11 支持：
 3. Restore embedded custom profiles
 4. Map Excel/CSV row to variables
 5. Normalize variables
-6. Run Preflight / Export
+6. Run Preflight
+7. Export only valid/specified output
 
 ### 3D
 
@@ -106,6 +166,8 @@ V0.11 支持：
 - Fold 0–100%
 - Three.js 优先
 - CDN 不可用时离线 Canvas fallback
+
+当前还没有声称完整实现生产级“2D 印刷稿自动贴到每个折叠面”的纹理映射。
 
 ### Production Export
 
@@ -124,7 +186,7 @@ V0.11 支持：
 
 ## Preflight
 
-当前会检查：
+当前检查包括：
 
 - Customer Profile
 - Packaging Rule Profile
@@ -134,12 +196,11 @@ V0.11 支持：
 - Package index/count
 - Multi-package notice
 - CRN 重复变量绑定
-- Barcode + QR 组合、比例、preset、aspect lock
+- Barcode + QR 组合 / ratio / preset / aspect lock
 - Barcode / GS1 语义
 - QR 编码
-- 对象是否超出 Panel
-- Safe Area
-- Bleed
+- Panel 边界
+- Safe Area / Bleed
 - Fold Graph
 - 导入刀版拓扑
 - CUT crossing / Polygon self-intersection
@@ -161,7 +222,7 @@ python -m http.server 8080
 http://localhost:8080
 ```
 
-不要直接使用 `file://` 打开，因为浏览器会限制 ES Module。
+不要直接使用 `file://`，浏览器会限制 ES Module。
 
 ## 自动测试
 
@@ -173,23 +234,30 @@ node --check tests/*.mjs
 node tests/smoke.mjs
 node tests/v10.mjs
 node tests/v11.mjs
+node tests/v12.mjs
 ```
 
-V0.11 回归覆盖包括 Master revision、Custom Packaging Rule、Custom Customer Profile、Custom Mark Template、portable Master embedded profiles 和 Batch Master pipeline。
+V0.12 回归覆盖：
+
+- Job Queue create / claim / complete / fail / cancel / retry
+- Mark Asset snapshot / insert / delete
+- Packaging Rule revision creation / restore
+- Workspace Bundle validate / serialize / parse / merge
+- V0.10 / V0.11 既有功能回归
 
 ## 数据存储
 
-当前仍以浏览器 `localStorage` 为主：
+当前 browser storage key：
 
 ```text
-boxstudio-mvp-v11
+boxstudio-mvp-v12
 ```
 
-V0.10 及更早 storage key 会作为迁移来源读取。
+V0.11 及更早 key 继续作为迁移来源。
 
-目前没有账号数据库 / 云端项目同步；这是后续版本的独立工作。
+目前仍没有账号数据库 / 云端项目同步。
 
-## 目录
+## 关键目录
 
 ```text
 src/
@@ -203,12 +271,16 @@ src/
   qrcode.js
   batch.js
   batchTemplates.js
+  jobQueue.js
   rules.js
   customerProfiles.js
   markTemplates.js
+  markAssets.js
   masterTemplates.js
+  profileBundles.js
   profileUi.js
   v11BatchUi.js
+  v12Ui.js
   preflight.js
   export.js
   threePreview.js
@@ -218,10 +290,12 @@ tests/
   smoke.mjs
   v10.mjs
   v11.mjs
+  v12.mjs
 
 docs/
   V0.10_TEST_REPORT.md
   V0.11_TEST_REPORT.md
+  V0.12_TEST_REPORT.md
 ```
 
 ## 参考源边界
@@ -232,10 +306,9 @@ docs/
 
 计划继续推进：
 
-- 大批量 Job Queue / progress / cancel
-- Profile / Master Template 云端持久化
-- 更完整的 Mark Library Editor
-- 客户模板导入导出包
-- 工厂规则版本管理
-- 结构补偿 Profile（仅使用已验证参数）
-- 更完整的 3D 材质 / 印刷贴图预览
+- 大批量队列的真正暂停 / 继续与浏览器 Worker 化
+- 云端项目 / Profile / Master 同步
+- 更完整的 Mark Library 独立编辑画布
+- 工厂 Structural Compensation Profile（仅使用已验证数据）
+- 3D 材质与印刷贴图预览
+- Production Job / Approval / Audit Log
