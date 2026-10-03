@@ -1,4 +1,5 @@
 import { IDENTITY, multiplyMatrix, applyMatrix, parseTransform } from './importDieline.js';
+import { parseSvgAppearance } from './svgAppearance.js';
 
 const SVG_MARK_SCHEMA='boxstudio-svg-mark';
 const SVG_MARK_SCHEMA_VERSION=1;
@@ -31,7 +32,7 @@ export function pathToLines(d='',curveSteps=18){
     else if(u==='H'){let nx=next();if(rel)nx+=x;out.push(line(x,y,nx,y));x=nx;}
     else if(u==='V'){let ny=next();if(rel)ny+=y;out.push(line(x,y,x,ny));y=ny;}
     else if(u==='C'){let c1x=next(),c1y=next(),c2x=next(),c2y=next(),nx=next(),ny=next();if(rel){c1x+=x;c1y+=y;c2x+=x;c2y+=y;nx+=x;ny+=y;}let px=x,py=y;for(let k=1;k<=curveSteps;k++){const q=k/curveSteps,xx=cubic(x,c1x,c2x,nx,q),yy=cubic(y,c1y,c2y,ny,q);out.push(line(px,py,xx,yy));px=xx;py=yy;}x=nx;y=ny;}
-    else if(u==='Q'){let cx=next(),cy=next(),nx=next(),ny=next();if(rel){cx+=x;cy+=y;nx+=x;ny+=y;}let px=x,py=y;for(let k=1;k<=curveSteps;k++){const q=k/curveSteps,xx=quad(x,cx,nx,q),yy=quad(y,cy,ny,q);out.push(line(px,py,xx,yy));px=xx;py=yy;}x=nx;y=ny;}
+    else if(u==='Q'){let cx=next(),cy=next(),nx=next(),ny=next();if(rel){cx+=x;cy+=y;nx+=x;ny+=y;}let px=x,py=y;for(let k=1;k<=curveSteps;k++){const q=k/curveSteps,xx=quad(x,cx,nx,q),yy=quad(y,cy,nx,q);out.push(line(px,py,xx,yy));px=xx;py=yy;}x=nx;y=ny;}
     else if(u==='A'){let rx=next(),ry=next(),rot=next(),large=next(),sweep=next(),nx=next(),ny=next();if(rel){nx+=x;ny+=y;}out.push(...sampleArc(x,y,rx,ry,rot,large,sweep,nx,ny,Math.max(16,curveSteps*2)));x=nx;y=ny;}
     else if(u==='Z'){out.push(line(x,y,sx,sy));x=sx;y=sy;cmd='';}
     else{while(i<t.length&&!isCmd(t[i]))i++;cmd='';}
@@ -54,13 +55,15 @@ export function validateSvgMark(mark){const errors=[];if(!mark||mark.schema!==SV
 export function parseSvgMark(svgText,{name='Imported SVG',maxSegments=6000}={}){
   const text=String(svgText||'').trim();if(!/^<\s*svg\b/i.test(text))throw new Error('SVG mark must start with an <svg> element.');if(BLOCKED_TAGS.test(text))throw new Error('SVG mark contains blocked embedded/external content.');if(EXTERNAL_REF.test(text))throw new Error('SVG mark contains an external reference.');
   const rootTag=text.match(/<\s*svg\b[^>]*>/i)?.[0]||'',rootAttrs=attrsOf(rootTag),vb=(rootAttrs.viewbox||'').trim().split(/[\s,]+/).map(Number),sourceViewBox=vb.length>=4&&vb.every(Number.isFinite)?vb.slice(0,4):[0,0,parseLength(rootAttrs.width,100)||100,parseLength(rootAttrs.height,100)||100];
-  const tokens=text.match(/<!--[^]*?-->|<\/?[^>]+>/g)||[],stack=[{matrix:[...IDENTITY],hidden:false}],segments=[];let depth=0;
+  const tokens=text.match(/<!--[^]*?-->|<\/?[^>]+>/g)||[],stack=[{matrix:[...IDENTITY],hidden:false}],segments=[];
   for(const token of tokens){if(token.startsWith('<!--'))continue;const closing=/^<\s*\//.test(token),nameMatch=token.match(/^<\s*\/?\s*([\w:-]+)/),tagName=nameMatch?.[1]?.toLowerCase();if(!tagName)continue;if(closing){if((tagName==='g'||tagName==='svg')&&stack.length>1)stack.pop();continue;}
     const a=attrsOf(token),parent=stack[stack.length-1],style=String(a.style||'').toLowerCase(),hidden=parent.hidden||a.display==='none'||a.visibility==='hidden'||/display\s*:\s*none|visibility\s*:\s*hidden/.test(style),matrix=multiplyMatrix(parent.matrix,parseTransform(a.transform||'')),selfClosing=/\/\s*>$/.test(token);
-    if((tagName==='g'||tagName==='svg')&&!selfClosing){stack.push({matrix,hidden});depth++;continue;}if(hidden)continue;
+    if((tagName==='g'||tagName==='svg')&&!selfClosing){stack.push({matrix,hidden});continue;}if(hidden)continue;
     if(['line','rect','polyline','polygon','circle','ellipse','path'].includes(tagName)){segments.push(...transformLines(primitiveLines(tagName,a),matrix));if(segments.length>maxSegments)throw new Error(`SVG mark exceeds ${maxSegments} vector segments.`);}
   }
-  const b=lineBounds(segments);if(!b)throw new Error('SVG mark does not contain supported vector geometry.');const normalized=segments.map(l=>({x1:l.x1-b.minX,y1:l.y1-b.minY,x2:l.x2-b.minX,y2:l.y2-b.minY})),mark={schema:SVG_MARK_SCHEMA,schemaVersion:SVG_MARK_SCHEMA_VERSION,name:String(name||'Imported SVG'),width:b.width,height:b.height,sourceViewBox,segmentCount:normalized.length,lines:normalized,sourceHash:fnv1a(text)};const check=validateSvgMark(mark);if(!check.ok)throw new Error(check.errors.join(' '));return mark;
+  const b=lineBounds(segments);if(!b)throw new Error('SVG mark does not contain supported vector geometry.');const normalized=segments.map(l=>({x1:l.x1-b.minX,y1:l.y1-b.minY,x2:l.x2-b.minX,y2:l.y2-b.minY}));
+  const appearance=parseSvgAppearance(text,{bounds:b});
+  const mark={schema:SVG_MARK_SCHEMA,schemaVersion:SVG_MARK_SCHEMA_VERSION,name:String(name||'Imported SVG'),width:b.width,height:b.height,sourceViewBox,segmentCount:normalized.length,lines:normalized,appearance,sourceHash:fnv1a(text)};const check=validateSvgMark(mark);if(!check.ok)throw new Error(check.errors.join(' '));return mark;
 }
 
 export function createSvgMarkElement(mark,{id=null,panelId='front',x=10,y=10,width=80,height=null,rotation=0}={}){
