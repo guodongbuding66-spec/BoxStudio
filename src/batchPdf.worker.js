@@ -18,7 +18,8 @@ self.onmessage = (event) => {
       hydrateWorkerAssetsV24(data.workerAssets);
       sessionAvailability=workerAssetAvailabilityV24(data.workerAssets);
     }
-    const builder=data.pipeline==='v24-native'?buildWorkerPdfTaskV24:buildWorkerPdfTask;
+    const useV24=data.pipeline==='v24-native'||data.baseState?.batchPipeline==='v24-native';
+    const builder=useV24?buildWorkerPdfTaskV24:buildWorkerPdfTask;
     const result = builder(data.baseState, data.row, index, {assets: sessionAvailability});
     if (result.ok && result.bytes instanceof Uint8Array) {
       const bytes = result.bytes;
