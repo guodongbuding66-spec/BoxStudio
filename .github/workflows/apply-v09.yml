@@ -17,10 +17,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Reassemble and apply V0.9 overlay
+      - name: Verify V0.9 payload parts
         shell: bash
         run: |
           set -euo pipefail
+          sha256sum .sync/v09.part00 .sync/v09.part01 .sync/v09.part02
+          echo "3b64485e06fbfa1d80f8da30a01322a42bb69aa58046d8065af3c62439d0aa75  .sync/v09.part00" | sha256sum -c -
+          echo "1a4ee8a89e4157ee14b9eaa92c0d63360e0aa66062113088a42b324bbbc5caf4  .sync/v09.part01" | sha256sum -c -
+          echo "5120bae7e6776a5e6e5c912d26be3bbb0865b39b5bd8bc8a550be5cb7f7389d6  .sync/v09.part02" | sha256sum -c -
           cat .sync/v09.part00 .sync/v09.part01 .sync/v09.part02 > /tmp/boxstudio-v09-patch.tar.xz
           echo "14e7f565ba4367e472e08916af04ce0c865d39f0ed0a08348059edbe17a0e790  /tmp/boxstudio-v09-patch.tar.xz" | sha256sum -c -
           tar -xJf /tmp/boxstudio-v09-patch.tar.xz -C .
