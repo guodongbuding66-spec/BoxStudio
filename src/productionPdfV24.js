@@ -1,0 +1,12 @@
+import { buildProductionPdfV23, productionPdfV23Diagnostics } from './productionPdfV23.js';
+import { downloadBytes } from './export.js';
+import { getDeviceLinkInfo, getDeviceLinkSource, clearRgbCmykDeviceLink, loadRgbCmykDeviceLink } from './iccDeviceLinkV23.js';
+
+function clone(v){return structuredClone(v)}
+export function currentDeviceLinkReference(){const info=getDeviceLinkInfo();return info?{name:info.name,size:info.size,fingerprint:info.fingerprint,inputColorSpace:info.inputColorSpace,outputColorSpace:info.outputColorSpace,tagType:info.tagType,gridPoints:info.gridPoints}:null;}
+export function declaredDeviceLinkReference(state){return state?.exportOptions?.deviceLinkRef||null;}
+export function deviceLinkBindingStatus(state){const declared=declaredDeviceLinkReference(state),current=currentDeviceLinkReference();if(!declared)return{ok:true,mode:'rgb',reason:'No DeviceLink is declared for this project.',declared:null,current};if(!current)return{ok:false,mode:'missing',reason:`Project requires DeviceLink ${declared.name||declared.fingerprint||''}, but no DeviceLink is loaded in this browser session.`,declared,current:null};if(String(declared.fingerprint||'')!==String(current.fingerprint||''))return{ok:false,mode:'mismatch',reason:`Loaded DeviceLink does not match the project declaration. Expected ${declared.fingerprint||'unknown'}, got ${current.fingerprint||'unknown'}.`,declared,current};return{ok:true,mode:'cmyk',reason:'Loaded DeviceLink matches the project declaration.',declared,current};}
+function withDeclaredLink(state,fn){const declared=declaredDeviceLinkReference(state),source=getDeviceLinkSource();if(declared){const status=deviceLinkBindingStatus(state);if(!status.ok)throw new Error(status.reason);return fn();}if(!source)return fn();clearRgbCmykDeviceLink();try{return fn();}finally{loadRgbCmykDeviceLink(source.bytes,source.name);}}
+export function buildProductionPdfV24(state){return withDeclaredLink(state,()=>buildProductionPdfV23(state));}
+export function exportProductionPdfV24(state){downloadBytes('boxstudio-v0.24-production-native.pdf',buildProductionPdfV24(state),'application/pdf');}
+export function productionPdfV24Diagnostics(state){const binding=deviceLinkBindingStatus(state),diag=withDeclaredLink(state,()=>productionPdfV23Diagnostics(state));return{...clone(diag),binding,serializer:'v0.24-native-production'};}
