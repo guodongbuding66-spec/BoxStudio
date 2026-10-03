@@ -72,3 +72,6 @@ jobs:
 
       - name: V0.23 integrated PDF, ICC DeviceLink, clip-point and spacing tests
         run: node tests/v23.mjs
+
+      - name: V0.24 native batch, deterministic context and approved-export tests
+        run: node tests/v24.mjs
