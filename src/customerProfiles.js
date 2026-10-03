@@ -65,7 +65,11 @@ export function deleteCustomCustomerProfile(state, id) {
   const profiles = { ...(next.customCustomerProfiles || {}) };
   delete profiles[id];
   next.customCustomerProfiles = profiles;
-  if (next.customerProfileId === id) next.customerProfileId = 'generic';
+  if (next.customerProfileId === id) {
+    next.customerProfileId = 'generic';
+    next.packagingRuleProfileId = 'generic';
+    next.lockedVariables = [];
+  }
   return next;
 }
 
@@ -80,7 +84,7 @@ export function applyCustomerProfile(state, profileId, { overwriteDefaults = fal
   for (const [key, value] of Object.entries(profile.defaultVariables || {})) {
     if (overwriteDefaults || next.variables[key] == null || next.variables[key] === '') next.variables[key] = value;
   }
-  next.lockedVariables = Array.from(new Set([...(next.lockedVariables || []), ...(profile.lockedVariables || [])]));
+  next.lockedVariables = Array.from(new Set(profile.lockedVariables || []));
   return next;
 }
 
