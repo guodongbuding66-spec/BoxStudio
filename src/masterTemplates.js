@@ -11,6 +11,17 @@ function snapshotWithoutHistory(template){
   return copy;
 }
 
+function embeddedProfilesFromState(state={}){
+  const customerId=state.customerProfileId;
+  const ruleId=state.packagingRuleProfileId;
+  const markId=state.markTemplateId;
+  return {
+    customer: customerId && state.customCustomerProfiles?.[customerId] ? clone(state.customCustomerProfiles[customerId]) : null,
+    packagingRule: ruleId && state.customPackagingRules?.[ruleId] ? clone(state.customPackagingRules[ruleId]) : null,
+    markTemplate: markId && state.customMarkTemplates?.[markId] ? clone(state.customMarkTemplates[markId]) : null,
+  };
+}
+
 export function normalizeMasterTemplate(template) {
   const source = clone(template || {});
   if (source.schemaVersion === 1) source.schemaVersion = TEMPLATE_SCHEMA_VERSION;
@@ -19,6 +30,7 @@ export function normalizeMasterTemplate(template) {
   source.updatedAt = source.updatedAt || source.createdAt;
   source.versions = Array.isArray(source.versions) ? source.versions.map(v => ({ ...clone(v), schemaVersion:TEMPLATE_SCHEMA_VERSION })) : [];
   source.variableDefaults = source.variableDefaults && typeof source.variableDefaults === 'object' ? source.variableDefaults : {};
+  source.embeddedProfiles = source.embeddedProfiles && typeof source.embeddedProfiles === 'object' ? source.embeddedProfiles : { customer:null, packagingRule:null, markTemplate:null };
   return source;
 }
 
@@ -54,6 +66,7 @@ export function createMasterTemplate(state, {
     lockedGroups: clone(source.lockedGroups || {}),
     lockedVariables: clone(source.lockedVariables || []),
     variableDefaults,
+    embeddedProfiles: embeddedProfilesFromState(source),
     versions: [],
   };
 }
@@ -174,6 +187,10 @@ export function applyMasterTemplate(state, template, { preserveVariables = true 
   const normalized = normalizeMasterTemplate(template);
   const next = clone(state || {});
   const previousVariables = clone(next.variables || {});
+  const embedded = normalized.embeddedProfiles || {};
+  if(embedded.customer?.id) next.customCustomerProfiles={...(next.customCustomerProfiles||{}),[embedded.customer.id]:clone(embedded.customer)};
+  if(embedded.packagingRule?.id) next.customPackagingRules={...(next.customPackagingRules||{}),[embedded.packagingRule.id]:clone(embedded.packagingRule)};
+  if(embedded.markTemplate?.id) next.customMarkTemplates={...(next.customMarkTemplates||{}),[embedded.markTemplate.id]:clone(embedded.markTemplate)};
   next.structure = clone(normalized.structure);
   next.elements = clone(normalized.elements);
   next.exportOptions = clone(normalized.exportOptions || next.exportOptions || {});
