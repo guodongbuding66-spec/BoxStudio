@@ -19,7 +19,9 @@ function normalizeRecord(record){
   return {
     key:key(record.queueId,record.index),queueId:String(record.queueId),index:Number(record.index),
     fileName:String(record.fileName||`item-${record.index}.bin`),mime:String(record.mime||'application/octet-stream'),
-    bytes:new Uint8Array(bytes),byteLength:bytes.byteLength,fingerprint:String(record.fingerprint||''),createdAt:record.createdAt||nowIso(),updatedAt:nowIso(),
+    bytes:new Uint8Array(bytes),byteLength:bytes.byteLength,fingerprint:String(record.fingerprint||''),
+    serializer:String(record.serializer||''),colorSpace:String(record.colorSpace||''),deviceLinkFingerprint:String(record.deviceLinkFingerprint||''),productionJobId:String(record.productionJobId||''),
+    createdAt:record.createdAt||nowIso(),updatedAt:nowIso(),
   };
 }
 
