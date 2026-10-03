@@ -152,6 +152,8 @@ function renderDrawer(){
 }
 
 function installButton(){
+  const visibleVersion = document.querySelector('.brand small');
+  if(visibleVersion) visibleVersion.textContent = 'V0.10';
   if(document.getElementById(BUTTON_ID)) return;
   const topbar = document.querySelector('.topbar');
   if(!topbar) return;
