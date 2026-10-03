@@ -1,61 +1,94 @@
-# BoxStudio V0.13
+# BoxStudio V0.14
 
-浏览器内运行的纸盒结构设计、2D 刀版、唛头编辑、批量订单、3D 折叠、印前检查、生产审批与生产文件导出原型。
+浏览器内运行的纸盒结构设计、2D 刀版、唛头编辑、客户规则、批量订单、3D 折叠、印前检查、生产审批与生产文件导出原型。
 
-当前主线：**参数化纸盒结构 + 唛头变量 + Customer / Packaging Rule + Master Template + Excel 批量生成 + Preflight + Production Approval**。
+当前主线：**参数化纸盒结构 + 唛头变量 + Customer / Packaging Rule + Master Template + Excel 批量生成 + Preflight + Production Approval + Recoverable Artifacts + Project Persistence**。
 
-## V0.13 新增
+## V0.14 新增
 
-### Large Batch Queue Pause / Resume
+### Recoverable Batch Artifacts
 
-在 V0.12 Large Batch Queue 基础上新增：
+V0.14 将批量 PDF 二进制写入浏览器 IndexedDB，不再只保存在当前 JSZip 内存会话中。
 
-- `pauseRequested`
-- Pause
-- Resume
-- `paused / pausing` 状态
-- 只在安全行边界暂停，不中断正在序列化的一张 PDF
-- 同页面会话中保留已生成的 JSZip 数据并继续运行
+现在支持：
 
-> 页面刷新后不会伪装成二进制 PDF 仍然存在。刷新后应使用 Start / Restart 重新生成。
+- 按 Queue ID + Row Index 持久化 PDF
+- 页面刷新后恢复已完成文件
+- Queue Metadata 与 IndexedDB Artifact 自动 reconcile
+- completed 但文件缺失 → 自动退回 pending
+- pending / failed 但存在真实文件 → 可恢复为 completed
+- Recovered ZIP
+- ZIP 内附 `boxstudio-artifacts.json` manifest
+- Pause / Resume / Cancel 继续保留安全行边界语义
 
-### Mark Layout Editor
+> IndexedDB 仍是浏览器本地存储，不是云端对象存储；清除站点数据仍会删除这些二进制文件。
 
-新增 Panel-local mm 编辑画布：
+### Production Roles
 
-- Panel 切换
-- Safe Area 可视化
-- 点击 / 拖动
-- 1 mm Nudge
-- Left / Center / Right / Top / Middle / Bottom 对齐
-- ±90° 旋转
-- Duplicate / Delete
-- 所有提交后的坐标经过 Panel 边界约束
+新增本地生产角色：
 
-该画布编辑的是 BoxStudio 已支持的 mark 对象，不宣称是通用 Illustrator / 任意 SVG 编辑器。
+- Viewer
+- Operator
+- Approver
+- Admin
 
-### Production Job / Approval / Audit
+权限不是只在按钮上隐藏，而是在 `productionJobs.js` 动作函数层再次校验。
 
-新增本地生产快照：
+Operator：Create / Submit / Revise / Export Approved
 
-- Create Snapshot
-- Submit
-- Approve
-- Reject
-- New Revision
-- Audit trail
-- Production fingerprint
-- Approved Production PDF gate
+Approver：Approve / Reject / Export Approved
 
-Approved Production PDF 只有在以下条件同时成立时放行：
+Admin：全部生产动作，包括 Delete
 
-1. 当前 Production Job 已 Approved；
-2. 审批快照没有 Preflight error；
-3. 当前结构、变量、唛头、Profile、Export Options 的 fingerprint 与审批版本完全一致。
+Viewer：只读
 
-修改 SKU、结构、唛头、Profile 或导出设置后，旧审批自动失效，必须建立新 revision 并重新审批。
+> 当前角色模型不是登录认证、SSO、电子签名或不可篡改审计系统。
 
-> 当前审批记录仍保存在浏览器项目中，不等同于账号认证、电子签名或法规合规审批系统。
+### Project Persistence Layer
+
+新增 `src/projectStore.js`。
+
+项目可保存为带版本信息的 Project Envelope：
+
+- schema / schemaVersion
+- project ID
+- revision
+- parent revision
+- createdAt / updatedAt
+- updatedBy
+- project state snapshot
+
+新增浏览器 Local Project Library：
+
+- Save Snapshot
+- Revision
+- List
+- Load
+- Delete
+- Project JSON Import / Export
+
+同时加入未来服务端对接用 REST Adapter，约定：
+
+```text
+GET    /projects
+GET    /projects/:id
+PUT    /projects/:id
+DELETE /projects/:id
+```
+
+`PUT` / `DELETE` 可使用 `If-Match` 做 revision 冲突控制。
+
+> 当前 GitHub 仓库不包含真正的 BoxStudio 云端后端。REST UI 只有在你提供兼容、允许 CORS 的服务端地址时才会工作。
+
+### V0.14 Persistent Production Workspace
+
+Profile 面板新增：
+
+- Persistent Batch Artifacts
+- Production Roles & Approval
+- Project Persistence
+
+V0.14 会隐藏旧 V0.12 Queue 控件和旧 V0.13 Production 控件，避免同一工作流出现两套入口。底层旧模块仍保留用于迁移和回归测试。
 
 ## 现有核心能力
 
@@ -69,7 +102,8 @@ Approved Production PDF 只有在以下条件同时成立时放行：
 - Polygon Panel
 - Panel / Fold Graph
 - CREASE → Fold Candidate 人工确认
-- 基础拓扑修复、CUT crossing / Polygon self-intersection 检查
+- 基础拓扑修复
+- CUT crossing / Polygon self-intersection 检查
 - Bleed / Safe Area
 
 > 工厂压线补偿、刀模板补偿和设备公差必须来自已验证生产数据。BoxStudio 不自动编造这些参数。
@@ -81,10 +115,11 @@ Approved Production PDF 只有在以下条件同时成立时放行：
 - Code 39 / EAN-13 / UPC-A / ITF-14 / GS1-128
 - QR Code
 - Barcode + QR 锁定组合
-- 250×80 mm / 200×64 mm 组合规格
+- 250×80 mm / 200×64 mm
 - This Side Up / Fragile / Keep Dry
 - Custom Mark Template
 - Mark Asset Library
+- Panel-local mm Mark Layout Editor
 
 ### Customer Profile / Packaging Rule
 
@@ -116,11 +151,30 @@ Master Template 保存结构、唛头元素和位置、Export Options、Customer
 - Master Template 批量管线
 - Batch-wide Preflight
 - Combined PDF / PDF ZIP
-- Large Batch Queue
-- completed / failed / cancelled / pending 状态
-- Preflight Error 行不会被伪装为成功
+- Job Queue
+- completed / failed / cancelled / pending
 - Pause / Resume
-- Cancel 在安全行边界停止，并输出真实已完成的 partial ZIP
+- Persistent PDF Artifact Cache
+- Recovered ZIP
+
+### Production Job / Approval / Audit
+
+- Create Snapshot
+- Submit
+- Approve
+- Reject
+- New Revision
+- Audit Trail
+- Production Fingerprint
+- Approved Production PDF Gate
+- V0.14 Role Permission Model
+
+Approved Production PDF 只有在以下条件同时成立时放行：
+
+1. 当前 Production Job 已 Approved；
+2. 审批快照没有 Preflight Error；
+3. 当前结构、变量、唛头、Profile、Export Options 的 fingerprint 与审批版本一致；
+4. 当前角色拥有 `export-approved` 权限。
 
 ### Workspace Bundle
 
@@ -131,9 +185,7 @@ Master Template 保存结构、唛头元素和位置、Export Options、Customer
 - Mark Templates
 - Mark Assets
 - Master Templates
-- 当前激活的 Profile IDs
-
-当前仍是本地 JSON Bundle，不是云端账号同步。
+- Active Profile IDs
 
 ### 3D
 
@@ -142,9 +194,9 @@ Master Template 保存结构、唛头元素和位置、Export Options、Customer
 - Fold 0–100%
 - Three.js 优先
 - runtime 不可用时离线 Canvas fallback
-- Three.js 路径可将 BoxStudio 支持的文字 / 图标 / Barcode+QR 对象绘制到矩形 Panel texture
+- Three.js 路径可将 BoxStudio 已支持的文字 / 图标 / Barcode+QR 绘制到矩形 Panel texture
 
-当前不宣称任意复杂印刷稿、Polygon Panel 和离线 fallback 已达到完整包装贴图校样精度。
+当前不宣称任意复杂印刷稿、Polygon Panel 与离线 fallback 已达到完整包装贴图校样精度。
 
 ### Production Export
 
@@ -171,13 +223,13 @@ Master Template 保存结构、唛头元素和位置、Export Options、Customer
 python -m http.server 8080
 ```
 
-然后打开：
+打开：
 
 ```text
 http://localhost:8080
 ```
 
-不要直接使用 `file://`，浏览器会限制 ES Module。
+不要直接使用 `file://`。
 
 ## 自动测试
 
@@ -191,19 +243,39 @@ node tests/v10.mjs
 node tests/v11.mjs
 node tests/v12.mjs
 node tests/v13.mjs
+node tests/v14.mjs
 ```
 
-V0.13 回归覆盖 Batch Pause/Resume、Mark Layout 边界/对齐/复制删除、Production Snapshot、Submit/Approve/Reject、fingerprint 失效、新 revision 与 audit。
+V0.14 回归覆盖：
+
+- Role allow / deny
+- Operator 不能 Approve
+- Approver 可以 Approve
+- Admin-only Delete
+- Project Envelope / Revision / Import / Export
+- Local Project Library
+- REST Adapter / If-Match
+- Artifact Store
+- Queue / Artifact Reconciliation
+- Persistent Queue Progress
+- Artifact Cleanup
 
 ## 数据存储
 
-当前 browser storage key：
+当前 browser project state key：
 
 ```text
-boxstudio-mvp-v13
+boxstudio-mvp-v14
 ```
 
-V0.12 及更早 key 继续作为迁移来源。目前仍没有账号数据库 / 云端项目同步。
+旧版本 key 继续作为迁移来源。
+
+附加本地存储：
+
+```text
+boxstudio-project-library-v1
+IndexedDB: boxstudio-artifacts-v1
+```
 
 ## 关键目录
 
@@ -220,6 +292,8 @@ src/
   batch.js
   batchTemplates.js
   jobQueue.js
+  persistentBatch.js
+  artifactStore.js
   rules.js
   customerProfiles.js
   markTemplates.js
@@ -227,11 +301,14 @@ src/
   markLayout.js
   masterTemplates.js
   productionJobs.js
+  permissions.js
+  projectStore.js
   profileBundles.js
   profileUi.js
   v11BatchUi.js
   v12Ui.js
   v13Ui.js
+  v14Ui.js
   preflight.js
   export.js
   threePreview.js
@@ -243,12 +320,14 @@ tests/
   v11.mjs
   v12.mjs
   v13.mjs
+  v14.mjs
 
 docs/
   V0.10_TEST_REPORT.md
   V0.11_TEST_REPORT.md
   V0.12_TEST_REPORT.md
   V0.13_TEST_REPORT.md
+  V0.14_TEST_REPORT.md
 ```
 
 ## 参考源边界
@@ -257,9 +336,11 @@ docs/
 
 ## 下一阶段
 
-- authenticated backend project persistence
-- approval roles / permissions / server-side audit
-- batch queue resumable binary artifacts
+- 正式 BoxStudio 后端与账号认证
+- server-side immutable audit / approval signatures
+- Web Worker PDF generation
+- 云端 resumable artifact/object storage
+- concurrent project conflict-resolution UI
 - general SVG mark symbol import/editor
 - 更完整的 3D print-artwork texture mapping
 - factory compensation profiles（只接受已验证生产参数）
