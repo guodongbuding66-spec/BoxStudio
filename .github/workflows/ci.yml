@@ -75,3 +75,6 @@ jobs:
 
       - name: V0.24 native batch, deterministic context and approved-export tests
         run: node tests/v24.mjs
+
+      - name: V0.25 Bezier clip, Smart Guide and LUT16 DeviceLink tests
+        run: node tests/v25.mjs
