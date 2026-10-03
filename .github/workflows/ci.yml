@@ -33,3 +33,6 @@ jobs:
 
       - name: V0.10 profile and master-template tests
         run: node tests/v10.mjs
+
+      - name: V0.11 rule editor, revisions and batch-master tests
+        run: node tests/v11.mjs
