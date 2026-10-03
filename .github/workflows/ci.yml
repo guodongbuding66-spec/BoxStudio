@@ -39,3 +39,6 @@ jobs:
 
       - name: V0.12 queue, bundle, asset and rule-history tests
         run: node tests/v12.mjs
+
+      - name: V0.13 pause-resume, mark-layout and approval tests
+        run: node tests/v13.mjs
