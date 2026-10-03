@@ -60,3 +60,6 @@ jobs:
 
       - name: V0.19 production appearance and cross-panel tests
         run: node tests/v19.mjs
+
+      - name: V0.20 native SVG, atlas and z-order tests
+        run: node tests/v20.mjs
