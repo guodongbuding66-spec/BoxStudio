@@ -81,3 +81,6 @@ jobs:
 
       - name: V0.26 persistent guides, numeric clips and native cubic PDF tests
         run: node tests/v26.mjs
+
+      - name: V0.27 native cubic production, worker batch and live-assist tests
+        run: node tests/v27.mjs
