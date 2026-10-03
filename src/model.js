@@ -1,7 +1,7 @@
 import { defaultStructure, defaultsForTemplate } from './geometry.js';
 
-export const STORAGE_KEY = 'boxstudio-mvp-v8';
-export const LEGACY_STORAGE_KEYS = ['boxstudio-mvp-v7','boxstudio-mvp-v6','boxstudio-mvp-v5','boxstudio-mvp-v4','boxstudio-mvp-v3','boxstudio-mvp-v2','boxstudio-mvp'];
+export const STORAGE_KEY = 'boxstudio-mvp-v10';
+export const LEGACY_STORAGE_KEYS = ['boxstudio-mvp-v9','boxstudio-mvp-v8','boxstudio-mvp-v7','boxstudio-mvp-v6','boxstudio-mvp-v5','boxstudio-mvp-v4','boxstudio-mvp-v3','boxstudio-mvp-v2','boxstudio-mvp'];
 
 export const defaultVariables = {
   sku: 'KF210215US-02PM-001',
@@ -68,6 +68,11 @@ export const defaultState = {
   elements: structuredClone(defaultElements),
   hiddenGroups: {},
   lockedGroups: { dieline: true },
+  lockedVariables: ['originCountry','destinationCountry','dimensionUnit','weightUnit'],
+  customerProfileId: 'us-export-master',
+  packagingRuleProfileId: 'us-side-seal',
+  markTemplateId: 'us-side-seal-master',
+  masterTemplates: [],
   selectedId: 'sku',
   zoom: 100,
   grid: true,
