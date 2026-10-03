@@ -1,53 +1,164 @@
-# BoxStudio V0.26
+# BoxStudio V0.27
 
 BoxStudio 是浏览器内运行的纸盒结构设计、2D 刀版、唛头编辑、Cross-panel Artwork、3D 折叠校样、Excel 批量生产、印前检查、生产审批和生产文件导出原型。
 
-当前主线：**参数化结构 + Customer / Packaging Rules + Master Template + Native SVG/PDF Appearance + Cross-panel Artwork + Folded 3D Texture Proof + Recoverable Web Worker Batch + Production Approval + Project Persistence + ICC DeviceLink + Bezier Clip Direct Selection + Smart Guides + Persistent User Guides + Native Cubic PDF Clip Proof**。
+当前主线：**参数化结构 + Customer / Packaging Rules + Master Template + Native SVG/PDF Appearance + Cross-panel Artwork + Folded 3D Texture Proof + Recoverable Web Worker Batch + Production Approval + Project Persistence + ICC DeviceLink + Bezier Clip Direct Selection + Smart Guides + Persistent User Guides + Native Cubic Production PDF**。
 
-## V0.26 新增
+## V0.27 新增
 
-### 1. Persistent User Guides
+### 1. Native Cubic Clip 进入完整 Production PDF
+
+V0.26 的 Native Cubic Clip 只存在于独立 Proof Serializer。V0.27 已把这条路径接入完整生产 PDF。
+
+对于带 Bezier Clip Nodes 的 Cross-panel Artwork，生产 PDF 的 Appearance Clip 现在可以直接输出：
+
+```text
+m   move-to
+l   line-to
+c   cubic Bezier
+h   close path
+W n apply clip
+```
+
+新的 V0.27 Production 路线继续保留：
+
+- CUT / CREASE / PERF / GLUE
+- Spot Separation / Overprint
+- Barcode + QR
+- Text / Notice / Shipping Icons
+- Technical / User TTF Outline
+- Native Axial Gradient
+- Native Radial Gradient
+- Multi-stop Gradient Function
+- Varying-alpha Soft Mask
+- Panel / Primitive Clip
+- DeviceRGB 或验证过的 DeviceLink DeviceCMYK
+- PDF/X-4 Candidate OutputIntent / XMP 路线
+
+V0.27 Serializer：
+
+```text
+v0.27-native-cubic-production
+```
+
+主导出：
+
+```text
+*-v27-production-native-cubic.pdf
+```
+
+**当前边界：** Native Cubic 已用于 Cross-panel Appearance 的 Fill / Gradient / Soft Mask 对象裁切；SVG Outline Fragment 仍经过现有确定性 Flattened Object-clip Materialization，没有把这部分描述成 Native Cubic。
+
+### 2. Approved Production 绑定 Serializer 身份
+
+V0.27 默认状态新增：
+
+```text
+exportOptions.productionSerializer = v0.27-native-cubic-production
+```
+
+生产审批指纹本来就包含完整 `exportOptions`，因此 V0.27 的 Serializer 身份会自动进入 Approved Revision Fingerprint。
+
+这意味着：
+
+- 用旧 Serializer 批准的 Revision 不会静默授权 V0.27 Approved PDF；
+- Production Serializer 发生变化后，Approval Gate 会检测到 Fingerprint 不匹配；
+- 需要重新 Revision / Submit / Approve；
+- 成功导出 Approved V0.27 PDF 后，Audit Event 会记录：
+
+```text
+serializer = v0.27-native-cubic-production
+```
+
+### 3. V0.27 Native Cubic Web Worker Batch
 
 新增：
 
 ```text
-src/smartGuidesV26.js
-src/v26GuideOverlay.js
+src/batchRunV27.js
 ```
 
-项目现在可以保存真正的用户辅助线：
+并升级：
 
 ```text
-userGuides[]
+src/batchWorkerCore.js
+src/batchPdf.worker.js
+src/v27Ui.js
 ```
 
-支持：
+V0.27 Batch 现在使用同一条 Native Cubic Production Serializer，而不是停留在 V0.24 Production Path。
 
-- Vertical / Horizontal Guide
-- 精确 mm 坐标
-- 数值修改
-- 删除
-- Design Canvas 持久显示
-- 未锁定辅助线直接拖动
-- Cross-panel Artwork 手动吸附到最近 User Guide
+Frozen Context 保存：
 
-User Guide 属于编辑辅助信息，不进入生产印刷稿。
+```text
+serializer = v0.27-native-cubic-production
+batchPipeline = v27-native-cubic
+nativeCubicClip = true
+rowsFingerprint
+DeviceLink declaration
+frozen base production state
+```
 
-### 2. Text Baseline Assist
+继续支持：
 
-V0.26 会根据当前 Text / Notice 对象、Panel 原点、Y 坐标、字号以及 BoxStudio 当前行距规则生成可重复的 Baseline Candidate。
+- Excel / CSV / TSV
+- Pause / Resume / Cancel / Retry
+- Frozen Base State
+- Row Fingerprint Change Blocking
+- Web Worker PDF
+- TTF Transfer
+- Output ICC Transfer
+- DeviceLink Binary + Fingerprint Validation
+- IndexedDB Recoverable Artifacts
+- Recovered ZIP
 
-可以：
+V0.27 Artifact Metadata 额外保存：
 
-- 在画布中显示淡紫色 Baseline
-- 把选中 Cross-panel Artwork 的 Top / Middle / Bottom 吸附到附近 Baseline
-- 单独配置 Baseline Tolerance
+```text
+serializer
+colorSpace
+deviceLinkFingerprint
+nativeCubicClipObjects
+```
 
-当前是 BoxStudio Layout Baseline，不宣称完整字体 Metrics / Typographic Baseline Engine。
+已有 V0.24 Batch Job 仍保持原 Serializer，不会静默升级。
 
-### 3. Rotation Assist
+### 4. User Guide / Baseline 正式进入 Live Move Gesture
 
-新增角度候选：
+新增：
+
+```text
+src/liveAssistV27.js
+src/v27CanvasOverlay.js
+```
+
+Cross-panel Artwork 拖动时，当前实时吸附链路为：
+
+```text
+Panel / Grid Snap
+→ Object Alignment
+→ Equal Spacing
+→ Persistent User Guide Snap
+→ Text Baseline Snap
+```
+
+Guide 语义：
+
+```text
+Cyan    = Persistent User Guide
+Violet  = Text Baseline
+Magenta = Object Alignment / Size Match
+Orange  = Equal Spacing
+Green   = Panel / Grid
+```
+
+同一 Y 方向同时接近 Persistent User Guide 和 Text Baseline 时，User Guide 优先。
+
+按住 `Alt` 可以临时绕过当前 Gesture 的 Live Assist。
+
+### 5. Rotation Assist 进入 Live Rotate Gesture
+
+单对象旋转时现在实时参与：
 
 ```text
 Angle Grid
@@ -57,128 +168,39 @@ Other Artwork + 180°
 Other Artwork + 270°
 ```
 
-如果 Grid Angle 与另一个对象角度距离完全相同，优先 Object-to-object Rotation Match。
+对象角度与普通 Grid Angle 同距离时，继续优先 Object-to-object Rotation Match。
 
-V0.26 Workspace 提供确定性的 Rotation Snap Action；V0.25 原有实时对象对齐、Size Match 和 Equal-gap Guide 继续保留。
+当前多对象 Group Rotation 仍使用已有 Shared Transform / Angle Grid 路线；V0.27 没有宣称 Group Rotation 已拥有完整 Object-relative Rotation Assist。
 
-### 4. Bezier Clip Numeric Inspector
-
-新增：
-
-```text
-src/clipPathV26.js
-```
-
-现在选中的 Clip Node 可以直接输入：
-
-```text
-Anchor X / Y
-Incoming Handle X / Y
-Outgoing Handle X / Y
-Smooth / Corner
-Outgoing Segment = Line / Curve
-```
-
-Line Segment 会清除当前节点 Out Handle 与下一节点 In Handle。
-
-Straight → Curve 时，如果原来没有控制柄，会生成确定性的 1/3 Chord Cubic Handle Pair。
-
-V0.25 已有的：
-
-- Canvas Anchor Drag
-- Tangent Drag
-- De Casteljau Insert Node
-- Delete Node
-- Smooth / Corner
-
-继续保留。
-
-### 5. Native Cubic PDF Clip Proof
+### 6. V0.27 Workspace
 
 新增：
 
 ```text
-src/nativeCubicPdfV26.js
+src/v27Ui.js
+src/v27Ui.css
+src/v27CanvasOverlay.js
 ```
 
-对于 Bezier Cross-panel Clip，新的 Proof Serializer 会直接输出 PDF Path：
+提供：
 
-```text
-m   move-to
-l   line-to
-c   cubic Bezier
-h   close
-W n clip
-```
+- V0.27 Native Cubic Production PDF
+- Approved V0.27 PDF
+- Native Cubic Production Diagnostics
+- Live Assist Diagnostics
+- V0.27 Recoverable Worker Batch
+- Pause / Resume / Cancel / Retry
+- Recovered ZIP
+- Worker TTF / ICC / DeviceLink Diagnostics
 
-它同时保留：
-
-- Native Axial Gradient
-- Native Radial Gradient
-- Multi-stop Functions
-- Varying Alpha Soft Mask
-- Panel / Primitive Clip
-- RGB 或当前验证过的 DeviceLink CMYK Appearance
-
-输出：
-
-```text
-*-v26-cubic-clip-proof.pdf
-```
-
-**边界：** V0.26 主 Production PDF 仍使用经过验证的 Flattened Bezier Clip Production Path。Native Cubic 目前是独立 Proof Serializer，还没有替换 Approved Production PDF 的 Clip Path。
-
-### 6. V0.26 Production Wrapper
-
-新增：
-
-```text
-src/productionPdfV26.js
-```
-
-继续继承：
-
-- Approval Gate
-- DeviceLink Binding
-- Native Linear / Radial Gradient
-- Gradient Soft Mask
-- Spot Dieline / Overprint
-- Barcode + QR
-- User TTF / Technical Outline
-- LUT8 / LUT16 RGB→CMYK DeviceLink
-- Bezier Clip Production Flattening
-
-Serializer：
-
-```text
-v0.26-native-production
-```
-
-### 7. V0.26 Workspace
-
-新增：
-
-```text
-src/v26Ui.js
-src/v26Ui.css
-src/v26GuideOverlay.js
-```
-
-功能包括：
+V0.26 Precision Workspace 继续保留，用于：
 
 - Bezier Node Numeric Inspector
-- Segment Line / Curve Switch
-- Persistent User Guides
-- Canvas Guide Drag
-- Text Baseline Visibility / Snap
-- Rotation Assist
-- Native Cubic Clip Proof PDF
-- LUT8 / LUT16 DeviceLink Loader
-- RGB → CMYK Numerical Test
-- V0.26 Production PDF
-- Approved V0.26 Production PDF
+- Segment Line / Curve
+- Persistent User Guide 管理
+- DeviceLink 文件加载与 RGB→CMYK 数值测试
 
-V0.25 Workspace 在 V0.26 下自动隐藏；V0.24 Batch Workspace 继续保留，因为 Frozen Context / Web Worker / IndexedDB Artifact Pipeline 仍是批量生产主线。
+旧 V0.24 / V0.25 / V0.26 Production Export 按钮在 V0.27 下隐藏，避免把旧 Serializer 当成当前 Approved Production 路线。
 
 ## 现有主要能力
 
@@ -212,7 +234,9 @@ V0.25 Workspace 在 V0.26 下自动隐藏；V0.24 Batch Workspace 继续保留�
 - Bezier Cross Clip
 - Smart Guides / Equal-gap Guides
 - Persistent User Guides
-- Text Baseline / Rotation Assist
+- Text Baseline Assist
+- Rotation Assist
+- Native Cubic Appearance Clip in Production PDF
 
 ### 3D / Proof
 
@@ -223,7 +247,7 @@ V0.25 Workspace 在 V0.26 下自动隐藏；V0.24 Batch Workspace 继续保留�
 - Fold Seam UV Diagnostics
 - Fold Bleed Continuity Diagnostics
 
-Folded Proof 仍用于浏览器几何和印刷位置核对，不宣称校色显示器级 ICC Soft Proof。
+Folded Proof 用于几何与印刷位置核对，不宣称校色显示器级 ICC Soft Proof。
 
 ### Batch / Production
 
@@ -232,13 +256,14 @@ Folded Proof 仍用于浏览器几何和印刷位置核对，不宣称校色显�
 - Batch Preflight
 - Pause / Resume / Cancel / Retry
 - Frozen Batch Context
-- Web Worker PDF
+- V0.27 Web Worker Native Cubic PDF
 - IndexedDB Recoverable Artifacts
 - Recovered ZIP
 - User TTF / Output ICC / DeviceLink Worker Transfer
 - Production Job / Revision / Approval / Reject
 - Viewer / Operator / Approver / Admin
 - Approved Production PDF Gate
+- Production Serializer Fingerprint Binding
 - Export Audit Event
 
 ### Project / Collaboration Foundation
@@ -265,14 +290,14 @@ PDF/X-4 Candidate
 
 ### ICC DeviceLink
 
-已验证子集：
+当前验证过的颜色转换子集：
 
 ```text
 RGB → CMYK A2B0 LUT8  / mft1
 RGB → CMYK A2B0 LUT16 / mft2
 ```
 
-普通 CMYK OutputIntent ICC 不会被误当成颜色转换引擎。
+普通 CMYK OutputIntent ICC 不会被误当成 RGB→CMYK 转换引擎。
 
 尚未宣称：
 
@@ -298,35 +323,37 @@ http://localhost:8080
 
 ## 自动测试
 
-GitHub Actions 当前执行 Syntax、Smoke，并从：
+GitHub Actions 当前执行：
 
 ```text
+Syntax
+Smoke
 V0.10
 ...
-V0.25
 V0.26
+V0.27
 ```
 
-全部顺序回归。
+V0.27 Regression 覆盖：
 
-V0.26 Regression 覆盖：
-
-- Numeric Bezier Anchor / Handle
-- Line ↔ Curve Segment
-- User Guide CRUD
-- User Guide Snap
-- Text Baseline Extraction / Snap
-- Rotation Match Priority
-- Native Cubic PDF `c` Operator
-- PDF `W n` Clip
-- Cubic Clip Diagnostics
-- V0.26 Production PDF Bytes
-- V0.26 Serializer Diagnostics
+- Full Production PDF Native Cubic `c` Operator
+- Production `W n` Clip
+- CutContour Spot Retention
+- Native Gradient / Soft Mask Retention
+- V0.27 Serializer Diagnostics
+- Frozen V0.27 Batch Context
+- Row Change Blocking
+- V0.27 Worker Production PDF
+- Worker Native Cubic Output
+- Live User Guide Move Snap
+- Live Text Baseline Move Snap
+- Live Object Rotation Match
+- Serializer Identity Approval Fingerprint
 
 详细报告：
 
 ```text
-docs/V0.26_TEST_REPORT.md
+docs/V0.27_TEST_REPORT.md
 ```
 
 ## 数据存储
@@ -334,10 +361,10 @@ docs/V0.26_TEST_REPORT.md
 主状态：
 
 ```text
-boxstudio-mvp-v26
+boxstudio-mvp-v27
 ```
 
-V0.25 以及之前支持的版本继续作为 Migration Source。
+V0.26 以及之前支持的版本继续作为 Migration Source。
 
 附加存储保持：
 
@@ -349,13 +376,14 @@ IndexedDB: boxstudio-artifacts-v1
 
 ## 当前边界 / 下一阶段
 
-- 将 Native Cubic Clip 从 Proof 合并进完整 Production / Approved PDF
-- 将 User Guide / Baseline / Rotation Assist 合并进完整 live drag gesture
+- SVG Outline Fragment 的 Cross-panel Object Clip 仍使用确定性 Flattened Materialization
+- Group Rotation 尚未接入完整 Object-relative Live Rotation Assist
 - ICC mAB / mBA Verified Subset
 - 更完整 Source ICC → Destination ICC CMM
 - Text Baseline 使用实际字体 Metrics
+- Browser Interaction E2E
 - Hosted Backend + Auth / SSO
 - Server-side Immutable Approval Audit
 - Cryptographic Approval Signature
 - Cloud Resumable Artifact Storage
-- Factory Compensation Profiles（只使用已验证生产参数）
+- Board Thickness / Bend Radius / Verified Print Stretch Compensation
