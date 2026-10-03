@@ -13,6 +13,7 @@ import { materializeSvgAppearanceState, parseColor } from './productionAppearanc
 import { materializeCrossPanelArtworkState } from './crossPanelArtwork.js';
 
 const PT=72/25.4,f=n=>(Number(n)||0).toFixed(3);
+function num(v,d=0){const n=Number(v);return Number.isFinite(n)?n:d}
 function asciiPdf(s=''){return String(s).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)').replace(/[^\x20-\x7E]/g,'?')}
 function xmlEsc(s=''){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;')}
 function escAttr(s=''){return xmlEsc(s)}
