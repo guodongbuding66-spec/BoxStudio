@@ -51,3 +51,6 @@ jobs:
 
       - name: V0.16 worker assets, granular merge and artwork tests
         run: node tests/v16.mjs
+
+      - name: V0.17 folded artwork texture proof tests
+        run: node tests/v17.mjs
