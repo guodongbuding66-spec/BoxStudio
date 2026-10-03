@@ -36,3 +36,6 @@ jobs:
 
       - name: V0.11 rule editor, revisions and batch-master tests
         run: node tests/v11.mjs
+
+      - name: V0.12 queue, bundle, asset and rule-history tests
+        run: node tests/v12.mjs
