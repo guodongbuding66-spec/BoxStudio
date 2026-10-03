@@ -1,246 +1,145 @@
-# BoxStudio V0.15
+# BoxStudio V0.16
 
-浏览器内运行的纸盒结构设计、2D 刀版、唛头编辑、客户规则、批量订单、3D 折叠、印前检查、生产审批与生产文件导出原型。
+BoxStudio 是浏览器内运行的纸盒结构设计、2D 刀版、唛头编辑、客户规则、Excel 批量订单、3D 折叠、印前检查、生产审批与生产文件导出原型。
 
-当前主线：**参数化纸盒结构 + 唛头变量 + Customer / Packaging Rule + Master Template + Excel 批量生成 + Preflight + Production Approval + Recoverable Artifacts + Project Persistence + SVG Mark + Worker Batch + Remote Merge**。
+当前主线：**参数化结构 + 唛头变量 + Customer / Packaging Rule + Master Template + Batch Worker + Recoverable Artifacts + Production Approval + Project Persistence + Granular Remote Merge + Panel Artwork Texture Atlas**。
 
-## V0.15 新增
+## V0.16 新增
 
-### SVG Mark / Logo Import
+### 1. Worker TTF / ICC Binary Transfer
 
-新增安全 SVG 唛头 / Logo 导入：
+V0.15 的 PDF Worker 会主动阻止依赖会话二进制资源的输出。V0.16 补上了这条生产链：
 
-- `path`
-- `line`
-- `rect`
-- `circle`
-- `ellipse`
-- `polygon`
-- `polyline`
-- M/L/H/V/C/Q/A/Z Path Commands
-- Bezier / Arc → Vector Segments
-- Panel 绑定
-- mm 尺寸
-- 旋转 / 移动仍复用 Mark Layout 数据模型
+- `src/workerAssets.js`
+- `fontRegistry.js` 保留用户上传 TTF 的原始 bytes
+- `iccRegistry.js` 暴露当前 ICC 原始 bytes
+- Worker 启动时一次性传输 TTF / ICC
+- Worker 内重新建立字体 / ICC Registry
+- 同一个 Worker 后续批量订单复用这些 Registry
 
-导入后以 `svg-symbol` 保存到项目元素中，生产 PDF 前通过 `materializeSvgMarksForProduction()` 转换为 BoxStudio 线对象。
+现在：
 
-安全策略会拒绝：
+- Technical Vector Text → 可直接走 Worker
+- User TTF Outline → 有 TTF binary 才允许 Worker
+- PDF/X Candidate → 有 ICC binary 才允许 Worker
+- 缺少生产资源 → 明确阻止，不静默降级
 
-- script
-- foreignObject
-- iframe / object / embed
-- image
-- use
-- 外部 URL / data / javascript href
+主线程仍负责 Queue、Pause / Resume / Cancel、IndexedDB Artifact、Recovered ZIP 和 UI。
 
-> V0.15 当前是“安全矢量轮廓”路径，不宣称完整复刻 Illustrator SVG Appearance。复杂填充、渐变、mask、clipPath、blend mode、CSS 与栅格图仍属于后续工作。
+### 2. Object-Level Remote Merge
 
-### SVG-aware Production PDF
+新增 `src/projectMergeV2.js`。
 
-V0.15 新增：
+以下高冲突域不再整块覆盖：
 
-- Draft PDF + SVG Marks
-- Approved PDF + SVG Marks
+- `elements`：按 `id` + field 合并
+- `masterTemplates`：按 `id` + field 合并
+- `productionJobs`：按 `id` + field 合并
+- Custom Customer / Packaging Rule / Mark Template / Mark Asset：按 key + field 合并
 
-审批版仍必须满足原有 Production Job Gate 和角色权限。
-
-V0.15 会隐藏旧 V0.14 的 Approved PDF 按钮，避免旧导出路径忽略新 `svg-symbol` 对象。
-
-### Web Worker Batch PDF
-
-新增真正的 module Web Worker 批量 PDF 路径：
+例如同一个 `sku` 元素：
 
 ```text
-src/batchWorkerCore.js
-src/batchPdf.worker.js
+Local  修改 x
+Remote 修改 y
 ```
 
-每一行订单在 Worker 内完成：
+可以自动合并。
 
-1. Master Template 套用；
-2. Excel / CSV 变量映射；
-3. Preflight；
-4. SVG Mark Materialization；
-5. Production PDF；
-6. ArrayBuffer Transfer 回主线程。
-
-主线程只负责 Queue、IndexedDB、进度、Pause / Resume / Cancel 和 ZIP。
-
-Worker Queue 继续使用 V0.14 的可恢复 Artifact Store，因此刷新页面后已生成 PDF 仍可 Reconcile / Recover。
-
-Worker 路径目前主动阻止：
-
-- User TTF Outline Mode
-- PDF/X Candidate Mode
-
-原因是这些路径可能依赖当前主线程会话中加载的 TTF / ICC 二进制资源。V0.15 不会为了“看似完成”而在 Worker 中静默丢失这些生产资源。
-
-### Remote Conflict Resolver
-
-新增远程项目冲突比较与合并：
-
-- Fetch & Compare
-- Remote Base
-- local-only
-- remote-only
-- both-same
-- conflict
-- Keep Local
-- Use Remote
-- Apply Merge Locally
-- Push Merged Revision
-
-有 Remote Base 时执行保守三方比较；没有 Base 的首次比较会把所有差异视为冲突，不会假设祖先关系。
-
-Push Merged Revision 使用远程当前 Revision 作为父版本，并继续通过 REST Adapter 的 `If-Match` 做并发写保护。
-
-> 当前是“项目域级 Merge”，不是 CRDT / OT 多人实时协同。`elements`、`masterTemplates`、`productionJobs`、`batch` 等数组当前作为原子域处理。
-
-## V0.14 能力继续保留
-
-### Recoverable Batch Artifacts
-
-V0.14 将批量 PDF 二进制写入浏览器 IndexedDB，不再只保存在当前 JSZip 内存会话中。
-
-支持：
-
-- Queue ID + Row Index 持久化
-- 页面刷新后恢复已完成文件
-- Queue Metadata / Artifact Reconcile
-- completed 但文件缺失 → pending
-- pending / failed 但文件存在 → completed
-- Recovered ZIP
-- ZIP Manifest
-- Pause / Resume / Cancel 安全行边界
-
-> IndexedDB 仍是浏览器本地存储，不是云端对象存储。
-
-### Production Roles
-
-本地生产角色：
-
-- Viewer
-- Operator
-- Approver
-- Admin
-
-权限同时在 UI 与 `productionJobs.js` 动作层检查。
-
-Operator：Create / Submit / Revise / Export Approved
-
-Approver：Approve / Reject / Export Approved
-
-Admin：全部生产动作，包括 Delete
-
-Viewer：只读
-
-> 当前角色模型不是登录认证、SSO、电子签名或不可篡改审计系统。
-
-### Project Persistence Layer
-
-`src/projectStore.js` 支持 Project Envelope：
-
-- schema / schemaVersion
-- project ID
-- revision
-- parent revision
-- createdAt / updatedAt
-- updatedBy
-- project state snapshot
-
-Local Project Library：
-
-- Save Snapshot
-- Revision
-- List
-- Load
-- Delete
-- Project JSON Import / Export
-
-REST Adapter：
+如果双方都修改：
 
 ```text
-GET    /projects
-GET    /projects/:id
-PUT    /projects/:id
-DELETE /projects/:id
+elements[sku].x
 ```
 
-`PUT` / `DELETE` 可使用 `If-Match` 做 Revision 冲突控制。
+且结果不同，则生成字段级冲突，必须明确选择 `Keep Local` 或 `Use Remote`。
 
-> 当前仓库仍不包含真正的 BoxStudio 云端后端。
+删除/新增冲突也会显式报告。
 
-## 现有核心能力
+其余 Structure、Variables、Export Options、Batch 等域仍采用保守原子三方比较。当前不是 CRDT / OT 实时协同系统。
+
+### 3. Panel Artwork Texture Atlas
+
+新增 `src/panelArtwork.js`，把不同唛头元素归一成 Panel-local artwork commands：
+
+- Text / Package Notice
+- Shipping Icons
+- Line / Shape
+- Barcode + QR
+- Imported SVG Symbol
+
+V0.16 Workspace 可直接查看每个 Panel 的 Canvas Texture Preview，并统计：
+
+- Panel Count
+- Artwork Element Count
+- Texture Command Count
+- Out-of-panel Commands
+
+这套 Atlas 是后续 Folded 3D 材质与 UV Mapping 的统一数据源基础。
+
+> V0.16 仍不宣称现有折叠 3D 已达到印厂级 UV Soft Proof。Polygon UV、接缝连续性、色彩管理与印刷形变模拟仍需继续开发。
+
+## 已有核心能力
 
 ### 结构 / 刀版
 
-- 参数化 Side-Seal / RSC 基础结构
-- Mailer 150010 参考结构
-- SVG / DXF / PDF / PDF-compatible AI 矢量刀版导入
-- CUT / CREASE / PERF / GLUE 语义
-- Bezier / Arc 原生控制点
+- Parametric Side-Seal / RSC
+- Mailer 150010
+- SVG / DXF / PDF / PDF-compatible AI 导入
+- CUT / CREASE / PERF / GLUE
+- Bezier / Arc
 - Polygon Panel
 - Panel / Fold Graph
-- CREASE → Fold Candidate 人工确认
-- 基础拓扑修复
+- CREASE → Fold Candidate
 - CUT Crossing / Polygon Self-intersection 检查
 - Bleed / Safe Area
 
-> 工厂压线补偿、刀模板补偿和设备公差必须来自已验证生产数据。BoxStudio 不自动编造这些参数。
+工厂压线补偿、刀模板补偿和设备公差只接受已验证生产数据，不自动编造。
 
 ### 唛头 / 条码
 
-- SKU、N.W.、G.W.、Package Meas、CRN、Contract No.、Origin、Destination、Package No.
-- 多包裹英文提示条件
+- SKU / N.W. / G.W. / Package Meas / CRN / Contract No.
+- Origin / Destination / Package No.
+- Multi-package Notice
 - Code 39 / EAN-13 / UPC-A / ITF-14 / GS1-128
 - QR Code
-- Barcode + QR 锁定组合
+- Barcode + QR Locked Group
 - 250×80 mm / 200×64 mm
 - This Side Up / Fragile / Keep Dry
-- Custom Mark Template
-- Mark Asset Library
-- Panel-local mm Mark Layout Editor
-- SVG Mark / Logo Outline Import
+- Custom Mark Template / Mark Asset
+- Panel-local mm Layout Editor
+- Safe SVG Logo / Mark Outline Import
 
-### Customer Profile / Packaging Rule
+SVG 目前仍是安全矢量轮廓子集，不等同完整 Illustrator Appearance。Fill / Gradient / Clip / Mask / CSS / Raster fidelity 仍未完成。
 
-- 客户默认变量 / 锁定变量
-- Origin / Destination / INCH / MM / LBS / KG
-- Packaging Rule 绑定
-- 默认 Mark Template
-- 自定义必填字段
-- 固定变量 `key=value`
-- CRN 重复绑定数量
-- Package index/count
-- Multi-package notice
-- Barcode+QR preset / ratio / aspect lock
-- Packaging Rule revision history / restore
+### Customer / Rule / Master
 
-### Master Template V2
-
-Master Template 保存结构、唛头元素和位置、Export Options、Customer / Packaging Rule / Mark Template IDs、Locked variables / groups、非订单变量默认值及自定义 Profile 快照。
-
-支持 Rename、Duplicate、Save Revision、Version History、Restore、JSON Import / Export，并可在批量订单中先套 Master 再填 Excel 行变量。
+- Customer Profile
+- Packaging Rule Builder
+- Rule Revision History
+- Locked Variables
+- Mark Template
+- Master Template V2
+- Rename / Duplicate / Revision / Restore
+- JSON Import / Export
+- Batch 先套 Master 再写入订单变量
 
 ### Excel / CSV Batch
 
 - `.xlsx` / `.csv` / `.tsv`
-- 多 Sheet
-- 自动字段识别 + 手工映射
-- Package `1/3` 解析
-- 批量 SVG / PDF 基础输出
-- Master Template 批量管线
+- Multi-sheet
+- Auto Mapping + Manual Mapping
+- Package `1/3`
 - Batch-wide Preflight
 - Combined PDF / PDF ZIP
 - Job Queue
-- completed / failed / cancelled / pending
-- Pause / Resume
-- Persistent PDF Artifact Cache
+- Pause / Resume / Cancel
+- IndexedDB Persistent Artifact Cache
 - Recovered ZIP
-- Web Worker PDF Path
+- Module Web Worker PDF Generation
+- V0.16 User TTF / ICC Worker Transfer
 
-### Production Job / Approval / Audit
+### Production Approval
 
 - Create Snapshot
 - Submit
@@ -249,38 +148,43 @@ Master Template 保存结构、唛头元素和位置、Export Options、Customer
 - New Revision
 - Audit Trail
 - Production Fingerprint
+- Viewer / Operator / Approver / Admin
 - Approved Production PDF Gate
-- Role Permission Model
-- V0.15 SVG-aware Approved PDF
 
-Approved Production PDF 只有在以下条件同时成立时放行：
+Approved PDF 必须同时满足：Approved Job、0 Preflight Error、Fingerprint 未变化、当前角色拥有导出权限。
 
-1. 当前 Production Job 已 Approved；
-2. 审批快照没有 Preflight Error；
-3. 当前结构、变量、唛头、Profile、Export Options 的 fingerprint 与审批版本一致；
-4. 当前角色拥有 `export-approved` 权限。
+### Project Persistence / Remote Merge
 
-### Workspace Bundle
+- Project Envelope + Revision
+- Local Project Library
+- JSON Import / Export
+- REST Adapter
+- `If-Match` Revision Protection
+- Remote Base
+- V0.15 Domain Merge
+- V0.16 Object / Field-level Merge
 
-可一次性迁移：
+REST 约定：
 
-- Custom Customer Profiles
-- Packaging Rules + revisions
-- Mark Templates
-- Mark Assets
-- Master Templates
-- Active Profile IDs
+```text
+GET    /projects
+GET    /projects/:id
+PUT    /projects/:id
+DELETE /projects/:id
+```
+
+当前仓库仍不包含真正托管的 BoxStudio 后端、登录系统或 SSO。
 
 ### 3D
 
 - Panel / Fold Graph
-- Hinge-pivot 折叠逻辑
-- Fold 0–100%
-- Three.js 优先
-- runtime 不可用时离线 Canvas fallback
-- Three.js 路径可将现有文字 / 图标 / Barcode+QR 绘制到矩形 Panel Texture
+- Hinge-pivot Fold 0–100%
+- Three.js Path
+- Offline Canvas Fallback
+- 矩形 Panel 基础 Texture
+- V0.16 Panel Artwork Texture Atlas
 
-当前 **还没有**把 V0.15 任意 SVG Mark 的完整外观、复杂印刷稿和 Polygon Panel 全部映射成最终 3D 校样贴图。
+当前不宣称 Polygon UV、复杂 SVG Appearance、色彩管理和印刷变形模拟已经完成。
 
 ### Production Export
 
@@ -288,21 +192,15 @@ Approved Production PDF 只有在以下条件同时成立时放行：
 - PNG Preview
 - R12 ASCII DXF
 - Production PDF
-- Spot Separation：CUT / CREASE / PERF / GLUE
+- CUT / CREASE / PERF / GLUE Spot Separation
 - Overprint
 - Technical Vector Text
-- 用户 TTF glyf 转曲
-- 用户 CMYK ICC OutputIntent
+- User TTF glyf Outline
+- CMYK ICC OutputIntent
 - PDF/X-4 Candidate Gate
-- V0.15 SVG Outline Materialization
+- SVG Outline Materialization
 
-`PDF/X-4 Candidate` 是受约束候选输出路径，不等于 Acrobat Preflight、callas pdfToolbox 或印厂 RIP 的第三方认证。
-
-## Preflight
-
-当前检查包括 Customer Profile、Packaging Rule Profile、Mark Template、必填/固定字段、Package index/count、Multi-package notice、CRN 重复绑定、Barcode+QR 组合与比例、Barcode/GS1、QR、Panel/Safe Area/Bleed、Fold Graph、导入刀版拓扑、CUT crossing / Polygon self-intersection、Spot / Overprint、文字转曲、ICC / PDF/X Candidate gate。
-
-V0.15 Worker Core 在进入 PDF 生成前还会额外验证 SVG Mark Schema 和矢量段数据。
+`PDF/X-4 Candidate` 不等同 Acrobat Preflight、callas pdfToolbox 或印厂 RIP 的第三方认证。
 
 ## 运行
 
@@ -332,32 +230,24 @@ node tests/v12.mjs
 node tests/v13.mjs
 node tests/v14.mjs
 node tests/v15.mjs
+node tests/v16.mjs
 ```
 
-V0.15 回归覆盖：
+V0.16 回归覆盖 TTF/ICC Worker Asset Eligibility、ICC transferable payload、Object-level Merge、field conflict resolution、Custom Profile field merge、SVG artwork commands、Barcode/QR texture commands、Panel bounds 与 Artwork Atlas。
 
-- SVG Path / Rect / Circle Parsing
-- Cubic Bezier Flatten
-- Blocked Script / Image
-- SVG Symbol → Production Lines
-- Rotation / Scaling Materialization
-- Worker Eligibility
-- Worker Core Production PDF `%PDF-`
-- Three-way Local-only / Remote-only Merge
-- Explicit Conflict Resolution
-- First Compare Without Base → Conflict
+详细报告：`docs/V0.16_TEST_REPORT.md`。
 
 ## 数据存储
 
-当前 browser project state key：
+Browser project state：
 
 ```text
-boxstudio-mvp-v15
+boxstudio-mvp-v16
 ```
 
 旧版本 key 继续作为迁移来源。
 
-附加本地存储：
+附加存储：
 
 ```text
 boxstudio-project-library-v1
@@ -369,73 +259,55 @@ IndexedDB: boxstudio-artifacts-v1
 
 ```text
 src/
-  app.js
   geometry.js
   foldgraph.js
   importDieline.js
   pdfAiImport.js
-  repair.js
   barcode.js
   qrcode.js
+  svgMark.js
+  panelArtwork.js
   batch.js
   batchTemplates.js
-  jobQueue.js
-  persistentBatch.js
-  artifactStore.js
   batchWorkerCore.js
   batchPdf.worker.js
-  svgMark.js
+  workerAssets.js
+  artifactStore.js
+  persistentBatch.js
+  projectStore.js
   projectMerge.js
-  rules.js
-  customerProfiles.js
-  markTemplates.js
-  markAssets.js
-  markLayout.js
-  masterTemplates.js
+  projectMergeV2.js
   productionJobs.js
   permissions.js
-  projectStore.js
-  profileBundles.js
-  profileUi.js
-  v11BatchUi.js
-  v12Ui.js
-  v13Ui.js
-  v14Ui.js
-  v15Ui.js
+  rules.js
+  masterTemplates.js
   preflight.js
   export.js
   threePreview.js
+  v14Ui.js
+  v15Ui.js
+  v16Ui.js
   ...
 
 tests/
   smoke.mjs
-  v10.mjs
-  v11.mjs
-  v12.mjs
-  v13.mjs
-  v14.mjs
-  v15.mjs
+  v10.mjs ... v16.mjs
 
 docs/
-  V0.10_TEST_REPORT.md
-  V0.11_TEST_REPORT.md
-  V0.12_TEST_REPORT.md
-  V0.13_TEST_REPORT.md
-  V0.14_TEST_REPORT.md
-  V0.15_TEST_REPORT.md
+  V0.10_TEST_REPORT.md ... V0.16_TEST_REPORT.md
 ```
 
 ## 参考源边界
 
-项目最初使用用户提供的“美线侧封箱印刷模板”作为真实业务规则参考。能够从源文件确认的字段、条码二维码组合要求、多包裹文字规则等可以进入规则层；源文件没有提供完整结构尺寸或纸箱厂补偿表的部分，不作为 PDF 原始规格伪造。
+项目最初使用用户提供的“美线侧封箱印刷模板”作为真实业务规则参考。能从源文件确认的字段、Barcode+QR 组合要求、多包裹规则等进入规则层；源文件未提供的完整结构尺寸、设备补偿表和工厂工艺参数不会被伪造为原始规格。
 
 ## 下一阶段
 
-- 正式 BoxStudio 后端与账号认证
+- Hosted BoxStudio Backend + Auth / SSO
 - Server-side Immutable Audit / Approval Signatures
-- 云端 Resumable Artifact / Object Storage
-- SVG Fill / Gradient / Clip / Mask 更完整生产渲染
-- Worker Transfer User TTF / ICC Registries
-- 更细粒度 Object-level Remote Merge
-- 更完整 3D Print-artwork Texture Mapping
-- Factory Compensation Profiles（只接受已验证生产参数）
+- Cloud Resumable Artifact / Object Storage
+- SVG Fill / Gradient / Clip / Mask Production Rendering
+- Per-object Ordering / Collaborative Merge
+- Panel Artwork Atlas → Folded 3D Material Integration
+- Polygon UV / Seam Continuity / Color-managed 3D Soft Proof
+- Factory Compensation Profiles（仅使用已验证生产参数）
