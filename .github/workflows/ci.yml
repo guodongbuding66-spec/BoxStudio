@@ -48,3 +48,6 @@ jobs:
 
       - name: V0.15 SVG, worker PDF and merge tests
         run: node tests/v15.mjs
+
+      - name: V0.16 worker assets, granular merge and artwork tests
+        run: node tests/v16.mjs
