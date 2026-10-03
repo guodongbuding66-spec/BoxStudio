@@ -42,3 +42,6 @@ jobs:
 
       - name: V0.13 pause-resume, mark-layout and approval tests
         run: node tests/v13.mjs
+
+      - name: V0.14 persistence, artifacts and role tests
+        run: node tests/v14.mjs
