@@ -66,3 +66,6 @@ jobs:
 
       - name: V0.21 native PDF shading and transform tests
         run: node tests/v21.mjs
+
+      - name: V0.22 soft-mask, clip and shared-transform tests
+        run: node tests/v22.mjs
