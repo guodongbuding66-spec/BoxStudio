@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { defaultState } from '../src/model.js';
 import {
   createMasterTemplate,
+  applyMasterTemplate,
   renameMasterTemplate,
   duplicateMasterTemplate,
   createMasterRevision,
@@ -12,6 +13,7 @@ import {
 } from '../src/masterTemplates.js';
 import { saveCustomPackagingRule, validatePackagingRuleState, getPackagingRuleProfile } from '../src/rules.js';
 import { saveCustomCustomerProfile, applyCustomerProfile, validateCustomerProfile, getCustomerProfile } from '../src/customerProfiles.js';
+import { createMarkTemplateFromState, saveCustomMarkTemplate, applyMarkTemplate, validateMarkTemplate, getMarkTemplate } from '../src/markTemplates.js';
 import { buildBatchState, buildBatchStates, summarizeBatchPreflight } from '../src/batchTemplates.js';
 
 const state=structuredClone(defaultState);
@@ -60,9 +62,34 @@ customState=saveCustomCustomerProfile(customState,{
   lockedVariables:['originCountry','destinationCountry'],preferredMarkTemplateId:'us-side-seal-master',
 });
 assert.equal(getCustomerProfile('retailer-a-us',customState).custom,true);
-const appliedCustomer=applyCustomerProfile(customState,'retailer-a-us',{overwriteDefaults:true});
+let appliedCustomer=applyCustomerProfile(customState,'retailer-a-us',{overwriteDefaults:true});
 assert.equal(appliedCustomer.packagingRuleProfileId,'retailer-a');
 assert.equal(validateCustomerProfile(appliedCustomer).ok,true);
+appliedCustomer=applyCustomerProfile(appliedCustomer,'generic',{overwriteDefaults:true});
+assert.deepEqual(appliedCustomer.lockedVariables,[]);
+
+let marksState=structuredClone(customState);
+marksState.elements.find(e=>e.id==='sku').x=123;
+const customMark=createMarkTemplateFromState(marksState,{id:'retailer-a-marks',label:'Retailer A Marks'});
+marksState=saveCustomMarkTemplate(marksState,customMark);
+marksState.markTemplateId='retailer-a-marks';
+assert.equal(getMarkTemplate('retailer-a-marks',marksState).custom,true);
+const marksApplied=applyMarkTemplate(structuredClone(defaultState),'retailer-a-marks');
+assert.notEqual(marksApplied.markTemplateId,'retailer-a-marks');
+const marksAppliedWithCatalog=applyMarkTemplate(marksState,'retailer-a-marks');
+assert.equal(marksAppliedWithCatalog.elements.find(e=>e.id==='sku').x,123);
+assert.equal(validateMarkTemplate(marksAppliedWithCatalog).ok,true);
+
+marksState.customerProfileId='retailer-a-us';
+marksState.packagingRuleProfileId='retailer-a';
+const portableMaster=createMasterTemplate(marksState,{id:'portable-master',label:'Portable Master'});
+assert.equal(portableMaster.embeddedProfiles.customer.id,'retailer-a-us');
+assert.equal(portableMaster.embeddedProfiles.packagingRule.id,'retailer-a');
+assert.equal(portableMaster.embeddedProfiles.markTemplate.id,'retailer-a-marks');
+const portableApplied=applyMasterTemplate(structuredClone(defaultState),portableMaster,{preserveVariables:true});
+assert.equal(portableApplied.customCustomerProfiles['retailer-a-us'].label,'Retailer A US');
+assert.equal(portableApplied.customPackagingRules['retailer-a'].label,'Retailer A');
+assert.equal(portableApplied.customMarkTemplates['retailer-a-marks'].label,'Retailer A Marks');
 
 const batchBase=structuredClone(defaultState);
 const batchMaster=createMasterTemplate(batchBase,{id:'batch-master',label:'Batch Master'});
