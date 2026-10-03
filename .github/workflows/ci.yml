@@ -24,9 +24,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in src/*.js tests/smoke.mjs; do
+          for f in src/*.js tests/*.mjs; do
             node --check "$f"
           done
 
       - name: Smoke tests
         run: node tests/smoke.mjs
+
+      - name: V0.10 profile and master-template tests
+        run: node tests/v10.mjs
