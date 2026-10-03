@@ -1,0 +1,65 @@
+name: Apply BoxStudio V0.8
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: ${{ !contains(github.event.head_commit.message, '[v08-applied]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reconstruct V0.8 release archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .sync/v08/part-* > /tmp/boxstudio-v08-clean.tar.xz
+          echo 'dbde4aa16efc8f61ce584780ba7f410f494c48b918431456b43ee1ba4c48ea4c  /tmp/boxstudio-v08-clean.tar.xz' | sha256sum -c -
+
+      - name: Expand V0.8 source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/boxstudio-v08
+          tar -xJf /tmp/boxstudio-v08-clean.tar.xz -C /tmp/boxstudio-v08
+          find . -mindepth 1 -maxdepth 1 \
+            ! -name '.git' \
+            ! -name '.sync' \
+            ! -name '.github' \
+            -exec rm -rf {} +
+          cp -a /tmp/boxstudio-v08/. .
+          rm -rf .sync
+          rm -rf .github
+
+      - name: Validate V0.8
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f index.html
+          test -f package.json
+          test -f src/app.js
+          test -f src/export.js
+          test -f src/iccRegistry.js
+          test -f src/printProfiles.js
+          test -f tests/smoke.mjs
+          grep -q '"version": "0.8.0"' package.json
+          grep -q 'BoxStudio V0.8' README.md
+          for f in src/*.js tests/smoke.mjs; do node --check "$f"; done
+          node tests/smoke.mjs
+
+      - name: Commit BoxStudio V0.8
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'feat: publish BoxStudio V0.8 [v08-applied]'
+          git push origin HEAD:main
