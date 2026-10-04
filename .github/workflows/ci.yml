@@ -68,8 +68,14 @@ jobs:
       - name: V0.30 mapping-profile, leading-zero, import-review and XLSX-failure tests
         run: node tests/v30.mjs
 
-      - name: V0.31 enforce - exact positive details
-        env: { V31_PROBE: exact-positive-details }
+      - name: V0.31 enforce - default 250x80 details
+        env: { V31_PROBE: exact-base-details }
+        run: node tests/v31-probe.mjs
+      - name: V0.31 enforce - mailer 200x64 details
+        env: { V31_PROBE: exact-mailer-details }
+        run: node tests/v31-probe.mjs
+      - name: V0.31 enforce - symbology result types
+        env: { V31_PROBE: exact-type-details }
         run: node tests/v31-probe.mjs
       - name: V0.31 enforce - exact negative details
         env: { V31_PROBE: exact-negative-details }
