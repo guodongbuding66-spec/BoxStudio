@@ -1,7 +1,7 @@
 import { defaultStructure, defaultsForTemplate } from './geometry.js';
 
-export const STORAGE_KEY = 'boxstudio-mvp-v31';
-export const LEGACY_STORAGE_KEYS = ['boxstudio-mvp-v30','boxstudio-mvp-v29','boxstudio-mvp-v28','boxstudio-mvp-v27','boxstudio-mvp-v26','boxstudio-mvp-v25','boxstudio-mvp-v24','boxstudio-mvp-v23','boxstudio-mvp-v22','boxstudio-mvp-v21','boxstudio-mvp-v20','boxstudio-mvp-v19','boxstudio-mvp-v18','boxstudio-mvp-v17','boxstudio-mvp-v16','boxstudio-mvp-v15','boxstudio-mvp-v14','boxstudio-mvp-v13','boxstudio-mvp-v12','boxstudio-mvp-v11','boxstudio-mvp-v10','boxstudio-mvp-v9','boxstudio-mvp-v8','boxstudio-mvp-v7','boxstudio-mvp-v6','boxstudio-mvp-v5','boxstudio-mvp-v4','boxstudio-mvp-v3','boxstudio-mvp-v2','boxstudio-mvp'];
+export const STORAGE_KEY = 'boxstudio-mvp-v32';
+export const LEGACY_STORAGE_KEYS = ['boxstudio-mvp-v31','boxstudio-mvp-v30','boxstudio-mvp-v29','boxstudio-mvp-v28','boxstudio-mvp-v27','boxstudio-mvp-v26','boxstudio-mvp-v25','boxstudio-mvp-v24','boxstudio-mvp-v23','boxstudio-mvp-v22','boxstudio-mvp-v21','boxstudio-mvp-v20','boxstudio-mvp-v19','boxstudio-mvp-v18','boxstudio-mvp-v17','boxstudio-mvp-v16','boxstudio-mvp-v15','boxstudio-mvp-v14','boxstudio-mvp-v13','boxstudio-mvp-v12','boxstudio-mvp-v11','boxstudio-mvp-v10','boxstudio-mvp-v9','boxstudio-mvp-v8','boxstudio-mvp-v7','boxstudio-mvp-v6','boxstudio-mvp-v5','boxstudio-mvp-v4','boxstudio-mvp-v3','boxstudio-mvp-v2','boxstudio-mvp'];
 
 export const defaultVariables = {
   sku:'KF210215US-02PM-001',nw:'74.1',gw:'80.7',length:'47.24',width:'23.62',height:'7.87',dimensionUnit:'INCH',weightUnit:'LBS',crn:'3203960FM4',contractNo:'HT24010213',originCountry:'China',destinationCountry:'US',packageIndex:'1',packageCount:'3',qrValue:'KF210215US-02PM-001',
@@ -32,8 +32,21 @@ export const mailerElements = [
   {id:'thisSideUp',type:'icon',icon:'up',group:'marks',panelId:'lid',x:242,y:18,w:34,h:34,r:0},
 ];
 
+export const foldingCartonElements = [
+  {id:'sku',type:'text',group:'marks',panelId:'front',x:8,y:10,w:92,h:16,r:0,template:'SKU: {{sku}}',fontSize:5,bold:true},
+  {id:'weight',type:'text',group:'marks',panelId:'front',x:8,y:30,w:92,h:24,r:0,template:'N.W.: {{nw}} {{weightUnit}}\nG.W.: {{gw}} {{weightUnit}}',fontSize:4.2},
+  {id:'origin',type:'text',group:'marks',panelId:'back',x:8,y:10,w:92,h:14,r:0,template:'Made in {{originCountry}}',fontSize:4.5},
+  {id:'crn1',type:'text',group:'marks',panelId:'back',x:8,y:28,w:92,h:14,r:0,template:'CRN: {{crn}}',fontSize:4.2,bold:true},
+  {id:'barcodeQr',type:'barcode-qr-group',group:'marks',panelId:'front',x:8,y:62,w:96,h:30.72,r:0,barcodeValue:'{{sku}}',qrValue:'{{qrValue}}',preset:'compact',lockAspect:true,barcodeType:'CODE39'},
+  {id:'packageNotice',type:'notice',group:'marks',panelId:'back',x:8,y:48,w:96,h:24,r:0,template:'Please note the product has {{packageCount}} packages,\nand this is the package {{packageIndex}}',fontSize:4},
+];
+
 export const defaultElements=rscElements;
-export function elementsForTemplate(template='side-seal-rsc'){return structuredClone(template==='mailer-150010'?mailerElements:rscElements);}
+export function elementsForTemplate(template='side-seal-rsc'){
+  if(template==='mailer-150010'||template==='fefco-0427')return structuredClone(mailerElements);
+  if(template==='reverse-tuck-end'||template==='auto-lock-bottom')return structuredClone(foldingCartonElements);
+  return structuredClone(rscElements);
+}
 export function stateForTemplate(template,previousVariables=defaultVariables){return {structure:defaultsForTemplate(template),elements:elementsForTemplate(template),variables:structuredClone(previousVariables),selectedId:'sku'};}
 
 export const defaultState = {
