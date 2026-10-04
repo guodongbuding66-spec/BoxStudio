@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>BoxStudio V0.33 Browser E2E</title></head>
+<body data-v33-e2e="running">
+  <div id="app"></div>
+  <pre id="v33E2ELog"></pre>
+  <script type="module" src="../src/app.js"></script>
+  <script type="module" src="../src/v33Ui.js"></script>
+  <script type="module">
+    const log=document.getElementById('v33E2ELog');
+    const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+    async function waitFor(selector,timeout=4000){const start=performance.now();while(performance.now()-start<timeout){const el=document.querySelector(selector);if(el)return el;await sleep(30)}throw new Error(`Timeout waiting for ${selector}`)}
+    try{
+      localStorage.clear();
+      await sleep(50);
+      const open=await waitFor('#v33OpenProfessional');
+      open.click();
+      await waitFor('#boxstudio-v33-workspace');
+      await waitFor('#v33Canvas');
+      const rowsBefore=document.querySelectorAll('[data-object-row]').length;
+      if(rowsBefore<2)throw new Error('Expected default project objects.');
+      const firstRow=document.querySelector('[data-object-row]');
+      firstRow.click();
+      await sleep(30);
+      const selectedBefore=document.querySelectorAll('.v33-object-row.selected').length;
+      if(selectedBefore<1)throw new Error('Object selection did not update.');
+      document.querySelector('[data-action="duplicate"]').click();
+      await sleep(40);
+      const rowsAfterDuplicate=document.querySelectorAll('[data-object-row]').length;
+      if(rowsAfterDuplicate<=rowsBefore)throw new Error('Duplicate did not add an object.');
+      const xInput=await waitFor('[data-v33-prop="x"]');
+      xInput.value='77';xInput.dispatchEvent(new Event('change',{bubbles:true}));
+      await sleep(40);
+      const saved=JSON.parse(localStorage.getItem('boxstudio-mvp-v32')||'null');
+      const selected=saved?.elements?.find(x=>x.id===saved.selectedId);
+      if(!selected||Math.abs(Number(selected.x)-77)>.001)throw new Error(`Numeric inspector did not persist x=77; got ${selected?.x}`);
+      const beforeTable=saved.elements.length;
+      document.querySelector('[data-action="add-table"]').click();
+      await sleep(50);
+      const savedTable=JSON.parse(localStorage.getItem('boxstudio-mvp-v32')||'null');
+      if(savedTable.elements.length<beforeTable+14)throw new Error('Table tool did not create flattened production primitives.');
+      if(!document.querySelector('[data-action="undo"]')||!document.querySelector('[data-action="group"]')||!document.querySelector('#v33PanelFocus'))throw new Error('Professional controls missing.');
+      document.body.dataset.v33E2e='pass';
+      log.textContent=`PASS rows=${rowsAfterDuplicate} tableElements=${savedTable.elements.length}`;
+    }catch(error){document.body.dataset.v33E2e='fail';log.textContent=`FAIL ${error?.stack||error}`;console.error(error)}
+  </script>
+</body>
+</html>
