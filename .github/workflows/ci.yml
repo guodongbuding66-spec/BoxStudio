@@ -90,3 +90,6 @@ jobs:
 
       - name: V0.29 resilient import, source-lineage and failed-row review tests
         run: node tests/v29.mjs
+
+      - name: V0.30 mapping-profile, leading-zero, import-review and XLSX-failure tests
+        run: node tests/v30.mjs
