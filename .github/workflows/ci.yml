@@ -33,113 +33,102 @@ jobs:
 
       - name: V0.10 profile and master-template tests
         run: node tests/v10.mjs
-
       - name: V0.11 rule editor, revisions and batch-master tests
         run: node tests/v11.mjs
-
       - name: V0.12 queue, bundle, asset and rule-history tests
         run: node tests/v12.mjs
-
       - name: V0.13 pause-resume, mark-layout and approval tests
         run: node tests/v13.mjs
-
       - name: V0.14 persistence, artifacts and role tests
         run: node tests/v14.mjs
-
       - name: V0.15 SVG, worker PDF and merge tests
         run: node tests/v15.mjs
-
       - name: V0.16 worker assets, granular merge and artwork tests
         run: node tests/v16.mjs
-
       - name: V0.17 folded artwork texture proof tests
         run: node tests/v17.mjs
-
       - name: V0.18 SVG appearance and fold bleed tests
         run: node tests/v18.mjs
-
       - name: V0.19 production appearance and cross-panel tests
         run: node tests/v19.mjs
-
       - name: V0.20 native SVG, atlas and z-order tests
         run: node tests/v20.mjs
-
       - name: V0.21 native PDF shading and transform tests
         run: node tests/v21.mjs
-
       - name: V0.22 soft-mask, clip and shared-transform tests
         run: node tests/v22.mjs
-
       - name: V0.23 integrated PDF, ICC DeviceLink, clip-point and spacing tests
         run: node tests/v23.mjs
-
       - name: V0.24 native batch, deterministic context and approved-export tests
         run: node tests/v24.mjs
-
       - name: V0.25 Bezier clip, Smart Guide and LUT16 DeviceLink tests
         run: node tests/v25.mjs
-
       - name: V0.26 persistent guides, numeric clips and native cubic PDF tests
         run: node tests/v26.mjs
-
       - name: V0.27 native cubic production, worker batch and live-assist tests
         run: node tests/v27.mjs
-
       - name: V0.28 object-relative group rotation and baseline-gap audit tests
         run: node tests/v28.mjs
-
       - name: V0.29 resilient import, source-lineage and failed-row review tests
         run: node tests/v29.mjs
-
       - name: V0.30 mapping-profile, leading-zero, import-review and XLSX-failure tests
         run: node tests/v30.mjs
 
       - name: V0.31 probe - default geometry
         continue-on-error: true
-        env:
-          V31_PROBE: default-geometry
+        env: { V31_PROBE: default-geometry }
         run: node tests/v31-probe.mjs
-
+      - name: V0.31 probe - mailer geometry
+        continue-on-error: true
+        env: { V31_PROBE: mailer-geometry }
+        run: node tests/v31-probe.mjs
       - name: V0.31 probe - default digital
         continue-on-error: true
-        env:
-          V31_PROBE: default-digital
+        env: { V31_PROBE: default-digital }
         run: node tests/v31-probe.mjs
-
       - name: V0.31 probe - mailer digital
         continue-on-error: true
-        env:
-          V31_PROBE: mailer
+        env: { V31_PROBE: mailer }
         run: node tests/v31-probe.mjs
-
       - name: V0.31 probe - Code39
         continue-on-error: true
-        env:
-          V31_PROBE: code39
+        env: { V31_PROBE: code39 }
         run: node tests/v31-probe.mjs
-
       - name: V0.31 probe - EAN13
         continue-on-error: true
-        env:
-          V31_PROBE: ean
+        env: { V31_PROBE: ean }
         run: node tests/v31-probe.mjs
-
       - name: V0.31 probe - UPCA
         continue-on-error: true
-        env:
-          V31_PROBE: upc
+        env: { V31_PROBE: upc }
         run: node tests/v31-probe.mjs
-
       - name: V0.31 probe - ITF14
         continue-on-error: true
-        env:
-          V31_PROBE: itf
+        env: { V31_PROBE: itf }
         run: node tests/v31-probe.mjs
-
       - name: V0.31 probe - GS1-128
         continue-on-error: true
-        env:
-          V31_PROBE: gs1
+        env: { V31_PROBE: gs1 }
+        run: node tests/v31-probe.mjs
+      - name: V0.31 probe - source mismatch blocks
+        continue-on-error: true
+        env: { V31_PROBE: source-mismatch }
+        run: node tests/v31-probe.mjs
+      - name: V0.31 probe - 1mm frame drift blocks
+        continue-on-error: true
+        env: { V31_PROBE: moved-frame }
+        run: node tests/v31-probe.mjs
+      - name: V0.31 probe - 90 rotation blocks
+        continue-on-error: true
+        env: { V31_PROBE: rotation-90 }
+        run: node tests/v31-probe.mjs
+      - name: V0.31 probe - 180 rotation blocks
+        continue-on-error: true
+        env: { V31_PROBE: rotation-180 }
+        run: node tests/v31-probe.mjs
+      - name: V0.31 probe - 270 rotation blocks
+        continue-on-error: true
+        env: { V31_PROBE: rotation-270 }
         run: node tests/v31-probe.mjs
 
       - name: V0.31 Production PDF digital-decode and geometry-acceptance tests
