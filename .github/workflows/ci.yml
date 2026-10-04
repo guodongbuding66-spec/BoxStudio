@@ -94,5 +94,53 @@ jobs:
       - name: V0.30 mapping-profile, leading-zero, import-review and XLSX-failure tests
         run: node tests/v30.mjs
 
+      - name: V0.31 probe - default geometry
+        continue-on-error: true
+        env:
+          V31_PROBE: default-geometry
+        run: node tests/v31-probe.mjs
+
+      - name: V0.31 probe - default digital
+        continue-on-error: true
+        env:
+          V31_PROBE: default-digital
+        run: node tests/v31-probe.mjs
+
+      - name: V0.31 probe - mailer digital
+        continue-on-error: true
+        env:
+          V31_PROBE: mailer
+        run: node tests/v31-probe.mjs
+
+      - name: V0.31 probe - Code39
+        continue-on-error: true
+        env:
+          V31_PROBE: code39
+        run: node tests/v31-probe.mjs
+
+      - name: V0.31 probe - EAN13
+        continue-on-error: true
+        env:
+          V31_PROBE: ean
+        run: node tests/v31-probe.mjs
+
+      - name: V0.31 probe - UPCA
+        continue-on-error: true
+        env:
+          V31_PROBE: upc
+        run: node tests/v31-probe.mjs
+
+      - name: V0.31 probe - ITF14
+        continue-on-error: true
+        env:
+          V31_PROBE: itf
+        run: node tests/v31-probe.mjs
+
+      - name: V0.31 probe - GS1-128
+        continue-on-error: true
+        env:
+          V31_PROBE: gs1
+        run: node tests/v31-probe.mjs
+
       - name: V0.31 Production PDF digital-decode and geometry-acceptance tests
         run: node tests/v31.mjs
