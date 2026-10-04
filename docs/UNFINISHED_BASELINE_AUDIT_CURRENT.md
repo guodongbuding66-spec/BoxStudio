@@ -1,9 +1,10 @@
-# BoxStudio 当前未完成清单（按最初产品需求重新审计）
+# BoxStudio 当前未完成清单（V0.32 后）
 
 **审计日期**：2026-10-04  
-**当前代码版本**：V0.31  
+**当前代码版本**：V0.32  
 **产品基准**：`docs/BOXSTUDIO_DEVELOPMENT_SPEC_CURRENT.md`  
-**原则**：只优先记录“纸盒设计网站 + 专业唛头编辑”核心是否完成。企业后台、SSO、ERP 等降为后期路线。
+**进度记录**：`docs/BASELINE_PROGRESS_V0.32.md`  
+**原则**：优先完成“纸盒设计网站 + 专业唛头编辑”核心。Backend / Auth / ERP / SSO 不抢占核心产品主线。
 
 ---
 
@@ -11,722 +12,486 @@
 
 | 状态 | 含义 |
 |---|---|
-| ✅ | 主线真实实现，已有自动回归或明确验收 |
-| 🟡 | 有实现，但离最初需求定义的完整体验仍有缺口 |
+| ✅ | 当前主线已有真实实现，并有自动回归或明确软件验收 |
+| 🟡 | 已有基础实现，但离最初产品定义的完整体验/生产闭环仍有缺口 |
 | ⬜ | 尚未形成可用实现 |
 | EXT | 必须依赖真实 CAD、印厂、扫描器、RIP、第三方工具或工厂样品才能最终验收 |
 
+> `✅ software` 不等于 `✅ factory certified`。需要物理样箱、外部 RIP、真实 CAD 或扫描器的项目，在外部证据出现前继续保持 EXT。
+
 ---
 
-# 1. 总体结论
+# 1. 当前总体结论
 
-V0.31 已经积累了不少底层能力，尤其是：
+V0.32 已经把主线重新拉回纸盒设计软件本体，并完成第一块核心补齐：
 
-- mm 几何模型；
-- US Side-Seal / Mailer 基础结构；
-- 变量唛头；
-- 条件 Package Notice；
-- Barcode / QR；
-- Excel / Batch 大量基础能力；
-- 3D 折叠与 Artwork Texture 基础；
-- 原生 PDF / SVG 路径；
-- Production PDF Digital Decode；
-- Preview/PDF `<=0.2 mm` 几何验收；
-- 一批节点、曲线、Guide、Clip、Panel 等编辑能力。
+- ✅ 可搜索/分类的 Template Center；
+- ✅ 5 个 actionable parametric core templates；
+- ✅ 0201 / RSC；
+- ✅ Mailer 150010；
+- ✅ FEFCO 0427 engineering core；
+- ✅ Reverse Tuck End engineering core；
+- ✅ Auto-lock Bottom engineering core；
+- ✅ Internal / External / Manufacturing dimension modes；
+- ✅ Material / Flute engineering presets；
+- ✅ Thickness compensation participates in geometry；
+- ✅ 从模板创建项目进入现有 Editor；
+- ✅ V0.10–V0.31 全套回归保持通过；
+- ✅ V0.32 独立 deterministic geometry 回归。
 
-但按照**最开始的产品定义**重新看，当前最大问题不是“缺企业后台”，而是：
+当前最大问题已经从“只有两个可生成结构”变成：
 
-> **纸盒设计软件本体还没有完整收口。**
+> **专业 2D 编辑器、完整唛头工作区、2D↔3D 双向联动、Dieline CAD、完整 Preflight 和 Export Center 仍没有收口。**
 
-尤其缺：
-
-1. 真正的 Template Center；
-2. 5 个以上生产级参数化盒型；
-3. 内/外/制造尺寸 + Material / Flute / Thickness；
-4. 专业 2D 编辑器完整 UX；
-5. 完整 Shipping Mark 组件库；
-6. 2D ↔ 3D 双向联动与材质系统；
-7. Dieline CAD 完整工作流；
-8. 完整生产 Preflight；
-9. DXF / GLB 等关键导出；
-10. Browser E2E 与真实 CAD / 印厂验收。
-
-因此从现在开始，**V0.32 以后重新围绕核心产品推进**。
+因此下一主线固定为 **V0.33 Professional 2D Editor**。
 
 ---
 
 # 2. Template Center / 参数化盒型
 
-## 当前：🟡
+## 当前：✅ software / EXT factory acceptance
 
-已有基础：
+### 已完成
 
-- US Side-Seal / RSC 类结构；
-- Mailer / 150010 类结构；
-- geometry generator 已存在；
-- panel / cut / crease / curve 等结构数据已存在；
-- 当前结构可以驱动一部分 2D / 3D / PDF。
+- [x] Template Center；
+- [x] 盒型搜索；
+- [x] 分类过滤；
+- [x] FEFCO / Model ID / tag 搜索基础；
+- [x] 实际 geometry 生成的刀版缩略预览；
+- [x] 从模板创建项目；
+- [x] 5 个 actionable core templates；
+- [x] 每个核心模板 deterministic generation regression；
+- [x] 旧 schema-only FEFCO / ECMA namespace 保留但不可误当成可用 geometry；
+- [x] 旧 V0.31 geometry 冻结并通过兼容桥继续复用。
 
-## 未完成
-
-### P0
-
-- [ ] 正式 Template Center 页面；
-- [ ] 分类筛选；
-- [ ] 搜索盒型 / FEFCO / Model ID；
-- [ ] 3D 模板缩略图；
-- [ ] 模板参数说明；
-- [ ] 从模板创建项目；
-- [ ] 至少 5 个生产级参数化盒型；
-- [ ] 每个模板独立 fixture / regression；
-- [ ] 参数变更后 geometry deterministic regression。
-
-### 第一批至少补齐
-
-- [ ] FEFCO 0201；
-- [ ] FEFCO 0427；
-- [ ] Tuck End；
-- [ ] Auto Lock / Snap Lock 之一；
-- [ ] 保留并完善当前 US Side-Seal；
-- [ ] 保留并完善 Mailer 150010。
-
-### 后续
+### 仍未完成
 
 - [ ] 20–30 个高频盒型；
-- [ ] Favorite / Recent；
-- [ ] Custom Template Builder。
+- [ ] 0203 / 0215 / 0216；
+- [ ] FEFCO 0426；
+- [ ] Straight Tuck End；
+- [ ] Snap Lock Bottom；
+- [ ] Crash Lock 其他变体；
+- [ ] Sleeve；
+- [ ] Tray；
+- [ ] Lid & Base；
+- [ ] Drawer；
+- [ ] Display Box；
+- [ ] 收藏 / 最近使用；
+- [ ] 管理员自定义模板制作器。
+
+### EXT
+
+0427 / RTE / Auto-lock 仍需：
+
+- [ ] trusted CAD overlay；
+- [ ] crease-center dimension measurement；
+- [ ] physical fold sample；
+- [ ] lock/tuck clearance verification；
+- [ ] board/caliper factory compensation；
+- [ ] converter / factory sign-off。
+
+在完成这些之前，不标记为 tooling certified。
 
 ---
 
-# 3. 尺寸模式 / Material / Flute / Thickness
+# 3. 尺寸 / Material / Flute / Thickness
 
-## 当前：⬜ / 🟡
+## 当前：🟡
 
-当前已有 L/W/H 类结构参数，但最初需求定义的完整包装尺寸系统还没有形成正式产品模块。
+### 已完成
 
-## 未完成
+- [x] `1 unit = 1 mm` 核心；
+- [x] Internal dimension mode；
+- [x] External dimension mode；
+- [x] Manufacturing dimension mode；
+- [x] Thickness enters compensation equations；
+- [x] F / E / B / C / EB / BC / AA engineering presets；
+- [x] Corrugated / Kraft / SBS / Greyboard 等基础材料 preset；
+- [x] explicit thickness override。
 
-- [ ] Inner Dimension；
-- [ ] Outer Dimension；
-- [ ] Manufacturing Dimension；
-- [ ] 三者之间明确换算；
-- [ ] 纸厚 `T` 作为结构正式参数；
-- [ ] Material database；
-- [ ] Corrugated / Kraft / Cardboard / Coated / Greyboard；
-- [ ] E / F / B / C / EB / BC / AA Flute；
-- [ ] Ply；
-- [ ] thicknessMm；
-- [ ] inside / outside allowance；
-- [ ] 厚度修改后结构回归；
-- [ ] 厚度同步影响 3D edge thickness；
-- [ ] Factory compensation profile（后续）。
+### 仍缺
 
-**这是 V0.32 的核心 P0。**
+- [ ] 完整 Material Database UI；
+- [ ] 每种材料可编辑技术属性；
+- [ ] Factory Profile；
+- [ ] Supplier-specific caliper；
+- [ ] crease / score allowance profile；
+- [ ] bend allowance；
+- [ ] moisture / grain / machine-direction rules；
+- [ ] 材料库版本管理；
+- [ ] 材料与 3D appearance 的完整联动。
 
 ---
 
 # 4. Professional 2D Editor
 
-## 当前：🟡
-
-已有相当多编辑基础，但仍没有达到 Figma / Illustrator / 包装 CAD 式完整体验。
-
-### 已有或基本可用
-
-- ✅ mm 坐标模型；
-- ✅ Text / Shape / Line / Icon / Barcode / QR 等对象基础；
-- ✅ Multi-select / Align / Distribute 基础；
-- ✅ Guides / Ruler / Snap 基础；
-- ✅ Panel-aware geometry；
-- ✅ 一部分 Object Guide / baseline / spacing / rotation 辅助；
-- ✅ 一部分 curve / clip / node editing；
-- ✅ Z-order 相关基础。
-
-### 未完成
-
-- [ ] 统一成熟 Layer Panel；
-- [ ] 图层重命名 / 排序 / Group hierarchy；
-- [ ] 任意对象 Group / Ungroup；
-- [ ] 完整 Copy / Paste；
-- [ ] 跨 Panel clipboard policy；
-- [ ] 完整 command-history Undo / Redo；
-- [ ] overlay / profile / clip / mapping 全部纳入 history；
-- [ ] 更完整 Property Inspector；
-- [ ] Selection UX；
-- [ ] Keyboard shortcut 统一；
-- [ ] Professional transform handles；
-- [ ] object snapping UI feedback；
-- [ ] 对齐/分布的专业交互；
-- [ ] panel focus / edit-only 模式；
-- [ ] 大文档性能测试。
-
-**V0.33 目标：把“功能存在”升级为“专业编辑器可持续使用”。**
-
----
-
-# 5. Shipping Marks / 唛头编辑器
-
-## 当前：🟡（核心数据能力较强，产品化仍未完整）
-
-### 已有
-
-- ✅ SKU / NW / GW / Size / CRN / Contract 等变量基础；
-- ✅ 多位置变量同步；
-- ✅ Package Notice 条件逻辑；
-- ✅ Barcode + QR Group；
-- ✅ 250×80 / 200×64 相关能力；
-- ✅ US Side-Seal 真实业务模板基础；
-- ✅ Master / Customer / Rule 等部分基础能力；
-- ✅ Excel Batch 大量数据链路。
-
-### 未完成
-
-- [ ] 独立 Marks Workspace 完整 UX；
-- [ ] Shipping Mark 组件面板；
-- [ ] SKU Block；
-- [ ] Weight Block；
-- [ ] Measurement Block；
-- [ ] Origin Block；
-- [ ] CRN Block；
-- [ ] Contract Block；
-- [ ] Package Notice Block；
-- [ ] Handling / Compliance 分类；
-- [ ] 组件拖入画布；
-- [ ] 可视化变量绑定；
-- [ ] 可视化 Rule Authoring；
-- [ ] 模板级 Required Field 配置；
-- [ ] Marks-specific Preflight navigation；
-- [ ] 更完整 Customer Mark Templates。
-
-**V0.34 目标：把唛头从“底层数据模型”做成真正高效的业务工作区。**
-
----
-
-# 6. 国际运输图标库
-
-## 当前：🟡
-
-已有少量图标基础，例如 This Side Up / Fragile / Keep Dry。
-
-## 未完成
-
-至少补齐：
-
-- [ ] Handle With Care；
-- [ ] Do Not Stack；
-- [ ] Stacking Limit；
-- [ ] Center of Gravity；
-- [ ] Clamp Here；
-- [ ] No Clamp；
-- [ ] Recycle；
-- [ ] Umbrella；
-- [ ] Glass；
-- [ ] 图标搜索 / 分类；
-- [ ] SVG 资产规范；
-- [ ] Rule Binding；
-- [ ] 模板锁定；
-- [ ] Export vector regression。
-
----
-
-# 7. Barcode / QR
-
-## 当前：✅ 核心数字生产验收 / 🟡 产品能力
-
-### 已完成
-
-- ✅ Code 39；
-- ✅ EAN-13；
-- ✅ UPC-A；
-- ✅ ITF-14；
-- ✅ GS1-128；
-- ✅ QR；
-- ✅ final Production PDF artifact digital decode；
-- ✅ source value round-trip；
-- ✅ final-PDF corruption negative case；
-- ✅ Barcode + QR Group；
-- ✅ Preview/PDF geometry gate。
-
-### 未完成
-
-- [ ] DataMatrix；
-- [ ] 更完整 quiet zone / module-size UX；
-- [ ] 旋转支持而不是单纯 fail-closed；
-- [ ] 真实打印扫描器验证 EXT；
-- [ ] ISO barcode print grade EXT；
-- [ ] 外部 RIP raster decode EXT。
-
-这里不再作为主线最大阻塞，后续纳入完整 Preflight。
-
----
-
-# 8. 3D 系统
-
-## 当前：🟡
-
-### 已有
-
-- ✅ Panel Fold 基础；
-- ✅ Artwork Texture Mapping 基础；
-- ✅ Orientation Review 基础；
-- ✅ Fold progress 基础；
-- ✅ 与结构 geometry 共用数据基础。
-
-### 未完成
-
-- [ ] 正式 2D / 3D / Split View；
-- [ ] 2D ↔ 3D 双向点击选中；
-- [ ] focus panel；
-- [ ] Fold Animation 完整 UX；
-- [ ] Front / Back / Left / Right / Top / Bottom 快捷视图；
-- [ ] Material system；
-- [ ] Kraft / White Corrugated / Cardboard / Coated / Greyboard；
-- [ ] 纸厚 → 3D edge thickness；
-- [ ] Marks Texture 与 Artwork 一致；
-- [ ] 3D snapshot export；
-- [ ] GLB export；
-- [ ] 复杂盒型 Fold Graph 回归。
-
-### 外部/后期
-
-- [ ] Physical board thickness compensation EXT；
-- [ ] bend radius EXT；
-- [ ] print stretch compensation EXT；
-- [ ] color-managed 3D soft proof EXT。
-
-**V0.35 主线。**
-
----
-
-# 9. Dieline CAD
-
-## 当前：🟡
+## 当前：🟡 —— **V0.33 主线**
 
 ### 已有基础
 
-- ✅ line / curve 数据；
-- ✅ Bezier / cubic 相关基础；
-- ✅ node / clip 编辑基础；
-- ✅ CUT / CREASE / PERF / GLUE 语义；
-- ✅ panel edit 基础。
+- [x] SVG/mm canvas；
+- [x] Select；
+- [x] Text；
+- [x] Shape；
+- [x] Line；
+- [x] Barcode / QR group；
+- [x] Variable text；
+- [x] Shipping Mark 基础；
+- [x] Move / Resize / Rotate 基础；
+- [x] Multi-select 基础；
+- [x] Align / Distribute 基础；
+- [x] Guides / grid / ruler 基础；
+- [x] Smart Guide 基础；
+- [x] persistent guides；
+- [x] object-relative group rotation 基础；
+- [x] clip / curve / polygon 等底层能力；
+- [x] Undo / Redo 核心 history。
 
-### 未完成
+### P0 未完成
 
-- [ ] 完整 node tool UX；
-- [ ] Add Node；
-- [ ] Delete Node；
-- [ ] Handle 编辑；
-- [ ] straight ↔ arc ↔ Bezier；
-- [ ] Cut ↔ Crease ↔ Perf UI；
-- [ ] Path Close / Join / Split；
-- [ ] self-intersection 检查；
-- [ ] Panel boundary rebuild；
-- [ ] 修改刀版后 Fold Graph 自动重建；
-- [ ] 修改刀版后 3D 自动刷新；
-- [ ] 结构破坏 warning；
-- [ ] CAD-style numeric editing。
-
-**V0.36 主线。**
-
----
-
-# 10. Preflight
-
-## 当前：🟡
-
-### 已完成或较强
-
-- ✅ Barcode / QR digital decode；
-- ✅ Preview/PDF geometry `<=0.2 mm`；
-- ✅ required checks fail-closed；
-- ✅ 一部分规则检查；
-- ✅ 一部分 batch / variable validation。
-
-### Structure 未完成
-
-- [ ] dieline closed；
-- [ ] broken paths；
-- [ ] self-intersection；
-- [ ] fold topology；
-- [ ] panel graph validity；
-- [ ] glue flap validity。
-
-### Artwork 未完成
-
-- [ ] image DPI；
-- [ ] bleed；
-- [ ] safe area；
-- [ ] clipping；
-- [ ] cut/fold crossing；
-- [ ] transparency policy。
-
-### Text 未完成
-
-- [ ] missing font；
-- [ ] embeddability；
-- [ ] real font metrics；
-- [ ] minimum text size；
-- [ ] overflow；
-- [ ] TTF glyph-path independent verification。
-
-### Marks 未完成
-
-- [ ] required marks profile；
-- [ ] destination-specific marks；
-- [ ] exact issue → object navigation；
-- [ ] exact issue → Excel source cell；
-- [ ] rule-level actionable fix。
-
-**V0.37 主线。**
+- [ ] Image tool 真正可用；
+- [ ] Icon tool 完整工作流；
+- [ ] Table tool；
+- [ ] 专业 Layer Panel UX；
+- [ ] arbitrary Group / Ungroup data model；
+- [ ] selection clipboard；
+- [ ] Copy / Paste；
+- [ ] cross-panel paste policy；
+- [ ] Bring Forward / Send Backward / absolute z-order UX；
+- [ ] 完整 Lock / Hide 对象级 UX；
+- [ ] 统一 Numeric Property Inspector；
+- [ ] X/Y/W/H/R 精密输入；
+- [ ] aspect-ratio lock；
+- [ ] anchor / transform-origin UX；
+- [ ] panel-focus mode；
+- [ ] “Edit this panel only”；
+- [ ] Fit Panel；
+- [ ] selection marquee 完整行为；
+- [ ] keyboard nudge / modifier policy；
+- [ ] 所有 overlay/profile/clip/mapping 进入统一 Undo/Redo；
+- [ ] browser interaction regression。
 
 ---
 
-# 11. Export Center
+# 5. Shipping Marks / Variables / Rules
 
-## 当前：🟡
+## 当前：🟡 —— V0.34 主线
 
-### 已有
+### 已完成
 
-- ✅ Production PDF 主路径；
-- ✅ SVG 相关能力；
-- ✅ PDF physical geometry regression；
-- ✅ Spot / OutputIntent / DeviceLink subset；
-- ✅ Artwork / native PDF 大量底层能力。
+- [x] SKU；
+- [x] NW / GW；
+- [x] Package Meas；
+- [x] CRN；
+- [x] Contract No.；
+- [x] Origin / Destination；
+- [x] `{{variable}}` binding；
+- [x] CRN 等重复字段同步；
+- [x] Package Count 条件提示；
+- [x] Barcode + QR group；
+- [x] Code39 / EAN-13 / UPC-A / ITF-14 / GS1-128；
+- [x] QR；
+- [x] 基础 handling icons；
+- [x] Mark profile / rule / asset 一批基础能力；
+- [x] Excel batch 基础。
 
-### 未完成
+### 仍缺
 
-#### Production
-
-- [ ] 正式统一 Export Center UX；
-- [ ] Preview PDF profile；
-- [ ] Artwork Only PDF；
-- [ ] Dieline Only PDF；
-- [ ] export presets；
-- [ ] downloadable export report。
-
-#### DXF
-
-- [ ] DXF exporter；
-- [ ] CUT Layer；
-- [ ] CREASE Layer；
-- [ ] PERF Layer；
-- [ ] arc / Bezier 转换策略；
-- [ ] 真实 AutoCAD / CAD 软件打开验收 EXT。
-
-#### Raster
-
-- [ ] PNG export；
-- [ ] JPG export；
-- [ ] high-resolution preview export。
-
-#### 3D
-
-- [ ] GLB；
-- [ ] 3D PNG snapshot。
-
-#### 外部生产
-
-- [ ] 正式 PDF/X 第三方认证 EXT；
-- [ ] printer/RIP profile 验收 EXT；
-- [ ] K-only / CMYK 外部验证 EXT。
-
-**V0.38 主线。**
+- [ ] 独立 Marks Workspace 完整 UX；
+- [ ] SKU Block component；
+- [ ] Weight Block component；
+- [ ] Measurement component；
+- [ ] Origin component；
+- [ ] Compliance component；
+- [ ] Handling component library 完整化；
+- [ ] Table/compound mark component；
+- [ ] Barcode+QR 标准/紧凑尺寸一键切换 UX；
+- [ ] component-level lock policy；
+- [ ] drag/drop mark library；
+- [ ] visual rule authoring；
+- [ ] 通用 `SET_VALUE / SET_TEXT / SET_STYLE / SET_LAYOUT / REQUIRE / DISABLE`；
+- [ ] computed-variable dependency graph；
+- [ ] rule conflict diagnostics；
+- [ ] customer-configurable mark library。
 
 ---
 
-# 12. Excel / Batch
+# 6. 2D ↔ 3D / Fold / Materials
 
-## 当前：🟡（底层完成度较高）
+## 当前：🟡 —— V0.35 主线
 
-### 已有
+### 已完成
 
-- ✅ Upload；
-- ✅ Multi-sheet；
-- ✅ Header Detection；
-- ✅ 双语 Alias 基础；
-- ✅ Mapping；
-- ✅ merged-cell expansion；
-- ✅ controlled Fill Down；
-- ✅ Footer Stop；
-- ✅ formula no-cache diagnostics；
-- ✅ leading-zero subset；
-- ✅ Import Review 基础；
-- ✅ Dry Run；
-- ✅ Worker Batch；
-- ✅ Partial Failure；
-- ✅ Retry；
-- ✅ ZIP；
-- ✅ failed_rows.csv / xlsx；
-- ✅ source-cell lineage。
+- [x] Panel / fold graph 基础；
+- [x] 3D folding 基础；
+- [x] Fold progress；
+- [x] Artwork texture proof 基础；
+- [x] cross-panel appearance 一批底层处理；
+- [x] orientation review 基础。
 
-### 未完成
+### 仍缺
 
-- [ ] Import Review Inline Correction；
-- [ ] 修改后重新校验；
-- [ ] Change Markers；
-- [ ] Re-upload Compare；
-- [ ] Duplicate bilingual header strategy；
-- [ ] complex number format recovery；
-- [ ] controlled Formula Engine 或严格 ERROR policy；
-- [ ] Issue 原生 canonical field/path；
-- [ ] Large workbook streaming benchmark；
-- [ ] Customer Mapping Profile 产品化；
-- [ ] Batch multi-page PDF UX。
+- [ ] 2D 点击对象 → 3D 对应面/对象高亮；
+- [ ] 3D 点击面 → 2D 自动定位；
+- [ ] 2D + 3D Split View 完整 UX；
+- [ ] Front / Back / Left / Right / Top / Bottom 快捷视图；
+- [ ] Fold 0/25/50/75/100 preset；
+- [ ] Fold animation controller；
+- [ ] E/B/C/BC 等真实 edge-thickness appearance；
+- [ ] White Corrugated / Kraft / Paperboard / Greyboard appearance；
+- [ ] 新 V0.32 三结构的 3D fold 专项验收；
+- [ ] Browser/WebGL E2E。
 
-**V0.39 主线的一部分。**
+### EXT
 
----
-
-# 13. Master Template / Customer Template
-
-## 当前：🟡
-
-已有部分 profile / master / lock / revision 基础，但还不是最初需求里完整的模板产品。
-
-## 未完成
-
-- [ ] Master Template 管理页面；
-- [ ] Create from Master；
-- [ ] Newer Template Available；
-- [ ] Customer Template Center；
-- [ ] 模板变量 schema；
-- [ ] 模板 Rule schema；
-- [ ] locked element UX；
-- [ ] locked variable UX；
-- [ ] template fixtures；
-- [ ] sample renders；
-- [ ] template-level preflight；
-- [ ] Draft / Published（后期 backend 前先本地实现）。
-
----
-
-# 14. 项目保存 / Undo / Auto Save / Version History
-
-## 当前：🟡
-
-已有本地状态、部分 history、revision / production job 等基础。
-
-## 未完成
-
-- [ ] 全模块统一 Undo / Redo；
-- [ ] 至少 100 steps；
-- [ ] clear command boundaries；
-- [ ] autosave 状态 UI；
-- [ ] crash recovery；
-- [ ] project migration regression；
-- [ ] Version History 页面；
-- [ ] Preview version；
-- [ ] Restore；
-- [ ] Duplicate；
-- [ ] local snapshot diff；
-- [ ] `.boxproj` import/export（如果继续采用该方向）。
-
-**V0.40 主线。**
-
----
-
-# 15. 首页 / Dashboard / Templates UX
-
-## 当前：⬜ / 🟡
-
-当前重点一直集中在 Editor，最初需求定义的完整产品入口仍未真正完成。
-
-## 未完成
-
-- [ ] Dashboard；
-- [ ] Create Box；
-- [ ] Import Dieline；
-- [ ] Marks Design；
-- [ ] Recent Projects；
-- [ ] Popular Structures；
-- [ ] Template Center；
-- [ ] Projects 页面；
-- [ ] Assets 页面；
-- [ ] consistent navigation；
-- [ ] editor launch workflow。
-
-注意：这些页面必须服务核心工作流，不优先做“漂亮官网”。
-
----
-
-# 16. Browser E2E / 真实操作验收
-
-## 当前：⬜
-
-这是当前非常重要的质量缺口。
-
-必须覆盖真实浏览器：
-
-- [ ] 创建项目；
-- [ ] 选择模板；
-- [ ] 改 L/W/H；
-- [ ] 改 thickness；
-- [ ] 编辑文本；
-- [ ] 改 SKU / CRN；
-- [ ] Package 1→3；
-- [ ] Barcode / QR 更新；
-- [ ] object drag / resize / rotate；
-- [ ] undo / redo；
-- [ ] 2D ↔ 3D；
-- [ ] fold；
-- [ ] Excel import；
-- [ ] batch generate；
-- [ ] preflight；
-- [ ] export PDF / SVG / DXF；
-- [ ] reload / autosave / restore。
-
-单元测试和 serializer regression 不能代替 Browser E2E。
-
----
-
-# 17. 真实外部验收轨
-
-以下不能只靠仓库内部测试宣称完成：
-
-### CAD
-
-- [ ] DXF 用 AutoCAD / 其他 CAD 打开；
-- [ ] Layer / unit / arc 验证。
-
-### Print / PDF
-
-- [ ] Acrobat / callas Preflight；
-- [ ] PDF/X 第三方验证；
-- [ ] CMYK / K-only；
-- [ ] 外部 RIP。
-
-### Barcode
-
-- [ ] 实体打印；
-- [ ] 真实扫描器；
-- [ ] ISO Grade。
-
-### Real Template
-
-- [ ] 美线真实原稿 overlay；
-- [ ] 关键尺寸实测；
-- [ ] 字体 / 条码 / CRN / Package Notice 对照；
-- [ ] 出具 real-sample acceptance report。
-
-### Factory
-
-- [ ] 真实纸厚；
+- [ ] board thickness physical fold compensation；
 - [ ] bend radius；
-- [ ] manufacturing allowance；
 - [ ] print stretch；
-- [ ] 打样反馈。
+- [ ] color-managed 3D soft proof。
 
 ---
 
-# 18. 重新定义的版本优先级
+# 7. Dieline CAD
+
+## 当前：🟡 —— V0.36 主线
+
+### 已有基础
+
+- [x] line selection；
+- [x] node/curve 基础；
+- [x] Bezier / cubic PDF；
+- [x] polygon panel；
+- [x] imported vector repair；
+- [x] CUT / CREASE / PERF / GLUE semantics；
+- [x] SVG / DXF / PDF-compatible AI import 基础；
+- [x] topology/intersection diagnostics 基础。
+
+### 仍缺
+
+- [ ] 专业 Node tool UX；
+- [ ] add/delete node 完整操作；
+- [ ] line ↔ arc ↔ Bezier 转换；
+- [ ] Cut ↔ Crease 一键转换 UX；
+- [ ] tangent handles；
+- [ ] curve continuity helpers；
+- [ ] slot / notch / tab 专用结构工具；
+- [ ] dimension annotations；
+- [ ] structural constraints；
+- [ ] geometry-change → fold graph rebuild 完整化；
+- [ ] import 后 panel auto-detection 更稳健；
+- [ ] custom box template authoring。
+
+---
+
+# 8. Preflight
+
+## 当前：🟡 —— V0.37 主线
+
+### 已完成的重要质量能力
+
+- [x] Barcode/QR final Production PDF digital decode；
+- [x] final-PDF corruption negative regression；
+- [x] required check 不可 warning-only 绕过；
+- [x] Preview/PDF core geometry `<= 0.2 mm`；
+- [x] technical outlined-text keypoint readback；
+- [x] unsupported rotation / TTF readback path fail-closed；
+- [x] 多种结构 / marks / safe-area 基础检查。
+
+### 仍缺
+
+- [ ] Dieline closure 全面检查；
+- [ ] broken path 全面检查；
+- [ ] fold topology production rules；
+- [ ] image DPI 全面检查；
+- [ ] bleed completeness；
+- [ ] safe-area policy 完整化；
+- [ ] min text size policy；
+- [ ] font embeddability policy；
+- [ ] TTF glyph-path 独立 measurement；
+- [ ] OTF/CFF/CFF2；
+- [ ] transparency 全面检查；
+- [ ] Barcode quiet-zone standards profile；
+- [ ] barcode size/orientation profile；
+- [ ] rule issue → exact object / Excel cell 统一定位；
+- [ ] Preflight UI 聚合/过滤/fix action；
+- [ ] 外部 Preflight adapter。
+
+### EXT
+
+- [ ] physical scanner ISO grade；
+- [ ] printer/RIP raster validation；
+- [ ] Acrobat/callas/第三方 PDF/X validation。
+
+---
+
+# 9. Export Center
+
+## 当前：🟡 —— V0.38 主线
+
+### 已有
+
+- [x] Production PDF；
+- [x] Preview/related PDF 基础；
+- [x] SVG；
+- [x] DXF 基础；
+- [x] PNG 基础；
+- [x] native vector Barcode/QR；
+- [x] CUT/CREASE spot semantics；
+- [x] OutputIntent / DeviceLink subset；
+- [x] PDF/X-4 Candidate；
+- [x] batch/multi-page PDF 基础。
+
+### 仍缺
+
+- [ ] 统一 Export Center UX；
+- [ ] Production / Artwork / Dieline / 3D 分类；
+- [ ] Artwork Only；
+- [ ] Dieline Only；
+- [ ] JPG；
+- [ ] GLB；
+- [ ] SVG 重新导入一致性验收；
+- [ ] DXF 在真实 CAD 的 layer/scale acceptance；
+- [ ] 3D high-resolution render；
+- [ ] export profile presets；
+- [ ] consistent filename policy；
+- [ ] export fixture for every core template。
+
+### EXT
+
+- [ ] 正式 PDF/X third-party pass；
+- [ ] real RIP separation / overprint acceptance；
+- [ ] real CAD round-trip acceptance。
+
+---
+
+# 10. Excel Batch / Master / Customer Template
+
+## 当前：🟡 —— V0.39 主线
+
+### 已有
+
+- [x] XLSX / CSV 基础；
+- [x] multi-sheet；
+- [x] mapping；
+- [x] aliases；
+- [x] header detection；
+- [x] fill-down subset；
+- [x] source lineage；
+- [x] worker batch；
+- [x] partial failure/retry；
+- [x] ZIP；
+- [x] failed rows review/export；
+- [x] local mapping profiles；
+- [x] Master Template 一批基础 domain。
+
+### 仍缺
+
+- [ ] duplicate bilingual header policy；
+- [ ] formula policy / controlled engine；
+- [ ] scientific notation / complex number format recovery；
+- [ ] inline correction in Import Review；
+- [ ] re-upload compare；
+- [ ] large workbook benchmark；
+- [ ] customer template management UI；
+- [ ] Master Template update/impact UX；
+- [ ] batch output grouped by SKU/package set；
+- [ ] per-template batch fixtures。
+
+---
+
+# 11. Project Reliability / Browser E2E
+
+## 当前：🟡 / ⬜ —— V0.40 主线
+
+### 已有
+
+- [x] localStorage autosave；
+- [x] local history；
+- [x] production job/revision 一批基础；
+- [x] storage migrations；
+- [x] CI domain/serializer regression。
+
+### 仍缺
+
+- [ ] 完整 project file `.boxproj`；
+- [ ] assets 打包/恢复；
+- [ ] Version History UX；
+- [ ] Preview / Restore / Duplicate；
+- [ ] autosave conflict strategy；
+- [ ] crash recovery；
+- [ ] full migration fixtures；
+- [ ] real browser import flow E2E；
+- [ ] real browser object editing E2E；
+- [ ] template create → edit → 3D → preflight → export E2E；
+- [ ] download verification；
+- [ ] mobile/tablet behavior acceptance。
+
+---
+
+# 12. 后期企业能力（不抢主线）
+
+以下仍有价值，但在 V0.33–V0.40 核心完成前不作为主线 P0：
+
+- Auth / Session；
+- server RBAC；
+- hosted database；
+- immutable server revision；
+- approval workflow；
+- server audit；
+- dashboard/reporting；
+- external proof links；
+- notifications；
+- Production Bundle / cryptographic manifest；
+- S3 / R2；
+- queues；
+- REST API；
+- Webhook；
+- ERP / PIM / PLM；
+- SSO / SCIM；
+- supplier / print-vendor portals。
+
+---
+
+# 13. 当前开发顺序
 
 ```text
-V0.32  Parametric Template Core
-V0.33  Professional 2D Editor
+V0.32  Parametric Template Core                    ✅ software
+V0.33  Professional 2D Editor                      ← NEXT
 V0.34  Marks Workspace + Component Library + Rules
 V0.35  2D ↔ 3D + Fold + Materials
 V0.36  Dieline CAD
 V0.37  Full Preflight
-V0.38  Export Center + DXF + PNG/JPG + GLB
-V0.39  Batch + Master Template + Customer Template
-V0.40  Project Reliability + Version History + Browser E2E
+V0.38  Export Center + DXF/PNG/JPG/GLB
+V0.39  Batch + Master/Customer Templates
+V0.40  Project Reliability + Browser E2E
 ```
 
 并行外部验收：
 
 ```text
+V0.32 new-template CAD/sample validation
 Current US Template real-sample acceptance
-DXF CAD acceptance
 External PDF/X / RIP validation
-Physical Barcode / QR validation
-Factory board / fold compensation validation
+Physical barcode/QR scanner validation
+Factory board / fold / print compensation validation
 ```
 
 ---
 
-# 19. 暂时延期，不进入当前主线
+# 14. V0.33 的 P0 完成判定
 
-以下不删除，但全部降级到 V0.40 后：
+V0.33 只有在下面这些真实操作闭环后才算完成：
 
-- Production Bundle；
-- SHA-256 immutable archive；
-- Hosted Backend；
-- Auth；
-- Server RBAC；
-- Reviewer Inbox；
-- Blocking Comments；
-- Two-step Approval；
-- Separation of Duties；
-- Scheduled Publish；
-- Notifications；
-- External Proof Link；
-- Master Data enterprise domain；
-- Impact Analysis；
-- Dashboard KPI；
-- ERP Adapter；
-- PIM / PLM；
-- REST API；
-- Webhook；
-- SSO；
-- SCIM；
-- Supplier Portal；
-- Print Vendor Portal；
-- S3 / R2；
-- Server Queue；
-- enterprise retention / backup。
+1. Image / Icon / Table 不再是 placeholder；
+2. 多选、Align、Distribute 稳定；
+3. arbitrary Group/Ungroup 可保存、撤销、恢复；
+4. Copy/Paste 可用并有跨 panel 策略；
+5. Layers 可 hide/lock/reorder；
+6. Numeric inspector 可精确编辑 X/Y/W/H/R；
+7. ruler/guide/snap 行为一致；
+8. panel-focus / Fit Panel 可用；
+9. Undo/Redo 覆盖 V0.33 新操作；
+10. 至少一条真实浏览器编辑流程回归。
 
-它们以后会做，但**不能再早于纸盒核心能力**。
-
----
-
-# 20. 当前最高优先级 P0
-
-## V0.32 — Parametric Template Core
-
-下一阶段必须关闭：
-
-```text
-1. Template Center 基础
-2. 5 个生产级参数化盒型
-3. L / W / H / T
-4. Inner / Outer / Manufacturing dimensions
-5. Material / Flute / Thickness
-6. Panel / Fold Graph contract
-7. Geometry Generator contract
-8. 每模板 fixture + regression
-9. 参数修改后的 2D / 3D / export consistency
-```
-
-## V0.32 完成判定
-
-只有同时通过以下测试，才允许进入 V0.33：
-
-- [ ] 5 个模板可从 Template Center 创建；
-- [ ] 每个模板修改 L/W/H 后正确重算；
-- [ ] 修改 thickness 后正确补偿；
-- [ ] 切换 dimension mode 后结果可解释；
-- [ ] panel graph 与 fold graph 有 regression；
-- [ ] Preview 与 Production geometry 一致；
-- [ ] 至少一个真实 Mailer 150010 fixture；
-- [ ] 至少一个真实 RSC/US Side-Seal fixture；
-- [ ] CI 全绿；
-- [ ] Browser E2E 至少覆盖模板创建与参数修改主路径。
-
----
-
-# 21. 完成判定原则
-
-后续任何版本都遵守：
-
-1. **有按钮 ≠ 完成**；
-2. **有代码 ≠ 完成**；
-3. **单元测试通过 ≠ 用户工作流完成**；
-4. **静态 SVG ≠ 参数化盒型**；
-5. **3D 能看 ≠ 2D/3D 联动完成**；
-6. **PDF 能下载 ≠ 生产文件完成**；
-7. **DXF 能下载 ≠ CAD 验收完成**；
-8. **数字 Barcode Decode ≠ 实体 ISO Grade**；
-9. **本地角色 ≠ 企业 RBAC**；
-10. **历史版本做过 ≠ 当前主线仍然有效，必须持续回归**。
-
-本文件以后作为“还差什么”的唯一当前清单；历史 `UNFINISHED_BASELINE_AUDIT.md` 仅保留作历史记录。
+完成这些以后，再进入 V0.34 Marks Workspace，而不是提前跳去 Backend/ERP。
