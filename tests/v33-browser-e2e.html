@@ -8,7 +8,9 @@
     </div>
   </div>
   <pre id="v33E2ELog"></pre>
-  <script type="module" src="../src/v33Ui.js"></script>
-  <script src="./v33-browser-e2e.js"></script>
+  <script type="module">
+    await import('../src/v33Ui.js');
+    await import('./v33-browser-e2e.js');
+  </script>
 </body>
 </html>
