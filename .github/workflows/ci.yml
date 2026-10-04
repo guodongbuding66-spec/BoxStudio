@@ -84,3 +84,6 @@ jobs:
 
       - name: V0.27 native cubic production, worker batch and live-assist tests
         run: node tests/v27.mjs
+
+      - name: V0.28 object-relative group rotation and baseline-gap audit tests
+        run: node tests/v28.mjs
