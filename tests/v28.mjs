@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { defaultState, STORAGE_KEY } from '../src/model.js';
+import { defaultState, STORAGE_KEY, LEGACY_STORAGE_KEYS } from '../src/model.js';
 import { liveGroupRotationAssistV28, groupRotationDiagnosticsV28 } from '../src/liveAssistV28.js';
 import { rotateCrossSelection } from '../src/crossPanelTransformV22.js';
 
@@ -40,7 +40,8 @@ assert.deepEqual(raw.guides,[]);
 
 const diag=groupRotationDiagnosticsV28(state,['a','b']);
 assert.deepEqual(diag,{selectionCount:2,targetCount:1,objectRelativeAvailable:true});
-assert.equal(STORAGE_KEY,'boxstudio-mvp-v28');
+assert.ok(STORAGE_KEY.startsWith('boxstudio-mvp-v'));
+assert.ok(STORAGE_KEY==='boxstudio-mvp-v28'||LEGACY_STORAGE_KEYS.includes('boxstudio-mvp-v28'),'V0.28 state must remain a supported migration source after later releases');
 assert.equal(defaultState.exportOptions.productionSerializer,'v0.27-native-cubic-production','V0.28 editor assist must not silently change the approved production serializer');
 
 const index=await readFile(new URL('../index.html',import.meta.url),'utf8');
