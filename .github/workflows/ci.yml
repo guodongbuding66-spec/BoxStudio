@@ -116,5 +116,13 @@ jobs:
           SERVER_PID=$!
           trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
           sleep 1
-          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=6000 --dump-dom http://127.0.0.1:8765/tests/v33-browser-e2e.html >/tmp/boxstudio-v33-dom.html
-          grep -q 'data-v33-e2e="pass"' /tmp/boxstudio-v33-dom.html || { cat /tmp/boxstudio-v33-dom.html; exit 1; }
+          set +e
+          timeout 20s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=6000 --dump-dom http://127.0.0.1:8765/tests/v33-browser-e2e.html >/tmp/boxstudio-v33-dom.html 2>/tmp/boxstudio-v33-chrome.log
+          CHROME_STATUS=$?
+          set -e
+          if ! grep -q 'data-v33-e2e="pass"' /tmp/boxstudio-v33-dom.html; then
+            echo "Chrome status: $CHROME_STATUS"
+            cat /tmp/boxstudio-v33-chrome.log || true
+            cat /tmp/boxstudio-v33-dom.html || true
+            exit 1
+          fi
