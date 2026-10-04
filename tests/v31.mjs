@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { defaultState, STORAGE_KEY, LEGACY_STORAGE_KEYS } from '../src/model.js';
 import { buildProductionPdfV27 } from '../src/productionPdfV27.js';
-import { digitalDecodeFromProductionPdfV31 } from '../src/digitalDecodeV31.js';
+import { digitalDecodeFromProductionPdfV31 } from '../src/digitalDecodeGateV31.js';
 import { geometryAcceptanceFromProductionPdfV31 } from '../src/geometryAcceptanceV31.js';
 import { runPreflight, runProductionAcceptanceV31 } from '../src/preflightV31.js';
 import { createProductionJob } from '../src/productionJobs.js';
