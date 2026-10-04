@@ -1,7 +1,7 @@
 import { defaultStructure, defaultsForTemplate } from './geometry.js';
 
-export const STORAGE_KEY = 'boxstudio-mvp-v29';
-export const LEGACY_STORAGE_KEYS = ['boxstudio-mvp-v28','boxstudio-mvp-v27','boxstudio-mvp-v26','boxstudio-mvp-v25','boxstudio-mvp-v24','boxstudio-mvp-v23','boxstudio-mvp-v22','boxstudio-mvp-v21','boxstudio-mvp-v20','boxstudio-mvp-v19','boxstudio-mvp-v18','boxstudio-mvp-v17','boxstudio-mvp-v16','boxstudio-mvp-v15','boxstudio-mvp-v14','boxstudio-mvp-v13','boxstudio-mvp-v12','boxstudio-mvp-v11','boxstudio-mvp-v10','boxstudio-mvp-v9','boxstudio-mvp-v8','boxstudio-mvp-v7','boxstudio-mvp-v6','boxstudio-mvp-v5','boxstudio-mvp-v4','boxstudio-mvp-v3','boxstudio-mvp-v2','boxstudio-mvp'];
+export const STORAGE_KEY = 'boxstudio-mvp-v30';
+export const LEGACY_STORAGE_KEYS = ['boxstudio-mvp-v29','boxstudio-mvp-v28','boxstudio-mvp-v27','boxstudio-mvp-v26','boxstudio-mvp-v25','boxstudio-mvp-v24','boxstudio-mvp-v23','boxstudio-mvp-v22','boxstudio-mvp-v21','boxstudio-mvp-v20','boxstudio-mvp-v19','boxstudio-mvp-v18','boxstudio-mvp-v17','boxstudio-mvp-v16','boxstudio-mvp-v15','boxstudio-mvp-v14','boxstudio-mvp-v13','boxstudio-mvp-v12','boxstudio-mvp-v11','boxstudio-mvp-v10','boxstudio-mvp-v9','boxstudio-mvp-v8','boxstudio-mvp-v7','boxstudio-mvp-v6','boxstudio-mvp-v5','boxstudio-mvp-v4','boxstudio-mvp-v3','boxstudio-mvp-v2','boxstudio-mvp'];
 
 export const defaultVariables = {
   sku:'KF210215US-02PM-001',nw:'74.1',gw:'80.7',length:'47.24',width:'23.62',height:'7.87',dimensionUnit:'INCH',weightUnit:'LBS',crn:'3203960FM4',contractNo:'HT24010213',originCountry:'China',destinationCountry:'US',packageIndex:'1',packageCount:'3',qrValue:'KF210215US-02PM-001',
@@ -39,12 +39,12 @@ export function stateForTemplate(template,previousVariables=defaultVariables){re
 export const defaultState = {
   projectName:'美线侧封箱 / Demo Project',projectId:'',projectRemoteRevision:0,remoteProjectEndpoint:'',lastRemoteSyncAt:null,
   structure:structuredClone(defaultStructure),variables:structuredClone(defaultVariables),elements:structuredClone(defaultElements),hiddenGroups:{},lockedGroups:{dieline:true},lockedVariables:['originCountry','destinationCountry','dimensionUnit','weightUnit'],
-  customerProfileId:'us-export-master',packagingRuleProfileId:'us-side-seal',markTemplateId:'us-side-seal-master',masterTemplates:[],customCustomerProfiles:{},customPackagingRules:{},customMarkTemplates:{},customMarkAssets:{},
+  customerProfileId:'us-export-master',packagingRuleProfileId:'us-side-seal',markTemplateId:'us-side-seal-master',masterTemplates:[],customCustomerProfiles:{},customPackagingRules:{},customMarkTemplates:{},customMarkAssets:{},batchMappingProfiles:[],
   selectedId:'sku',zoom:100,grid:true,guides:true,page:'editor',editorTab:'Design',savedAt:null,showRulers:true,syncDimensions:true,foldProgress:100,
   markEditorPanelId:'front',productionActor:'local-user',productionRole:'operator',productionJobs:[],activeProductionJobId:null,
   userGuides:[],
   crossPanelEdit:{selection:[],snap:true,gridMm:5,toleranceMm:3,angleStep:15,smartSpacing:true,spacingToleranceMm:3,objectGuides:true,objectGuideToleranceMm:3,clipNodeIndex:0,userGuideToleranceMm:3,textBaselineGuides:true,textBaselineToleranceMm:3,rotationGuides:true,rotationGuideToleranceDeg:3},
-  batch:{fileName:'',rows:[],selectedIndex:0,columns:[],sheets:[],sheetIndex:0,mapping:{},masterTemplateId:'',queue:null},
+  batch:{fileName:'',rows:[],selectedIndex:0,columns:[],sheets:[],sheetIndex:0,mapping:{},mappingProfileId:'',masterTemplateId:'',queue:null},
   dielineEdit:{kind:'CUT',index:0},curveEdit:{kind:'CUT',index:0},panelEdit:{selected:[],splitOrientation:'vertical',splitRatio:0.5,polygonPoints:'20,20 110,20 130,65 80,100 20,80'},
   exportOptions:{outlineText:false,fontMode:'technical',printProfile:'generic',spotDielines:true,overprintDielines:true,spotNames:{CUT:'CutContour',CREASE:'Crease',PERF:'Perforation',GLUE:'Glue'},pdfxMode:'off',outputConditionIdentifier:'Custom CMYK',outputConditionInfo:'User supplied CMYK ICC output profile',productionSerializer:'v0.27-native-cubic-production'},repairTolerance:0.5,
 };
