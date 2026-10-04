@@ -8,12 +8,15 @@ import { STORAGE_KEY, LEGACY_STORAGE_KEYS, stateForTemplate } from '../src/model
 
 const IDS=['side-seal-rsc','mailer-150010','fefco-0427','reverse-tuck-end','auto-lock-bottom'];
 assert.deepEqual(V32_TEMPLATE_CATALOG.map(x=>x.id),IDS);
-assert.deepEqual(STANDARD_TEMPLATE_CATALOG.map(x=>x.id),IDS);
-assert.equal(STANDARD_TEMPLATE_CATALOG.every(x=>x.engine===x.id),true);
+const actionable=STANDARD_TEMPLATE_CATALOG.filter(x=>x.engine);
+assert.deepEqual(actionable.map(x=>x.id),IDS);
+assert.equal(actionable.every(x=>x.engine===x.id),true);
+assert.ok(STANDARD_TEMPLATE_CATALOG.some(x=>x.id==='fefco-04xx-schema'&&x.status==='schema-only'));
+assert.ok(STANDARD_TEMPLATE_CATALOG.some(x=>x.id==='ecma-schema'&&x.status==='schema-only'));
 assert.equal(searchTemplateCatalog({query:'0427'}).length,1);
 assert.equal(searchTemplateCatalog({query:'crash lock'})[0]?.id,'auto-lock-bottom');
 assert.equal(searchTemplateCatalog({category:'folding-carton'}).length,2);
-assert.equal(searchTemplateCatalog({standard:'FEFCO'}).length,2);
+assert.equal(searchTemplateCatalog({standard:'FEFCO'}).filter(x=>x.engine).length,2);
 
 assert.ok(MATERIAL_PRESETS_V32.length>=5);
 assert.ok(Object.keys(FLUTE_PRESETS_V32).includes('BC'));
