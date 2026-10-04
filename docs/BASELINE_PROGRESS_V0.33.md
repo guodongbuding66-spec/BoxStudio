@@ -113,29 +113,41 @@ PNG/JPEG raster placement is **not** marked production-ready in V0.33. The curre
 
 The implementation was not accepted on first pass.
 
-Two failures were found and corrected:
+Three failures were found and corrected:
 
 1. A V0.32 regression assertion accidentally treated schema-only FEFCO/ECMA namespace entries as actionable engines. The test was corrected so the five real engines are checked separately while schema placeholders remain required.
 2. V0.33 Z-order initially rebuilt the requested order and then sorted again by stale `zIndex`, undoing Bring-to-Front/Back. The core was corrected to **reindex the requested final array order without re-sorting it**.
+3. The V0.33 shell initially observed the whole `documentElement` and unconditionally rewrote `document.title`. That title mutation retriggered the `MutationObserver`, creating a microtask starvation loop in a real browser. The observer is now scoped to `#app`, and title/version text are written only when their value actually changes.
 
 These failures are retained as evidence that the CI gates are detecting real mistakes rather than only exercising happy paths.
 
 ## 7. Browser interaction regression
 
-V0.33 adds a Headless Chrome browser fixture that loads the actual application modules and performs real UI interaction:
+V0.33 adds a Headless Chrome browser fixture using the actual V0.33 UI module and project state. It performs real DOM interaction:
 
-1. load `app.js`;
-2. wait for the Professional 2D entry;
+1. load the V0.33 UI module;
+2. require the Professional 2D entry;
 3. open the V0.33 workspace;
 4. select an object;
 5. Duplicate it;
-6. edit X through the numeric inspector;
-7. verify persisted project state;
+6. edit X to `77` through the numeric inspector;
+7. verify the persisted Project element changed to X = `77`;
 8. add a Table;
 9. verify the flattened table primitives were persisted;
-10. require a DOM `PASS` marker.
+10. require the Professional controls and Panel Focus to exist;
+11. signal browser PASS to the CI fixture.
 
-The Chrome process is bounded by a hard timeout so a browser background task cannot leave CI hanging. The pass/fail criterion is the resulting browser DOM state, not the Chrome process exit timing.
+The Chrome process is bounded by a hard timeout so a browser background task cannot leave CI hanging. Browser PASS is a required gate rather than a warning.
+
+### Accepted CI
+
+- Workflow: **CI #432**
+- Run ID: `37191390957`
+- Head: `2e1b11bef3baf77e01ddc0bb87679c60afff9006`
+- Result: **SUCCESS**
+- V0.10–V0.32 regression: PASS
+- V0.33 pure-state regression: PASS
+- V0.33 real browser interaction regression: PASS
 
 ## 8. Remaining V0.33/editor gaps
 
