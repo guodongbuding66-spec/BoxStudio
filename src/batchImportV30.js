@@ -1,3 +1,5 @@
+import { matrixToDatasetV29 } from './batchImportV29.js';
+
 const xmlUnescape=s=>String(s??'').replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
 
 export function leadingZeroWidthV30(formatCode=''){
@@ -29,4 +31,10 @@ export function formatCodeForStyleV30(styles,styleIndex){const i=Number(styleInd
 export function restoreCellNumericTextV30(rawValue,{styleIndex=null,styles=null}={}){
   const formatCode=formatCodeForStyleV30(styles,styleIndex),restored=restoreLeadingZerosV30(rawValue,formatCode);
   return{value:restored,restored:restored!==String(rawValue??'').trim(),formatCode};
+}
+
+export function matrixToDatasetV30(matrix=[],options={}){
+  const{leadingZeroRestorations=[], ...base}=options||{},ds=matrixToDatasetV29(matrix,base);
+  ds.importDiagnostics={...(ds.importDiagnostics||{}),leadingZeroRestorations:[...(leadingZeroRestorations||[])],leadingZeroRestorationCount:(leadingZeroRestorations||[]).length};
+  return ds;
 }
