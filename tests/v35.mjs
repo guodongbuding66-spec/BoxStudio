@@ -73,7 +73,7 @@ const missingHinge=buildFoldDiagnosticsV35({root:'a',nodes:[{id:'a'},{id:'b'}],e
 const missingRoot=buildFoldDiagnosticsV35({nodes:[{id:'a'}],edges:[]});assert.equal(missingRoot.ok,false);assert.ok(missingRoot.issues.some(issue=>issue.code==='ROOT_REQUIRED'));
 
 const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('BoxStudio V0.35'));assert.ok(index.includes('v35Ui.css'));assert.ok(index.includes('v35Ui.js'));
-const ui=await readFile(new URL('../src/v35Ui.js',import.meta.url),'utf8');assert.ok(ui.includes('2D ↔ 3D Review'));assert.ok(ui.includes('Fold Direction / Dependency Order'));assert.ok(ui.includes('Graph-derived review sequence, not a factory machine program.'));
-const proof=await readFile(new URL('../src/threeArtworkProof.js',import.meta.url),'utf8');assert.ok(proof.includes('onSelectPanel'));assert.ok(proof.includes('setSelectedPanel'));assert.ok(proof.includes('materialStyle'));assert.ok(proof.includes('setPointerCapture'));
+const ui=await readFile(new URL('../src/v35Ui.js',import.meta.url),'utf8');assert.ok(ui.includes('2D ↔ 3D Review'));assert.ok(ui.includes('Fold Direction / Dependency Order'));assert.ok(ui.includes('Graph-derived review sequence, not a factory machine program.'));assert.ok(ui.includes('GRAPH OK · ${warnings} WARNING'));
+const proof=await readFile(new URL('../src/threeArtworkProof.js',import.meta.url),'utf8');assert.ok(proof.includes('onSelectPanel'));assert.ok(proof.includes('setSelectedPanel'));assert.ok(proof.includes('materialStyle'));assert.ok(proof.includes('setPointerCapture'));assert.ok(proof.includes('logicalW=canvas.width/d'));assert.ok(proof.includes('logicalH=canvas.height/d'));
 const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.equal(pkg.version,'0.35.0');
 console.log('BoxStudio V0.35 2D-3D linked review tests passed');
