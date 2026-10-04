@@ -33,7 +33,7 @@ assert.equal(filterImportReviewRowsV30(reviewRows,{status:'failed',query:'B5'}).
 const table=failedRowsTableV30(state,{preflightSummary:fakeSummary});assert.equal(table.length,2);assert.ok(table[1].includes('B5'));
 const parts=failedRowsXlsxPartsV30(state,{preflightSummary:fakeSummary});assert.ok(parts['xl/workbook.xml'].includes('Failed Rows'));assert.ok(parts['xl/worksheets/sheet1.xml'].includes('B5'));assert.ok(parts['xl/worksheets/sheet1.xml'].includes('000123'));
 
-assert.equal(STORAGE_KEY,'boxstudio-mvp-v30');assert.ok(LEGACY_STORAGE_KEYS.includes('boxstudio-mvp-v29'));assert.equal(defaultState.exportOptions.productionSerializer,'v0.27-native-cubic-production');
-const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('BoxStudio V0.30'));assert.ok(index.includes('v30Ui.css'));assert.ok(index.includes('v30Ui.js'));
-const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.equal(pkg.version,'0.30.0');
+assert.ok(STORAGE_KEY==='boxstudio-mvp-v30'||LEGACY_STORAGE_KEYS.includes('boxstudio-mvp-v30'),'V0.30 storage must remain current or a migration source');assert.ok(LEGACY_STORAGE_KEYS.includes('boxstudio-mvp-v29'));assert.equal(defaultState.exportOptions.productionSerializer,'v0.27-native-cubic-production');
+const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('v30Ui.css'));assert.ok(index.includes('v30Ui.js'));
+const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.ok(Number(pkg.version.split('.')[1])>=30,'current package must be V0.30 or later');
 console.log('BoxStudio V0.30 tests passed');
