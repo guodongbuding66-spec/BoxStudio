@@ -94,7 +94,7 @@ export function patchMarkElementV34(state,id,patch={}){
 
 function tokenFields(element){return [['template',element?.template],['barcodeValue',element?.barcodeValue],['qrValue',element?.qrValue]];}
 export function extractVariableTokensV34(value=''){return Array.from(new Set([...String(value||'').matchAll(/{{\s*([\w]+)\s*}}/g)].map(match=>match[1])));}
-export function insertVariableTokenV34(value,key,{start=null,end=null}={}){const text=String(value||''),token=`{{${String(key||'').trim()}}`;if(!key)return text;const a=Number.isInteger(start)?Math.max(0,Math.min(text.length,start)):text.length,b=Number.isInteger(end)?Math.max(a,Math.min(text.length,end)):a;return `${text.slice(0,a)}${token}${text.slice(b)}`;}
+export function insertVariableTokenV34(value,key,{start=null,end=null}={}){const text=String(value||''),cleanKey=String(key||'').trim();if(!cleanKey)return text;const token='{{'+cleanKey+'}}',a=Number.isInteger(start)?Math.max(0,Math.min(text.length,start)):text.length,b=Number.isInteger(end)?Math.max(a,Math.min(text.length,end)):a;return `${text.slice(0,a)}${token}${text.slice(b)}`;}
 
 export function variableDefinitionsV34(state={}){
   const known=new Map(VARIABLE_DEFINITIONS_V34.map(item=>[item.key,{...item}]));
