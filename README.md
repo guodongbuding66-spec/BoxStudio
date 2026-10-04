@@ -1,48 +1,115 @@
-# BoxStudio V0.28
+# BoxStudio V0.29
 
 BoxStudio 是浏览器内运行的纸盒结构设计、2D 刀版、唛头编辑、Cross-panel Artwork、3D 折叠校样、Excel 批量生产、印前检查、生产审批和生产文件导出原型。
 
-当前主线：**参数化结构 + Customer / Packaging Rules + Master Template + Native SVG/PDF Appearance + Cross-panel Artwork + Folded 3D Texture Proof + Recoverable Web Worker Batch + Production Approval + Project Persistence + ICC DeviceLink + Bezier Clip Direct Selection + Smart Guides + Persistent User Guides + Native Cubic Production PDF + Original-plan Gap Register**。
+当前主线：**参数化结构 + Customer / Packaging Rules + Master Template + Native SVG/PDF Appearance + Cross-panel Artwork + Folded 3D Texture Proof + Recoverable Web Worker Batch + Production Approval + Project Persistence + ICC DeviceLink + Bezier Clip Direct Selection + Smart Guides + Persistent User Guides + Native Cubic Production PDF + Original-plan Gap Register + Resilient Excel Import**。
 
-## V0.28 新增
+## V0.29 新增
 
-### 1. Group Rotation Object-relative Live Assist
-
-V0.27 的单对象旋转已经支持：
-
-```text
-Angle Grid
-Other Artwork Rotation
-Other Artwork + 90° / 180° / 270°
-```
-
-V0.28 把同一逻辑补到 **多对象 Shared Group Rotation**：
-
-- 选中 2 个或以上 Cross-panel Artwork；
-- 使用已有 shared rotate handle；
-- 整组围绕 shared center 旋转；
-- 可以吸附到未选中 Artwork 的角度；
-- 可以吸附到该目标角度 +90° / +180° / +270°；
-- object-relative target 与普通 angle grid 同距离时优先 object-relative；
-- `Alt` 临时绕过当前 live assist；
-- 最终提交仍走统一 `rotateCrossSelection()` domain transform。
+### 1. Resilient Excel / CSV Import Core
 
 新增：
 
 ```text
-src/liveAssistV28.js
-src/v28GroupRotationPatch.js
+src/batchImportV29.js
+src/batchReviewV29.js
+src/v29Ui.js
+src/v29Ui.css
 ```
 
-### 2. 与最初开发文档的“未完成清单”正式入库
+V0.29 直接针对最初 V1/V2/V3 开发文档中尚未关闭的 Excel Import Engine 差距，新增：
 
-新增持续 Gap Register：
+- Header 不在第 1 行时的自动识别；
+- 英文 / 中文常用字段 Alias；
+- XLSX merged-cell expansion；
+- 受控业务字段 Fill Down；
+- `TOTAL / SUBTOTAL / GRAND TOTAL / 合计 / 总计 / 小计 / 汇总` Footer Stop；
+- 公式单元格没有 cached value 时的 Cell Reference 诊断；
+- 原始 Excel `__row`；
+- Header → Cell 的 `__lineage`；
+- Canonical Field → Cell 的 `__canonicalLineage`。
+
+Header Detection 默认扫描前 24 行，并按识别到的 canonical business field 数量打分；识别不足时才 fallback 到第一条非空行。
+
+### 2. Import Review Diagnostics
+
+Batch Marks 中新增 V0.29 Import Review：
+
+- Header Row；
+- Recognized Header Count；
+- Merged Range Count；
+- Fill-down Cell Count；
+- Footer Row；
+- Formula cache warnings；
+- Batch Preflight Passed / Failed / Warnings。
+
+可导出：
+
+```text
+failed_rows.csv
+boxstudio-import-diagnostics.json
+```
+
+`failed_rows.csv` 会包含 source row、错误码/错误标题、原始列数据和 canonical cell-lineage。
+
+这仍不等同于 V3.0 要求的完整 Import Review；`failed_rows.xlsx`、Filter/Sort/Jump/Inline Correction、Persistent Mapping Profile 和 leading-zero 修复仍未完成。
+
+### 3. 原始开发文档对照进度
+
+V0.28 建立了总 Gap Register：
 
 ```text
 docs/UNFINISHED_BASELINE_AUDIT.md
 ```
 
-这份文档不是重新写一个新 roadmap，而是对照项目最开始的：
+V0.29 增加本轮差距关闭记录：
+
+```text
+docs/BASELINE_PROGRESS_V0.29.md
+```
+
+V0.29 可以把总清单中的这些条目从“未完成”推进到“已完成/部分完成”：
+
+- Header Detection → ✅
+- Merge / Fill Down → ✅ 基础业务规则
+- TOTAL / Footer Stop → ✅
+- Formula Cell Error → 🟡 更完整
+- Cell-level lineage → 🟡 已有来源坐标
+- failed rows export → 🟡 CSV 已有，XLSX 未完成
+
+### 4. V0.29 不改变 Production Serializer
+
+V0.29 是 Import / Review hardening，不改变生产 PDF bytes 的主路线。
+
+当前 production serializer 仍为：
+
+```text
+v0.27-native-cubic-production
+```
+
+因此单纯升级 Import Engine 不会让已经批准的生产 Serializer 身份发生静默变化。
+
+## V0.28 基线能力
+
+### Group Rotation Object-relative Live Assist
+
+V0.28 已把 object-relative rotation assist 补到多对象 Shared Group Rotation：
+
+- 选中 2 个或以上 Cross-panel Artwork；
+- 整组围绕 shared center 旋转；
+- 可吸附到未选中 Artwork 的角度；
+- 可吸附到目标角度 +90° / +180° / +270°；
+- object-relative target 与普通 angle grid 同距离时优先 object-relative；
+- `Alt` 临时绕过 current live assist；
+- 最终提交仍走统一 `rotateCrossSelection()` domain transform。
+
+V0.28 同时建立：
+
+```text
+docs/UNFINISHED_BASELINE_AUDIT.md
+```
+
+对照最初：
 
 ```text
 在线唛头网站_开发文档_V1.0.md
@@ -50,7 +117,7 @@ docs/UNFINISHED_BASELINE_AUDIT.md
 在线唛头网站_开发文档_V3.0_集百家之长终版.md
 ```
 
-逐项把当前状态分成：
+按：
 
 ```text
 ✅ 已完成
@@ -59,34 +126,7 @@ docs/UNFINISHED_BASELINE_AUDIT.md
 🚫 初始明确非优先
 ```
 
-重点重新核对：
-
-- Phase 1 Production MVP；
-- Phase 1.5 Excel & Batch；
-- Phase 2 Template Designer；
-- Phase 2.5 Workflow；
-- Phase 3 Compare + Content；
-- Phase 3.5 3D；
-- Phase 4 Enterprise；
-- PoC A–H；
-- MVP Definition of Done；
-- Production Bundle / Deterministic Rendering；
-- Template Publication / Regression；
-- Preflight / PDF / ICC / Barcode Quality Boundary。
-
-以后不再因为“已经有一个按钮/函数/原型”就把完整业务闭环写成已完成。
-
-### 3. V0.28 没有改变 Production Serializer
-
-V0.28 是编辑器交互和开发基线审计版本，不改变生产 PDF bytes 的主路线。
-
-当前正式 production serializer 仍为：
-
-```text
-v0.27-native-cubic-production
-```
-
-这样不会因为单纯升级 UI/version 就使旧的 Approved Production Fingerprint 无意义失效。
+持续收敛，而不是继续无序扩需求。
 
 ## V0.27 Production 基线
 
@@ -163,6 +203,14 @@ Folded Proof 用于几何与印刷位置核对，不宣称校色显示器级 ICC
 
 - `.xlsx` / `.csv` / `.tsv`；
 - Multi-sheet / Mapping；
+- Header Detection；
+- Bilingual Alias；
+- XLSX Merge expansion；
+- controlled Fill Down；
+- Footer Stop；
+- Formula cache diagnostics；
+- source row / cell lineage；
+- failed-row CSV / import diagnostics；
 - Batch Preflight；
 - Pause / Resume / Cancel / Retry；
 - Frozen Batch Context；
@@ -190,19 +238,25 @@ Folded Proof 用于几何与印刷位置核对，不宣称校色显示器级 ICC
 
 ## 与最初开发文档对照后的主要未完成项
 
-完整清单见：
+完整总清单：
 
 ```text
 docs/UNFINISHED_BASELINE_AUDIT.md
 ```
 
-当前最高优先级未完成项：
+V0.29 更新：
+
+```text
+docs/BASELINE_PROGRESS_V0.29.md
+```
+
+当前高优先级未完成项：
 
 - Browser Interaction E2E；
 - Production PDF rasterize → Barcode/QR Digital Decode Required Check；
 - Preview/PDF `<= 0.2 mm` 独立几何验收；
 - Current US Template 外部 RIP / K-only / PDF/X 验收；
--完整 Excel Import Engine：Header Detection / Fill Down / TOTAL / Cell lineage / failed_rows.xlsx；
+- Excel Import：Persistent Mapping Profile / leading-zero normalization / exact issue→cell linking / `failed_rows.xlsx` / full review table；
 - Production Bundle + cryptographic SHA-256 output hash；
 - Hosted Backend + Auth/RBAC + server DB；
 - Factory / Country / Customer / Product Master Data；
@@ -273,24 +327,32 @@ V0.10
 ...
 V0.27
 V0.28
+V0.29
 ```
 
-V0.28 Regression 覆盖：
+V0.29 Regression 覆盖：
 
-- Group object-relative rotation matching；
-- external target remains unchanged；
-- object-relative tie priority；
-- +90° orthogonal group assist；
-- live-assist bypass；
-- V0.28 storage migration；
-- V0.27 production serializer remains stable；
-- V0.28 UI/patch load；
-- unfinished baseline gap-register presence。
+- bilingual canonical aliases；
+- column / merge reference parsing；
+- header detection after title rows；
+- merged-cell expansion；
+- controlled fill-down；
+- footer stop；
+- formula warning preservation；
+- source-row / source-cell lineage；
+- header fallback；
+- batch review summary；
+- failed-row CSV；
+- diagnostics JSON；
+- V0.29 storage migration；
+- V0.29 UI wiring；
+- package version；
+- production serializer remains stable。
 
 详细报告：
 
 ```text
-docs/V0.28_TEST_REPORT.md
+docs/V0.29_TEST_REPORT.md
 ```
 
 ## 数据存储
@@ -298,10 +360,10 @@ docs/V0.28_TEST_REPORT.md
 主状态：
 
 ```text
-boxstudio-mvp-v28
+boxstudio-mvp-v29
 ```
 
-V0.27 以及之前支持的版本继续作为 Migration Source。
+V0.28 以及之前支持的版本继续作为 Migration Source。
 
 附加存储保持：
 
@@ -313,18 +375,18 @@ IndexedDB: boxstudio-artifacts-v1
 
 ## 下一阶段优先级
 
-从 V0.29 起优先关闭原始开发文档的 P0/P1 差距，不继续无序增加边缘功能。推荐顺序：
+继续以原始 V1/V2/V3 开发文档为收敛基线：
 
 ```text
-V0.29  Browser E2E + Digital Decode + PDF/Geometry Acceptance
-V0.30  Excel Import Engine completion
-V0.31  Production Bundle + SHA-256 + immutable snapshot schema
-V0.32  Master Data + Content Library domain
-V0.33  Hosted Backend + Auth/RBAC + DB
-V0.34  Template Publish + Artwork Workflow + server audit
-V0.35  Compare + Impact Analysis + Search/Dashboard
-V0.36  External Preflight + advanced ICC/CMM
-V0.37  ERP/API/Webhook/SSO enterprise adapters
+V0.30  Import Review table + persistent Mapping Profile + leading-zero + failed_rows.xlsx
+V0.31  Browser E2E + Digital Decode + PDF/Geometry Acceptance
+V0.32  Production Bundle + SHA-256 + immutable snapshot schema
+V0.33  Master Data + Content Library domain
+V0.34  Hosted Backend + Auth/RBAC + DB
+V0.35  Template Publish + Artwork Workflow + server audit
+V0.36  Compare + Impact Analysis + Search/Dashboard
+V0.37  External Preflight + advanced ICC/CMM
+V0.38  ERP/API/Webhook/SSO enterprise adapters
 ```
 
 这里的“完成”只以真实实现和测试证据为准。浏览器 E2E、第三方 PDF/X 认证、实体条码 ISO Grade、印厂验收在完成前都不会被描述为已完成。
