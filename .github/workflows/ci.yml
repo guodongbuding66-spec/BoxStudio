@@ -112,17 +112,24 @@ jobs:
           set -euo pipefail
           CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
           test -n "$CHROME"
-          python3 -m http.server 8765 >/tmp/boxstudio-v33-http.log 2>&1 &
+          python3 tests/v33_e2e_server.py >/tmp/boxstudio-v33-http.log 2>&1 &
           SERVER_PID=$!
-          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
-          sleep 1
-          set +e
-          timeout 20s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=6000 --dump-dom http://127.0.0.1:8765/tests/v33-browser-e2e.html >/tmp/boxstudio-v33-dom.html 2>/tmp/boxstudio-v33-chrome.log
-          CHROME_STATUS=$?
-          set -e
-          if ! grep -q 'data-v33-e2e="pass"' /tmp/boxstudio-v33-dom.html; then
-            echo "Chrome status: $CHROME_STATUS"
-            cat /tmp/boxstudio-v33-chrome.log || true
-            cat /tmp/boxstudio-v33-dom.html || true
-            exit 1
-          fi
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run http://127.0.0.1:8765/tests/v33-browser-e2e.html >/tmp/boxstudio-v33-chrome.log 2>&1 &
+          CHROME_PID=$!
+          trap 'kill "$CHROME_PID" "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 80); do
+            if test -f /tmp/boxstudio-v33-pass; then
+              cat /tmp/boxstudio-v33-pass
+              exit 0
+            fi
+            if test -f /tmp/boxstudio-v33-fail; then
+              cat /tmp/boxstudio-v33-fail
+              cat /tmp/boxstudio-v33-chrome.log || true
+              exit 1
+            fi
+            sleep 0.25
+          done
+          echo 'Browser E2E timed out without PASS/FAIL signal.'
+          cat /tmp/boxstudio-v33-http.log || true
+          cat /tmp/boxstudio-v33-chrome.log || true
+          exit 1
