@@ -81,6 +81,8 @@ export function ensureReviewStateV35(state={}){
   let next=ensureEditorV33(clone(state));const geo=generateGeometry(next.structure||{}),graph=buildFoldGraph(geo),valid=new Set((graph.nodes||[]).map(node=>node.artPanel||node.id)),old=next.reviewV35||{};
   const first=(graph.nodes||[]).find(node=>valid.has(node.artPanel||node.id)),selected=valid.has(old.selectedPanelId)?old.selectedPanelId:(valid.has(next.editorV33?.focusPanelId)?next.editorV33.focusPanelId:(first?.artPanel||first?.id||null));
   next.reviewV35={schema:V35_REVIEW_SCHEMA,version:V35_REVIEW_VERSION,selectedPanelId:selected,selectedElementId:old.selectedElementId||null,splitRatio:Math.max(.28,Math.min(.72,num(old.splitRatio,.5))),syncEnabled:old.syncEnabled!==false,lastSelectionSource:old.lastSelectionSource||'init',liveRevision:Math.max(0,Math.floor(num(old.liveRevision,0)))};
+  const selectedElement=(next.elements||[]).find(element=>element.id===next.reviewV35.selectedElementId&&element.panelId===selected);
+  if(!selectedElement)next.reviewV35.selectedElementId=null;
   return next;
 }
 
@@ -90,6 +92,7 @@ export function selectReviewPanelV35(state,panelId,{source='2d'}={}){
   const focused=panelFocusV33(next,panelId);next=focused.state;
   const panelElement=(next.elements||[]).find(element=>element.panelId===panelId&&element.id===next.reviewV35.selectedElementId);
   if(panelElement)next=setSelectionV33(next,[panelElement.id],{primary:panelElement.id});
+  else{next.reviewV35.selectedElementId=null;next=setSelectionV33(next,[])}
   return next;
 }
 
@@ -100,6 +103,7 @@ export function selectReviewElementV35(state,elementId,{source='2d'}={}){
 
 export function patchReviewElementV35(state,patch={}){
   let next=ensureReviewStateV35(state),id=next.reviewV35.selectedElementId||next.selectedId;if(!id)return next;
+  const element=(next.elements||[]).find(item=>item.id===id&&item.panelId===next.reviewV35.selectedPanelId);if(!element)return next;
   next=setSelectionV33(next,[id],{primary:id});
   const allowed=new Set(['x','y','w','h','r','fontSize','template','barcodeValue','qrValue','bold']);const clean={};for(const [key,value] of Object.entries(patch))if(allowed.has(key))clean[key]=value;
   next=updatePrimaryElementV33(next,clean);next.reviewV35.selectedElementId=id;next.reviewV35.liveRevision++;return next;
