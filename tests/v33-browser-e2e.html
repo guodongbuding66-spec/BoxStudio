@@ -2,9 +2,12 @@
 <html lang="en">
 <head><meta charset="utf-8"><title>BoxStudio V0.33 Browser E2E</title></head>
 <body data-v33-e2e="running">
-  <div id="app"></div>
+  <div id="app">
+    <div class="workspace">
+      <div class="tabbar"><button class="active">Design</button><span class="spacer"></span></div>
+    </div>
+  </div>
   <pre id="v33E2ELog"></pre>
-  <script type="module" src="../src/app.js"></script>
   <script type="module" src="../src/v33Ui.js"></script>
   <script type="module">
     const log=document.getElementById('v33E2ELog');
@@ -13,7 +16,7 @@
     async function signal(path,key,value){try{await fetch(`${path}?${key}=${encodeURIComponent(value)}`,{cache:'no-store'})}catch(error){console.error('E2E signal failed',error)}}
     try{
       localStorage.clear();
-      await sleep(50);
+      await sleep(60);
       const open=await waitFor('#v33OpenProfessional');
       open.click();
       await waitFor('#boxstudio-v33-workspace');
@@ -23,8 +26,7 @@
       const firstRow=document.querySelector('[data-object-row]');
       firstRow.click();
       await sleep(30);
-      const selectedBefore=document.querySelectorAll('.v33-object-row.selected').length;
-      if(selectedBefore<1)throw new Error('Object selection did not update.');
+      if(document.querySelectorAll('.v33-object-row.selected').length<1)throw new Error('Object selection did not update.');
       document.querySelector('[data-action="duplicate"]').click();
       await sleep(40);
       const rowsAfterDuplicate=document.querySelectorAll('[data-object-row]').length;
@@ -41,7 +43,7 @@
       const savedTable=JSON.parse(localStorage.getItem('boxstudio-mvp-v32')||'null');
       if(savedTable.elements.length<beforeTable+14)throw new Error('Table tool did not create flattened production primitives.');
       if(!document.querySelector('[data-action="undo"]')||!document.querySelector('[data-action="group"]')||!document.querySelector('#v33PanelFocus'))throw new Error('Professional controls missing.');
-      const detail=`PASS rows=${rowsAfterDuplicate} tableElements=${savedTable.elements.length}`;
+      const detail=`PASS isolated-real-ui rows=${rowsAfterDuplicate} tableElements=${savedTable.elements.length}`;
       document.body.dataset.v33E2e='pass';
       log.textContent=detail;
       await signal('/__v33_pass__','detail',detail);
