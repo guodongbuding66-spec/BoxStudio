@@ -59,6 +59,12 @@ const model=buildReviewModelV35(state);
 assert.equal(model.selectedPanelId,'back');assert.equal(model.selectedElement.id,'origin');assert.equal(model.stats.panels,graph.nodes.length);assert.equal(model.stats.liveRevision,state.reviewV35.liveRevision);
 assert.ok(model.panelElements.some(element=>element.id==='origin'));
 
+// Switching linked panels must clear an object that belongs to the previous panel; stale edits are blocked.
+let switched=selectReviewPanelV35(state,'front',{source:'3d'});
+assert.equal(switched.reviewV35.selectedElementId,null);assert.deepEqual(switched.editorV33.selection,[]);assert.equal(switched.selectedId,null);
+const revisionBeforeStalePatch=switched.reviewV35.liveRevision,originXBefore=switched.elements.find(element=>element.id==='origin').x;
+switched=patchReviewElementV35(switched,{x:999});assert.equal(switched.elements.find(element=>element.id==='origin').x,originXBefore);assert.equal(switched.reviewV35.liveRevision,revisionBeforeStalePatch);
+
 // Diagnostics must fail closed on topology defects rather than presenting a plausible sequence.
 const hinge={x1:0,y1:0,x2:1,y2:0};
 const broken={root:'a',nodes:[{id:'a'},{id:'b'}],edges:[{from:'a',to:'b',angle:90,hinge},{from:'b',to:'a',angle:-90,hinge}]};
@@ -67,6 +73,6 @@ const missingHinge=buildFoldDiagnosticsV35({root:'a',nodes:[{id:'a'},{id:'b'}],e
 
 const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('BoxStudio V0.35'));assert.ok(index.includes('v35Ui.css'));assert.ok(index.includes('v35Ui.js'));
 const ui=await readFile(new URL('../src/v35Ui.js',import.meta.url),'utf8');assert.ok(ui.includes('2D ↔ 3D Review'));assert.ok(ui.includes('Fold Direction / Dependency Order'));assert.ok(ui.includes('Graph-derived review sequence, not a factory machine program.'));
-const proof=await readFile(new URL('../src/threeArtworkProof.js',import.meta.url),'utf8');assert.ok(proof.includes('onSelectPanel'));assert.ok(proof.includes('setSelectedPanel'));assert.ok(proof.includes('materialStyle'));
+const proof=await readFile(new URL('../src/threeArtworkProof.js',import.meta.url),'utf8');assert.ok(proof.includes('onSelectPanel'));assert.ok(proof.includes('setSelectedPanel'));assert.ok(proof.includes('materialStyle'));assert.ok(proof.includes('setPointerCapture'));
 const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.equal(pkg.version,'0.35.0');
 console.log('BoxStudio V0.35 2D-3D linked review tests passed');
