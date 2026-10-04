@@ -102,3 +102,6 @@ jobs:
 
       - name: V0.32 parametric template core - five engines, size modes, board compensation and catalog
         run: node tests/v32.mjs
+
+      - name: V0.33 professional 2D editor - selection, group, clipboard, z-order, layers, table and SVG image
+        run: node tests/v33.mjs
