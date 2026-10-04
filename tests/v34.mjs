@@ -41,8 +41,13 @@ state.variables.packageCount='1';
 state=saveMarkRuleV34(state,{id:'show-sku-multi',label:'Show SKU only for multi-package',targetIds:['v34-sku'],effect:'show',conditions:[{field:'packageCount',op:'gt',value:'1'}]});
 assert.equal(state.elements.find(x=>x.id==='v34-sku').hidden,true);
 let debug=markRuleDebugV34(state).find(item=>item.rule.id==='show-sku-multi');assert.equal(debug.matched,false);assert.equal(debug.trace[0].actual,'1');
+// Rule visibility is production-authoritative: hidden elements must not reach the artwork plan.
+plan=buildPanelArtworkPlan(state,generateGeometry(state.structure),'front');
+assert.ok(!plan.commands.some(command=>command.source==='v34-sku'),'rule-hidden mark leaked into production artwork plan');
 state=setVariableV34(state,'packageCount','3');state=applyMarkRulesV34(state);assert.equal(state.elements.find(x=>x.id==='v34-sku').hidden,false);
 debug=markRuleDebugV34(state).find(item=>item.rule.id==='show-sku-multi');assert.equal(debug.matched,true);
+plan=buildPanelArtworkPlan(state,generateGeometry(state.structure),'front');
+assert.ok(plan.commands.some(command=>command.source==='v34-sku'),'rule-visible mark did not return to production artwork plan');
 state=saveMarkRuleV34(state,{id:'hide-non-us',label:'Hide for non-US',targetIds:['v34-sku'],effect:'hide',conditions:[{field:'destinationCountry',op:'neq',value:'US'}]});
 assert.equal(markRuleDebugV34(state).find(item=>item.rule.id==='hide-non-us').matched,false);
 state=saveMarkRuleV34(state,{id:'customer-rule',label:'Customer condition',targetIds:['v34-sku'],effect:'show',conditions:[{field:'customerProfileId',op:'eq',value:'us-export-master'}]});
