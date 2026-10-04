@@ -7,7 +7,8 @@ const DEFAULT_LAYERS=Object.freeze({artwork:{visible:true,locked:false},marks:{v
 
 function layerKey(el){return el?.group==='artwork'?'artwork':'marks'}
 function orderedWithZ(elements=[]){return elements.map((el,index)=>({el,index,z:Number.isFinite(Number(el?.zIndex))?Number(el.zIndex):index})).sort((a,b)=>a.z-b.z||a.index-b.index).map(x=>x.el)}
-function normalizeZ(elements=[]){const out=orderedWithZ(elements).map((el,i)=>({...el,zIndex:i}));return out}
+function reindexZ(elements=[]){return elements.map((el,i)=>({...el,zIndex:i}))}
+function normalizeZ(elements=[]){return reindexZ(orderedWithZ(elements))}
 function idSet(state){return new Set((state?.elements||[]).map(x=>x.id))}
 
 export function ensureEditorV33(state={}){
@@ -42,7 +43,7 @@ export function pasteClipboardV33(state,clipboard,{offsetMm=8,idFactory=defaultI
     const src=clone(clipboard.elements[i]),oldGroup=src.groupId;if(oldGroup&&!groupMap.has(oldGroup))groupMap.set(oldGroup,uid('group'));
     src.id=idFactory(src,i);src.x=num(src.x)+offsetMm;src.y=num(src.y)+offsetMm;if(oldGroup)src.groupId=groupMap.get(oldGroup);src.zIndex=(next.elements?.length||0)+i;src._v33Created=true;created.push(src);
   }
-  next.elements=normalizeZ([...(next.elements||[]),...created]);return setSelectionV33(next,created.map(x=>x.id));
+  next.elements=reindexZ([...normalizeZ(next.elements||[]),...created]);return setSelectionV33(next,created.map(x=>x.id));
 }
 export function duplicateSelectionV33(state,opts={}){return pasteClipboardV33(state,copySelectionV33(state),opts)}
 export function deleteSelectionV33(state){const next=ensureEditorV33(state),ids=new Set(next.editorV33.selection);next.elements=(next.elements||[]).filter(x=>!ids.has(x.id));next.editorV33.selection=[];next.selectedId=null;return next}
@@ -52,11 +53,11 @@ export function moveSelectionZV33(state,action='front'){
   if(action==='back')list=[...selected,...rest];
   else if(action==='front')list=[...rest,...selected];
   else if(action==='forward'){
-    list=[...rest,...selected];const target=Math.min(list.length-selected.length,(Math.max(...selected.map(x=>(next.elements||[]).findIndex(y=>y.id===x.id)))+1));list=[...rest];list.splice(target,0,...selected);
+    const last=Math.max(...selected.map(x=>list.findIndex(y=>y.id===x.id))),target=Math.min(rest.length,last-selected.length+2);list=[...rest];list.splice(Math.max(0,target),0,...selected);
   }else if(action==='backward'){
-    const first=Math.min(...selected.map(x=>(next.elements||[]).findIndex(y=>y.id===x.id))),target=Math.max(0,first-1);list=[...rest];list.splice(target,0,...selected);
+    const first=Math.min(...selected.map(x=>list.findIndex(y=>y.id===x.id))),target=Math.max(0,first-1);list=[...rest];list.splice(target,0,...selected);
   }
-  next.elements=normalizeZ(list);return next;
+  next.elements=reindexZ(list);return next;
 }
 
 function selectedAbsolute(next){const geo=generateGeometry(next.structure),ids=new Set(next.editorV33.selection);return{geo,items:(next.elements||[]).filter(el=>ids.has(el.id)).map(el=>({el,rr:resolveElementRect(el,geo)}))}}
@@ -78,7 +79,7 @@ export function elementVisibleV33(state,el){const next=ensureEditorV33(state),la
 export function elementLockedV33(state,el){const next=ensureEditorV33(state),layer=next.editorV33.layers[layerKey(el)];return Boolean(el.locked||layer?.locked)}
 
 export function insertTableV33(state,{panelId=null,x=12,y=12,w=180,h=90,rows=3,cols=3,header=true,group='artwork',groupId=null}={}){
-  let next=ensureEditorV33(state);const geo=generateGeometry(next.structure),panel=geo.panelMap[panelId]||geo.panelMap.front||geo.panelMap.base||geo.bodyPanels?.[0];if(!panel)return next;rows=Math.max(2,Math.min(12,Math.round(num(rows,3))));cols=Math.max(2,Math.min(8,Math.round(num(cols,3))));w=Math.min(Math.max(40,num(w,180)),Math.max(40,panel.w-8));h=Math.min(Math.max(28,num(h,90)),Math.max(28,panel.h-8));x=Math.max(0,Math.min(num(x,12),Math.max(0,panel.w-w)));y=Math.max(0,Math.min(num(y,12),Math.max(0,panel.h-h)));const gid=groupId||uid('table'),base=`table-${Date.now().toString(36)}`,made=[],push=el=>made.push({...el,group,groupId:gid,groupName:'Table',panelId:panel.id,zIndex:(next.elements?.length||0)+made.length,_v33Created:true});push({id:`${base}-border`,type:'shape',x,y,w,h,r:0,fill:'none'});for(let c=1;c<cols;c++)push({id:`${base}-v${c}`,type:'line',x:x+w*c/cols,y,w:0,h,r:0});for(let r=1;r<rows;r++)push({id:`${base}-h${r}`,type:'line',x,y:y+h*r/rows,w,h:0,r:0});for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)push({id:`${base}-t${r}-${c}`,type:'text',x:x+w*c/cols+2,y:y+h*r/rows+2,w:Math.max(8,w/cols-4),h:Math.max(6,h/rows-4),r:0,template:header&&r===0?`Header ${c+1}`:`Cell ${r+1}.${c+1}`,fontSize:Math.max(3,Math.min(6,h/rows*.24)),bold:Boolean(header&&r===0)});next.elements=normalizeZ([...(next.elements||[]),...made]);return setSelectionV33(next,made.map(x=>x.id),{primary:made[0].id});
+  let next=ensureEditorV33(state);const geo=generateGeometry(next.structure),panel=geo.panelMap[panelId]||geo.panelMap.front||geo.panelMap.base||geo.bodyPanels?.[0];if(!panel)return next;rows=Math.max(2,Math.min(12,Math.round(num(rows,3))));cols=Math.max(2,Math.min(8,Math.round(num(cols,3))));w=Math.min(Math.max(40,num(w,180)),Math.max(40,panel.w-8));h=Math.min(Math.max(28,num(h,90)),Math.max(28,panel.h-8));x=Math.max(0,Math.min(num(x,12),Math.max(0,panel.w-w)));y=Math.max(0,Math.min(num(y,12),Math.max(0,panel.h-h)));const gid=groupId||uid('table'),base=`table-${Date.now().toString(36)}`,made=[],push=el=>made.push({...el,group,groupId:gid,groupName:'Table',panelId:panel.id,zIndex:(next.elements?.length||0)+made.length,_v33Created:true});push({id:`${base}-border`,type:'shape',x,y,w,h,r:0,fill:'none'});for(let c=1;c<cols;c++)push({id:`${base}-v${c}`,type:'line',x:x+w*c/cols,y,w:0,h,r:0});for(let r=1;r<rows;r++)push({id:`${base}-h${r}`,type:'line',x,y:y+h*r/rows,w,h:0,r:0});for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)push({id:`${base}-t${r}-${c}`,type:'text',x:x+w*c/cols+2,y:y+h*r/rows+2,w:Math.max(8,w/cols-4),h:Math.max(6,h/rows-4),r:0,template:header&&r===0?`Header ${c+1}`:`Cell ${r+1}.${c+1}`,fontSize:Math.max(3,Math.min(6,h/rows*.24)),bold:Boolean(header&&r===0)});next.elements=reindexZ([...normalizeZ(next.elements||[]),...made]);return setSelectionV33(next,made.map(x=>x.id),{primary:made[0].id});
 }
 
 export function panelFocusV33(state,panelId=null){const next=ensureEditorV33(state),geo=generateGeometry(next.structure),panel=geo.panelMap[panelId]||geo.panelMap[next.editorV33.focusPanelId]||geo.panelMap.front||geo.panelMap.base||geo.bodyPanels?.[0];if(!panel)return{state:next,panel:null,viewBox:`0 0 ${geo.width} ${geo.height}`};const pad=Math.max(8,Math.min(40,Math.min(panel.w,panel.h)*.12)),x=panel.x-pad,y=panel.y-pad,w=panel.w+pad*2,h=panel.h+pad*2;next.editorV33.focusPanelId=panel.id;next.editorV33.fitMode='panel';return{state:next,panel,viewBox:`${x} ${y} ${w} ${h}`}}
