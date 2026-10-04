@@ -68,16 +68,22 @@ jobs:
       - name: V0.30 mapping-profile, leading-zero, import-review and XLSX-failure tests
         run: node tests/v30.mjs
 
-      - name: V0.31 isolate - default gate core
-        env: { V31_BASE_PROBE: core }
+      - name: V0.31 isolate - raw geometry gate
+        env: { V31_BASE_PROBE: geometry }
         run: node tests/v31-base-probe.mjs
-      - name: V0.31 isolate - default PDF bytes and signature
-        env: { V31_BASE_PROBE: bytes }
-        run: node tests/v31-base-probe.mjs
-      - name: V0.31 isolate - default digital result fields
+      - name: V0.31 isolate - raw digital decode gate
         env: { V31_BASE_PROBE: digital }
         run: node tests/v31-base-probe.mjs
-      - name: V0.31 isolate - default MediaBox
+      - name: V0.31 isolate - aggregate gate
+        env: { V31_BASE_PROBE: aggregate }
+        run: node tests/v31-base-probe.mjs
+      - name: V0.31 isolate - accepted wrapper
+        env: { V31_BASE_PROBE: accepted }
+        run: node tests/v31-base-probe.mjs
+      - name: V0.31 isolate - PDF bytes and signature
+        env: { V31_BASE_PROBE: bytes }
+        run: node tests/v31-base-probe.mjs
+      - name: V0.31 isolate - MediaBox
         env: { V31_BASE_PROBE: media }
         run: node tests/v31-base-probe.mjs
       - name: V0.31 enforce - mailer 200x64 details
