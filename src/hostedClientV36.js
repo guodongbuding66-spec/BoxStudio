@@ -12,7 +12,7 @@ export function createHostedApiV36({baseUrl='/api/v1',fetchImpl=globalThis.fetch
   let token='';try{token=String(storage?.getItem?.(V36_SESSION_STORAGE_KEY)||'')}catch{}
   const setToken=value=>{token=String(value||'');try{if(token)storage?.setItem?.(V36_SESSION_STORAGE_KEY,token);else storage?.removeItem?.(V36_SESSION_STORAGE_KEY)}catch{}};
   const request=async(path,{method='GET',body=null,headers={}}={})=>{
-    const response=await fetchImpl(join(baseUrl,path),{method,headers:{accept:'application/json',...(token?{authorization:`Bearer ${token}`}:{})...(body!=null?{'content-type':'application/json'}:{}),...headers},...(body!=null?{body:JSON.stringify(body)}:{})});
+    const response=await fetchImpl(join(baseUrl,path),{method,headers:{accept:'application/json',...(token?{authorization:`Bearer ${token}`}:{}) ,...(body!=null?{'content-type':'application/json'}:{}),...headers},...(body!=null?{body:JSON.stringify(body)}:{})});
     const payload=await decode(response);if(!response.ok){const error=new Error(payload?.message||`Hosted API ${response.status}`);error.status=response.status;error.code=payload?.error;error.detail=payload?.detail;throw error;}return payload;
   };
   return{
