@@ -1,6 +1,6 @@
 import { runPreflight as runBasePreflight } from './preflight.js';
 import { buildProductionPdfV27 } from './productionPdfV27.js';
-import { digitalDecodeFromProductionPdfV31 } from './digitalDecodeV31.js';
+import { digitalDecodeFromProductionPdfV31 } from './digitalDecodeGateV31.js';
 import { geometryAcceptanceFromProductionPdfV31 } from './geometryAcceptanceV31.js';
 
 export function runProductionAcceptanceV31(state,{toleranceMm=.2}={}){
