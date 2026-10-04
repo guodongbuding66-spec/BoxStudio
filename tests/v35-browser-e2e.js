@@ -6,6 +6,13 @@ function requireEl(selector){const el=document.querySelector(selector);if(!el)th
 function saved(){return JSON.parse(localStorage.getItem(STORAGE_KEY)||'null')}
 const tick=()=>new Promise(resolve=>setTimeout(resolve,120));
 
+function renderedFacePoint(canvas){
+  const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height,data=ctx.getImageData(0,0,w,h).data;
+  const bright=(x,y)=>{if(x<0||y<0||x>=w||y>=h)return false;const i=(Math.floor(y)*w+Math.floor(x))*4;return data[i]+data[i+1]+data[i+2]>430&&data[i+3]>200};
+  for(let y=8;y<h-8;y+=4)for(let x=8;x<w-8;x+=4){if(bright(x,y)&&bright(x-4,y)&&bright(x+4,y)&&bright(x,y-4)&&bright(x,y+4))return{x,y}}
+  return null;
+}
+
 await signal('/__v35_started__','detail','driver-loaded');
 try{
   localStorage.clear();
@@ -20,17 +27,14 @@ try{
   if(document.querySelectorAll('[data-v35-panel]').length<4)throw new Error('2D review did not render expected dieline panels.');
   if(document.querySelectorAll('.v35-sequence>div').length<1)throw new Error('Fold dependency sequence did not render.');
 
-  // Real 3D pointer hit: try several interior proof locations until a projected face is hit.
-  const rect=proofCanvas.getBoundingClientRect(),fractions=[[.5,.5],[.38,.5],[.62,.5],[.5,.38],[.5,.62],[.35,.35],[.65,.65]];
-  for(let i=0;i<fractions.length;i++){
-    const [fx,fy]=fractions[i],clientX=rect.left+rect.width*fx,clientY=rect.top+rect.height*fy,pointerId=40+i;
-    proofCanvas.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,clientX,clientY,pointerId,button:0,pointerType:'mouse'}));
-    proofCanvas.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,clientX,clientY,pointerId,button:0,pointerType:'mouse'}));
-    await tick();
-    if(saved().reviewV35?.lastSelectionSource==='3d')break;
-  }
+  // Real 3D pointer hit: derive a click point from the pixels actually rendered as a paperboard face.
+  const facePoint=renderedFacePoint(proofCanvas);if(!facePoint)throw new Error('Could not locate a rendered 3D paperboard face pixel.');
+  const rect=proofCanvas.getBoundingClientRect(),clientX=rect.left+(facePoint.x/proofCanvas.width)*rect.width,clientY=rect.top+(facePoint.y/proofCanvas.height)*rect.height;
+  proofCanvas.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,clientX,clientY,pointerId:41,button:0,pointerType:'mouse'}));
+  proofCanvas.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,clientX,clientY,pointerId:41,button:0,pointerType:'mouse'}));
+  await tick();
   let state=saved();
-  if(state.reviewV35?.lastSelectionSource!=='3d')throw new Error('Real 3D face pointer hit did not synchronize selection.');
+  if(state.reviewV35?.lastSelectionSource!=='3d')throw new Error(`Rendered 3D face click did not synchronize selection at ${facePoint.x},${facePoint.y}.`);
   if(state.editorV33?.focusPanelId!==state.reviewV35?.selectedPanelId)throw new Error('3D face selection did not synchronize V0.33 2D panel focus.');
 
   // 2D panel selection must persist into the shared review model used by the 3D proof.
