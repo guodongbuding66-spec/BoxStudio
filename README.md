@@ -1,317 +1,292 @@
-# BoxStudio V0.30
+# BoxStudio V0.31
 
-BoxStudio 是浏览器内运行的纸盒结构设计、2D 刀版、唛头编辑、Cross-panel Artwork、3D 折叠校样、Excel 批量生产、印前检查、生产审批和生产文件导出原型。
+BoxStudio 是浏览器内运行的包装纸盒结构、2D 刀版、唛头 Artwork、3D 折叠校样、Excel 批量生产、印前检查、生产审批与生产文件导出原型。
 
-当前主线：**参数化结构 + Customer / Packaging Rules + Master Template + Native SVG/PDF Appearance + Cross-panel Artwork + Folded 3D Texture Proof + Recoverable Web Worker Batch + Production Approval + Project Persistence + ICC DeviceLink + Bezier Clip Direct Selection + Smart Guides + Original-plan Gap Register + Resilient Excel Import**。
+当前主线：**参数化结构 + Panel-aware Geometry + Rules / Master Templates + Cross-panel Artwork + Folded 3D Proof + Recoverable Web Worker Batch + Production Approval + ICC / Spot / Overprint + Resilient Excel Import + Production PDF Required Checks**。
 
-## V0.30 新增
+## V0.31：Production Acceptance
 
-### Persistent Mapping Profiles
+V0.31 对照最初 V1/V2/V3 开发文档，关闭了两个长期 P0 数字稿检查缺口。
 
-新增 `src/mappingProfilesV30.js`。当前可保存 Header → Canonical Field 映射，并按标准化 Header Signature 识别相同文件格式。再次导入完全相同的 Header 集合时可自动套用一次；用户随后仍可手工修改，不会被持续强制覆盖。
+### 1. Barcode / QR Digital Decode Required Check
 
-当前 Mapping Profile 是浏览器本地状态，不等同于 Customer/Supplier 级服务端配置。
-
-### XLSX Leading-zero Protection
-
-新增 `src/batchImportV30.js`，并接入 `src/batch.js`。导入 XLSX 时读取 `xl/styles.xml` 的 custom `numFmt` 与 `cellXfs`。对明确的纯零格式，例如：
+新增：
 
 ```text
-000000000000
+src/digitalDecodeV31.js
+src/digitalDecodeGateV31.js
 ```
 
-如果缓存值是 `123`，可恢复为 `000000000123`，并记录 Cell / From / To / Format Code。
-
-当前只处理可确定的 zero-mask subset，不猜测 General、日期、科学计数法或复杂格式的业务语义。
-
-### Import Review Table
-
-新增 `src/importReviewV30.js` 与 `src/v30Ui.js`：
-
-- All / Passed / Failed Filter；
-- SKU / Source Row / Error / Cell Search；
-- Source Row / SKU / Status Sort；
-- Source Row、SKU、Issue、Cell Hint；
-- Open Row 并把该行数据重新装入当前变量；
-- Cell Hint 只在错误能映射到一个 Canonical Field 时显示。
-
-### `failed_rows.xlsx`
-
-新增 `src/failedRowsXlsxV30.js`，直接生成 OpenXML `.xlsx`。失败行工作簿包含：
-
-- Source Row；
-- SKU；
-- Error Codes；
-- Errors；
-- Cell Hints；
-- 原始导入列。
-
-V0.29 的 `failed_rows.csv` 与 Import Diagnostics JSON 继续保留。
-
-### 基线差距文档
-
-历史首轮总审计：
+流程不是只验证编码器输入，而是：
 
 ```text
-docs/UNFINISHED_BASELINE_AUDIT.md
+Production PDF bytes
+→ 解析实际 Barcode / QR 矢量矩形
+→ 对码区进行内存栅格化
+→ 独立解码
+→ 与源数据比较
+→ PASS / blocking ERROR
 ```
 
-V0.29 / V0.30 增量：
+当前回归覆盖：
+
+- Code 39
+- EAN-13
+- UPC-A
+- ITF-14
+- GS1-128 / Code128-B + FNC1 + checksum
+- QR Version 1–4 / ECL L / byte mode
+
+GS1-128 使用 canonical Code128 symbol table 做逐符号 raster-run pattern fitting，避免简单最小线宽量化造成的误判。
+
+**边界：**这是生成 PDF 数字稿的 artifact check，不是实体印刷条码 ISO Grade，也不是硬件扫描枪验收。
+
+### 2. Preview / PDF Geometry Acceptance
+
+新增：
 
 ```text
-docs/BASELINE_PROGRESS_V0.29.md
-docs/BASELINE_PROGRESS_V0.30.md
+src/geometryAcceptanceV31.js
 ```
 
-当前继续开发使用的最新版未完成清单：
+系统会从当前 Preview 的 mm Geometry 建立关键点，再从生成后的 Production PDF 中重新解析坐标进行比较：
+
+- MediaBox 物理尺寸
+- Barcode/QR Group 等核心矩形
+- Text / Notice anchor（非转曲模式）
+- Artwork line
+- CUT / CREASE / PERF / GLUE key lines
+
+默认验收阈值：
 
 ```text
-docs/UNFINISHED_BASELINE_AUDIT_CURRENT.md
+<= 0.2 mm
 ```
 
-它直接对照最初的：
+这对应最初 V3 PoC E 的 Preview/PDF Fidelity 目标。
+
+### 3. Required Checks 进入生产链路
+
+新增：
 
 ```text
-在线唛头网站_开发文档_V1.0.md
-在线唛头网站_开发文档_V2.0_开源项目调研版.md
-在线唛头网站_开发文档_V3.0_集百家之长终版.md
+src/preflightV31.js
 ```
 
-并持续区分 `✅ / 🟡 / ⬜ / EXT`，不会因为已经存在按钮、基础函数或本地模拟流程就把完整生产闭环写成完成。
+required checks：
 
-## V0.29 Resilient Import 基线
+```text
+DIGITAL_DECODE_V31
+PREVIEW_PDF_GEOMETRY_V31
+```
 
-V0.29 已加入：
+并已接入：
 
-- Header Detection，不再要求 Header 位于第 1 行；
-- 英文 / 中文常用字段 Alias；
-- XLSX merged-cell expansion；
-- 受控业务字段 Fill Down；
-- TOTAL / SUBTOTAL / GRAND TOTAL / 合计 / 总计 / 小计 / 汇总 Footer Stop；
-- Formula cell 无 cached value 时的 Cell Reference 诊断；
-- `__row`；
-- Header → Cell 的 `__lineage`；
-- Canonical Field → Cell 的 `__canonicalLineage`；
-- Import diagnostics；
-- `failed_rows.csv`。
+- Production Job create / revise preflight
+- Production submit / approve blocking gate
+- Batch preflight
+- V0.31 Production Acceptance UI
 
-## V0.28 编辑器基线
+### 4. V0.31 Workspace
 
-V0.28 为多对象 Shared Group Rotation 增加 object-relative live assist：目标对象角度、目标 +90° / +180° / +270°，并保留 `Alt` 临时绕过。
+新增：
 
-## V0.27 Production 基线
+```text
+src/v31Ui.js
+src/v31Ui.css
+```
 
-当前正式 Production PDF serializer 仍是：
+提供：
+
+- Run Required Checks
+- Digital Decode PASS / FAIL
+- Geometry PASS / FAIL
+- 最大几何误差显示
+- Export Checked PDF
+- Export Approved Checked PDF
+- Approved export audit event
+
+旧 V0.27 直接生产按钮在当前 V0.31 Workspace 下隐藏，当前可见生产路径要求先通过 V0.31 acceptance。
+
+## V0.30 / V0.29 Excel & Batch
+
+当前已经具备：
+
+- `.xlsx` / `.csv` / `.tsv`
+- Multi-sheet
+- Header Detection
+- 双语 Alias
+- Mapping
+- Persistent local Mapping Profiles
+- merged-cell expansion
+- controlled Fill Down
+- TOTAL / SUBTOTAL / 合计 footer stop
+- formula-without-cache diagnostics
+- XLSX pure-zero `numFmt` leading-zero recovery subset
+- Import Review
+- source row / cell lineage
+- Dry Run
+- Web Worker Batch PDF
+- Pause / Resume / Cancel / Retry
+- Partial Failure
+- `failed_rows.csv` / `failed_rows.xlsx`
+- IndexedDB recoverable artifacts
+- Recovered ZIP
+
+## Structure / Dieline
+
+- Side-Seal / RSC 参数化结构
+- Mailer 150010
+- SVG / DXF / PDF / PDF-compatible AI 导入
+- CUT / CREASE / PERF / GLUE
+- Bezier / Arc
+- Polygon Panel
+- Panel / Fold Graph
+- CREASE → Fold Candidate
+- Bleed / Safe Area
+- Topology Repair
+- Single mm Geometry Source of Truth
+
+## Marks / Artwork
+
+- SKU / N.W. / G.W. / Package Meas / CRN / Contract No.
+- Origin / Destination / multi-package notice
+- Barcode + QR locked group
+- Shipping Icons
+- Variables / rules
+- Safe SVG Import
+- SVG Fill / Gradient / Clip subset
+- Cross-panel Artwork
+- Z-order
+- Multi-select / Align / Distribute
+- Shared transform
+- Bezier Cross Clip
+- Smart spacing / alignment / size / rotation guides
+- Persistent user guides
+- text baseline assist
+
+## 3D / Proof
+
+- hinge-pivot Fold 0–100%
+- polygon UV
+- panel texture atlas
+- Cross-panel Fragment → Folded 3D Texture
+- seam / bleed continuity diagnostics
+
+3D 只用于 Review / Orientation Check；2D Geometry / Production PDF 才是生产源。
+
+## Production PDF / Prepress
+
+当前生产 serializer：
 
 ```text
 v0.27-native-cubic-production
 ```
 
-V0.27 把 Native Cubic Bezier Clip 接入完整 Production PDF，并继续保留：
+支持路线包括：
 
-- CUT / CREASE / PERF / GLUE；
-- Spot Separation / Overprint；
-- Barcode + QR；
-- Text / Notice / Shipping Icons；
-- Technical / User TTF Outline；
-- Native axial/radial gradient；
-- multi-stop gradient；
-- varying-alpha soft mask；
-- Panel / Primitive Clip；
-- DeviceRGB 或已验证 DeviceLink DeviceCMYK；
-- PDF/X-4 Candidate OutputIntent / XMP 路线。
+- Vector Barcode / QR
+- Text / Notice / Icons
+- user TTF glyf outline subset
+- CUT / CREASE / PERF / GLUE
+- Spot Separation
+- Overprint
+- Native axial / radial gradient
+- varying-alpha Soft Mask
+- Cross-panel clipping
+- native cubic Bezier clip
+- OutputIntent
+- RGB→CMYK DeviceLink verified subset: `mft1/LUT8`, `mft2/LUT16`
 
-V0.28–V0.30 都没有静默修改 Production serializer。
-
-## 现有主要能力
-
-### Structure / Dieline
-
-- Side-Seal / RSC 参数化结构；
-- Mailer 150010；
-- SVG / DXF / PDF / PDF-compatible AI 导入；
-- CUT / CREASE / PERF / GLUE；
-- Bezier / Arc；
-- Polygon Panel；
-- Panel / Fold Graph；
-- CREASE → Fold Candidate；
-- Bleed / Safe Area；
-- Topology Repair。
-
-### Marks / Artwork
-
-- SKU / N.W. / G.W. / Package Meas / CRN / Contract No.；
-- Origin / Destination / Package Notice；
-- Code 39 / EAN-13 / UPC-A / ITF-14 / GS1-128；
-- QR Code；
-- Barcode + QR Locked Group；
-- Shipping Icons；
-- Safe SVG Import；
-- SVG Fill / Gradient / Clip safe subset；
-- Cross-panel Artwork；
-- Object Z-order；
-- Multi-select / Align / Distribute；
-- Shared Transform；
-- Bezier Cross Clip；
-- Smart Guides / Equal-gap / User Guide / Text Baseline；
-- single-object + group object-relative Rotation Assist；
-- Native Cubic Appearance Clip in Production PDF。
-
-### 3D / Proof
-
-- Hinge-pivot Fold 0–100%；
-- Polygon UV；
-- Panel Artwork Texture Atlas；
-- Cross-panel Fragment → Folded 3D Texture；
-- Fold Seam UV Diagnostics；
-- Fold Bleed Continuity Diagnostics。
-
-3D 只用于几何、面向和 Artwork 位置校样，不是 Production Source，也不宣称校色显示器级 ICC Soft Proof。
-
-### Excel / Batch
-
-- `.xlsx` / `.csv` / `.tsv`；
-- Multi-sheet；
-- Header Detection；
-- bilingual Alias；
-- merged-cell expansion；
-- controlled Fill Down；
-- Footer Stop；
-- Formula cache diagnostics；
-- leading-zero zero-mask restoration；
-- source row / cell lineage；
-- persistent local Mapping Profile；
-- Import Review Filter / Search / Sort / Open Row；
-- `failed_rows.csv` / `failed_rows.xlsx` / diagnostics JSON；
-- Batch Preflight；
-- Pause / Resume / Cancel / Retry；
-- Frozen Batch Context；
-- Web Worker Production PDF；
-- IndexedDB Recoverable Artifacts；
-- Recovered ZIP；
-- TTF / Output ICC / DeviceLink Worker Transfer。
-
-### Approval / Collaboration Foundation
-
-- Production Job / Revision / Submit / Approve / Reject；
-- local Viewer / Operator / Approver / Admin role model；
-- stale approval fingerprint；
-- Approved Production PDF Gate；
-- Export Audit Event；
-- Local Project Library；
-- Revision Envelope；
-- JSON Import / Export；
-- REST Adapter foundation；
-- `If-Match` revision protection；
-- Three-way remote merge；
-- Object / Field-level merge。
-
-这些仍是 collaboration foundation，不等同于 Hosted Backend / Auth / Server Audit 已完成。
-
-## 当前未完成的最高优先级
-
-完整清单：`docs/UNFINISHED_BASELINE_AUDIT_CURRENT.md`。
-
-当前 P0/P1 主要剩余：
-
-- Production PDF rasterize → Barcode/QR Digital Decode Required Check；
-- Preview/PDF 关键点 `<= 0.2 mm` 独立几何验收；
-- Current US Template 真实原稿对比与外部 RIP / K-only / PDF/X 验收；
-- Browser Interaction E2E；
-- Production Bundle + cryptographic SHA-256 + immutable snapshot；
-- Hosted Backend + Auth/RBAC + Server DB；
-- Factory / Country / Customer / Product Master Data；
-- Content Library；
-- Template Publish Pipeline；
-- immutable Artwork/Template Revision + append-only server Audit；
-- Blocking Comment / Two-step Approval / Scheduled Publish / Notification / External Proof Link；
-- Search / Revision Compare / Impact Analysis / Dashboard；
-- ICC mAB/mBA / General Source→Destination CMM；
-- ERP/PIM/PLM/API/Webhook/SSO/SCIM；
-- S3/R2 server artifact storage + server queue；
-- board thickness / bend radius / factory-verified print stretch compensation。
-
-## PDF/X 与 ICC 边界
-
-当前仍明确称：
+PDF/X 当前仍严格称为：
 
 ```text
 PDF/X-4 Candidate
 ```
 
-不是 Acrobat Preflight、callas pdfToolbox 或印厂 RIP 的第三方认证结果。
+未经过 Acrobat / callas / 印厂 RIP 第三方认证前，不称正式 PDF/X 合规。
 
-当前验证过的 DeviceLink subset：
+## Approval / Persistence
 
-```text
-RGB → CMYK A2B0 LUT8  / mft1
-RGB → CMYK A2B0 LUT16 / mft2
-```
+已有：
 
-尚未宣称 mAB / mBA、任意 Source ICC → Destination ICC CMM、Rendering Intent Pipeline、Black Point Compensation 或 Proof Device Simulation。
+- Production Job Draft / Submitted / Approved / Rejected
+- revision
+- stale-approval fingerprint gate
+- local Viewer / Operator / Approver / Admin permissions
+- approved export audit events
+- Local Project Library
+- Revision Envelope
+- JSON import/export
+- REST adapter foundation
+- `If-Match` revision protection
+- three-way merge foundation
 
-## 运行
-
-```bash
-python -m http.server 8080
-```
-
-打开 `http://localhost:8080`。不要直接使用 `file://`。
+当前仍是浏览器/本地协作基础，不等于 hosted Auth / RBAC / server immutable audit。
 
 ## 自动测试
 
-CI 配置当前包含：
+GitHub Actions 当前执行：
 
 ```text
 Syntax
 Smoke
 V0.10
 ...
-V0.28
-V0.29
-V0.30
+V0.31
 ```
 
-V0.30 Regression 覆盖：
+V0.31 已验证：
 
-- zero-mask detection / leading-zero restoration；
-- XLSX custom numFmt / cellXfs；
-- Mapping Profile save / resolve / apply / exact-header auto-apply；
-- mismatch blocking；
-- preflight field inference + source-cell hint；
-- Import Review filter/search；
-- `failed_rows.xlsx` OpenXML parts；
-- V0.30 storage migration；
-- V0.29 migration source retention；
-- V0.30 UI wiring；
-- Production serializer stability。
+- 5 类 Barcode Production-PDF round trip
+- QR Production-PDF round trip
+- GS1-128 canonical pattern matching + checksum
+- Preview/PDF key-point geometry acceptance `<=0.2 mm`
+- stale PDF geometry failure
+- required checks进入 preflight
+- Production Job blocking integration
+- storage migration / UI wiring
 
-详细报告：`docs/V0.30_TEST_REPORT.md`。
+验证通过的 V0.31 run：
+
+```text
+37181531606
+```
+
+详细报告：
+
+```text
+docs/V0.31_TEST_REPORT.md
+```
 
 ## 数据存储
 
-主状态：
+当前主状态：
 
 ```text
-boxstudio-mvp-v30
+boxstudio-mvp-v31
 ```
 
-V0.29 以及之前支持的版本继续作为 Migration Source。
+V0.30 及支持的更早版本继续作为 Migration Source。
 
-附加存储：
+## 对照最初开发文档的未完成清单
+
+持续维护：
 
 ```text
-boxstudio-project-library-v1
-boxstudio-remote-base-v1:<projectId>
-IndexedDB: boxstudio-artifacts-v1
+docs/UNFINISHED_BASELINE_AUDIT_CURRENT.md
 ```
 
-## 下一阶段
+该文档明确区分：
 
-继续按最初 V1/V2/V3 文档收敛：
+- 已完成；
+- 部分完成；
+- 未实现；
+- 必须依赖第三方 / 印厂 / 实体样品的 EXT 验收。
+
+下一主线：
 
 ```text
-V0.31  Digital Barcode/QR Decode + Preview/PDF Geometry Acceptance
 V0.32  Production Bundle + SHA-256 + immutable snapshot schema
 V0.33  Master Data + Content Library domain
 V0.34  Hosted Backend + Auth/RBAC + Database
@@ -321,4 +296,18 @@ V0.37  External Preflight + advanced ICC/CMM
 V0.38  ERP / API / Webhook / SSO enterprise adapters
 ```
 
-浏览器 E2E、第三方 PDF/X 认证、实体条码 ISO Grade、印厂验收在实际完成前都不会被描述为已完成。
+并行质量轨：Browser Interaction E2E、当前美线真实样稿叠加验收、外部 PDF/X/RIP、实体 Barcode/QR 扫描、工厂纸板折弯/印刷补偿验证。
+
+## 运行
+
+```bash
+python -m http.server 8080
+```
+
+打开：
+
+```text
+http://localhost:8080
+```
+
+不要直接使用 `file://`。
