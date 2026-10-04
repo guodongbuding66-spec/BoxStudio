@@ -1,21 +1,55 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { defaultState, stateForTemplate } from '../src/model.js';
 import { buildProductionPdfV27 } from '../src/productionPdfV27.js';
 import { buildAcceptedProductionPdfV31 } from '../src/productionAcceptanceV31.js';
-import { geometryAcceptanceV31, digitalDecodeRequiredCheckV31, runV31Acceptance } from '../src/acceptanceV31.js';
+import { geometryAcceptanceV31, digitalDecodeRequiredCheckV31, runV31Acceptance, parsePdfMediaBoxV31 } from '../src/acceptanceV31.js';
 
 const mode=process.env.V31_PROBE||'default-geometry';
 const clone=v=>structuredClone(v);
 const group=s=>s.elements.find(e=>e.type==='barcode-qr-group');
 function mailerState(){const s=clone(defaultState),p=stateForTemplate('mailer-150010',s.variables);s.structure=p.structure;s.elements=p.elements;s.variables=p.variables;return s;}
-function stateFor(mode){
-  if(mode.startsWith('mailer'))return mailerState();
+const cases={code39:['CODE39','BOX-31-A','QR-C39'],ean:['EAN13','400638133393','QR-EAN13'],upc:['UPCA','03600029145','QR-UPCA'],itf:['ITF14','1234567890123','QR-ITF14'],gs1:['GS1_128','(01)09501101530003(10)ABC123','QR-GS1']};
+function stateFor(kind){
+  if(kind.startsWith('mailer'))return mailerState();
   const s=clone(defaultState),g=group(s);
-  const cases={code39:['CODE39','BOX-31-A','QR-C39'],ean:['EAN13','400638133393','QR-EAN13'],upc:['UPCA','03600029145','QR-UPCA'],itf:['ITF14','1234567890123','QR-ITF14'],gs1:['GS1_128','(01)09501101530003(10)ABC123','QR-GS1']};
-  if(cases[mode]){const [type,value,qr]=cases[mode];g.barcodeType=type;g.barcodeValue=value;g.qrValue=qr;}
+  if(cases[kind]){const [type,value,qr]=cases[kind];g.barcodeType=type;g.barcodeValue=value;g.qrValue=qr;}
   return s;
 }
-if(mode==='source-mismatch'){
+function assertAccepted(state,label='accepted'){
+  const out=buildAcceptedProductionPdfV31(state);
+  assert.equal(out.report.ok,true,`${label}: ${out.report.summary}`);
+  assert.equal(out.report.geometry.ok,true,`${label}: geometry`);
+  assert.equal(out.report.digital.ok,true,`${label}: digital`);
+  assert.ok(out.report.geometry.maxErrorMm<=.2,`${label}: geometry tolerance`);
+  return out;
+}
+
+if(mode==='sequence-positive'){
+  const order=['base','mailer','code39','ean','upc','itf','gs1'];
+  for(const kind of order){
+    const s=kind==='base'?clone(defaultState):kind==='mailer'?mailerState():stateFor(kind);
+    const out=assertAccepted(s,kind);
+    console.log(`${kind}: PASS ${out.report.summary}`);
+  }
+}else if(mode==='sequence-negative'){
+  const frozen=clone(defaultState),pdf=buildProductionPdfV27(frozen);
+  const changed=clone(frozen);changed.variables.sku='DIFFERENT-SKU';let r=runV31Acceptance(changed,pdf);assert.equal(r.ok,false,'source mismatch');assert.equal(r.digital.ok,false,'source mismatch digital');console.log('source-mismatch: PASS');
+  const moved=clone(frozen);group(moved).x+=1;r=runV31Acceptance(moved,pdf);assert.equal(r.ok,false,'moved');assert.equal(r.geometry.ok,false,'moved geometry');console.log('moved-frame: PASS');
+  for(const angle of [90,180,270]){const s=clone(defaultState);group(s).r=angle;assert.throws(()=>buildAcceptedProductionPdfV31(s),/Required Check failed/);r=runV31Acceptance(s,buildProductionPdfV27(s));assert.equal(r.geometry.ok,false);console.log(`rotation-${angle}: PASS`);}
+}else if(mode==='sequence-all'){
+  const base=assertAccepted(clone(defaultState),'base');assert.ok(parsePdfMediaBoxV31(base.bytes).width>0);
+  assertAccepted(mailerState(),'mailer');
+  for(const kind of ['code39','ean','upc','itf','gs1'])assertAccepted(stateFor(kind),kind);
+  const frozen=clone(defaultState),pdf=buildProductionPdfV27(frozen),changed=clone(frozen);changed.variables.sku='DIFFERENT-SKU';assert.equal(runV31Acceptance(changed,pdf).ok,false);
+  const moved=clone(frozen);group(moved).x+=1;assert.equal(runV31Acceptance(moved,pdf).geometry.ok,false);
+  for(const angle of [90,180,270]){const s=clone(defaultState);group(s).r=angle;assert.throws(()=>buildAcceptedProductionPdfV31(s),/Required Check failed/);}
+  console.log('sequence-all: PASS');
+}else if(mode==='meta'){
+  const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('BoxStudio V0.31'));assert.ok(index.includes('v31Ui.css'));assert.ok(index.includes('v31Ui.js'));
+  const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.equal(pkg.version,'0.31.0');
+  console.log('meta: PASS');
+}else if(mode==='source-mismatch'){
   const frozen=clone(defaultState),pdf=buildProductionPdfV27(frozen),changed=clone(frozen);changed.variables.sku='DIFFERENT-SKU';const r=runV31Acceptance(changed,pdf);console.log(JSON.stringify(r.digital,null,2));assert.equal(r.ok,false);assert.equal(r.digital.ok,false);
 }else if(mode==='moved-frame'){
   const frozen=clone(defaultState),pdf=buildProductionPdfV27(frozen),changed=clone(frozen);group(changed).x+=1;const r=runV31Acceptance(changed,pdf);console.log(JSON.stringify(r.geometry,null,2));assert.equal(r.ok,false);assert.equal(r.geometry.ok,false);
