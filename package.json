@@ -1,6 +1,10 @@
 {
-  "name": "boxstudio-v0.35",
-  "version": "0.35.0",
+  "name": "boxstudio-v0.36",
+  "version": "0.36.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "start:api": "node server/httpV36.mjs",
+    "test:v36": "node tests/v36.mjs"
+  }
 }
