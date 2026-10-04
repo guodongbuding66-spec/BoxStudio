@@ -10,6 +10,7 @@
     const log=document.getElementById('v33E2ELog');
     const sleep=ms=>new Promise(r=>setTimeout(r,ms));
     async function waitFor(selector,timeout=4000){const start=performance.now();while(performance.now()-start<timeout){const el=document.querySelector(selector);if(el)return el;await sleep(30)}throw new Error(`Timeout waiting for ${selector}`)}
+    async function signal(path,key,value){try{await fetch(`${path}?${key}=${encodeURIComponent(value)}`,{cache:'no-store'})}catch(error){console.error('E2E signal failed',error)}}
     try{
       localStorage.clear();
       await sleep(50);
@@ -40,9 +41,17 @@
       const savedTable=JSON.parse(localStorage.getItem('boxstudio-mvp-v32')||'null');
       if(savedTable.elements.length<beforeTable+14)throw new Error('Table tool did not create flattened production primitives.');
       if(!document.querySelector('[data-action="undo"]')||!document.querySelector('[data-action="group"]')||!document.querySelector('#v33PanelFocus'))throw new Error('Professional controls missing.');
+      const detail=`PASS rows=${rowsAfterDuplicate} tableElements=${savedTable.elements.length}`;
       document.body.dataset.v33E2e='pass';
-      log.textContent=`PASS rows=${rowsAfterDuplicate} tableElements=${savedTable.elements.length}`;
-    }catch(error){document.body.dataset.v33E2e='fail';log.textContent=`FAIL ${error?.stack||error}`;console.error(error)}
+      log.textContent=detail;
+      await signal('/__v33_pass__','detail',detail);
+    }catch(error){
+      const message=String(error?.stack||error);
+      document.body.dataset.v33E2e='fail';
+      log.textContent=`FAIL ${message}`;
+      console.error(error);
+      await signal('/__v33_fail__','message',message);
+    }
   </script>
 </body>
 </html>
