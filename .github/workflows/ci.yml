@@ -92,6 +92,12 @@ jobs:
       - name: V0.31 enforce - symbology result types
         env: { V31_PROBE: exact-type-details }
         run: node tests/v31-probe.mjs
+      - name: V0.31 enforce - outlined text final-PDF geometry
+        env: { V31_PROBE: outlined-text }
+        run: node tests/v31-probe.mjs
+      - name: V0.31 enforce - damaged final-PDF barcode must block
+        env: { V31_PROBE: damaged-pdf }
+        run: node tests/v31-probe.mjs
       - name: V0.31 enforce - exact negative details
         env: { V31_PROBE: exact-negative-details }
         run: node tests/v31-probe.mjs
