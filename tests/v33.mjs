@@ -68,7 +68,8 @@ const mark=parseSvgMark(svg,{name:'V33 Vector Image'}),image=createSvgMarkElemen
 
 const focus=panelFocusV33(defaultState,'front');assert.equal(focus.panel.id,'front');assert.ok(focus.viewBox.split(' ').length===4);const all=fitAllV33(focus.state);assert.equal(all.state.editorV33.fitMode,'all');
 
-const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('BoxStudio V0.33'));assert.ok(index.includes('v33Ui.css'));assert.ok(index.includes('v33Ui.js'));
+// V0.33 must remain present after later releases, but the shell/package version is allowed to advance.
+const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('v33Ui.css'));assert.ok(index.includes('v33Ui.js'));
 const ui=await readFile(new URL('../src/v33Ui.js',import.meta.url),'utf8');assert.ok(ui.includes('Professional 2D'));assert.ok(ui.includes('Image SVG'));assert.ok(ui.includes('Table'));assert.ok(ui.includes('Panel Focus'));assert.ok(ui.includes("key==='c'"));assert.ok(ui.includes("key==='v'"));
-const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.equal(pkg.version,'0.33.0');
+const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));const [major,minor]=String(pkg.version||'0.0.0').split('.').map(Number);assert.ok(major>0||(major===0&&minor>=33),`Expected package version >= 0.33.0; got ${pkg.version}`);
 console.log('BoxStudio V0.33 professional 2D editor tests passed');
