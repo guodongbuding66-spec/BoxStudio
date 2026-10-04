@@ -1,14 +1,14 @@
 import { STORAGE_KEY, defaultState } from './model.js';
 import { createHostedApiV36, V36_ENDPOINT_STORAGE_KEY } from './hostedClientV36.js';
 
-const esc=(value='')=>String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
+const esc=(value='')=>String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const clone=value=>structuredClone(value);
 const slug=value=>String(value||'project').trim().toLowerCase().replace(/[^a-z0-9._-]+/g,'-').replace(/^-+|-+$/g,'')||'project';
-let host=null,observer=null,session=null,projects=[],selectedProject=null,revisions=[],auditEvents=[],errorText='',busy=false,refreshEpoch=0;
+let host=null,observer=null,session=null,projects=[],selectedProject=null,revisions=[],auditEvents=[],errorText='',busy=false,refreshEpoch=0,apiClient=null,apiEndpoint='';
 
 function endpoint(){try{return localStorage.getItem(V36_ENDPOINT_STORAGE_KEY)||'/api/v1'}catch{return'/api/v1'}}
-function setEndpoint(value){const next=String(value||'/api/v1').trim()||'/api/v1';try{localStorage.setItem(V36_ENDPOINT_STORAGE_KEY,next)}catch{}return next}
-function api(){return createHostedApiV36({baseUrl:endpoint()})}
+function setEndpoint(value){const next=String(value||'/api/v1').trim()||'/api/v1';try{localStorage.setItem(V36_ENDPOINT_STORAGE_KEY,next)}catch{}apiClient=null;apiEndpoint='';return next}
+function api(){const current=endpoint();if(!apiClient||apiEndpoint!==current){apiEndpoint=current;apiClient=createHostedApiV36({baseUrl:current});}return apiClient}
 function readProjectState(){try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');return raw?{...clone(defaultState),...raw,structure:{...defaultState.structure,...(raw.structure||{})},variables:{...defaultState.variables,...(raw.variables||{})}}:clone(defaultState)}catch{return clone(defaultState)}}
 function writeProjectIdentity(id,revision){const current=readProjectState();current.projectId=id;current.projectRemoteRevision=Number(revision)||0;current.savedAt=new Date().toISOString();localStorage.setItem(STORAGE_KEY,JSON.stringify(current))}
 function roleCan(action){const role=session?.user?.role||'viewer',map={operator:['sync','submit'],approver:['approve','reject'],admin:['sync','submit','approve','reject']};return Boolean(map[role]?.includes(action))}
