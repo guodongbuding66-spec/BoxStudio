@@ -14,23 +14,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
       - name: Syntax checks
         shell: bash
         run: |
           set -euo pipefail
-          for f in src/*.js tests/*.mjs; do
-            node --check "$f"
-          done
-
+          for f in src/*.js tests/*.mjs; do node --check "$f"; done
       - name: Smoke tests
         run: node tests/smoke.mjs
-
       - name: V0.10 profile and master-template tests
         run: node tests/v10.mjs
       - name: V0.11 rule editor, revisions and batch-master tests
@@ -74,86 +68,17 @@ jobs:
       - name: V0.30 mapping-profile, leading-zero, import-review and XLSX-failure tests
         run: node tests/v30.mjs
 
-      - name: V0.31 probe - default geometry
-        continue-on-error: true
-        env: { V31_PROBE: default-geometry }
-        run: node tests/v31-probe.mjs
-      - name: V0.31 probe - mailer geometry
-        continue-on-error: true
-        env: { V31_PROBE: mailer-geometry }
-        run: node tests/v31-probe.mjs
-      - name: V0.31 probe - default digital
-        continue-on-error: true
-        env: { V31_PROBE: default-digital }
-        run: node tests/v31-probe.mjs
-      - name: V0.31 probe - mailer digital
-        continue-on-error: true
-        env: { V31_PROBE: mailer }
-        run: node tests/v31-probe.mjs
-      - name: V0.31 probe - Code39
-        continue-on-error: true
-        env: { V31_PROBE: code39 }
-        run: node tests/v31-probe.mjs
-      - name: V0.31 probe - EAN13
-        continue-on-error: true
-        env: { V31_PROBE: ean }
-        run: node tests/v31-probe.mjs
-      - name: V0.31 probe - UPCA
-        continue-on-error: true
-        env: { V31_PROBE: upc }
-        run: node tests/v31-probe.mjs
-      - name: V0.31 probe - ITF14
-        continue-on-error: true
-        env: { V31_PROBE: itf }
-        run: node tests/v31-probe.mjs
-      - name: V0.31 probe - GS1-128
-        continue-on-error: true
-        env: { V31_PROBE: gs1 }
-        run: node tests/v31-probe.mjs
-      - name: V0.31 probe - source mismatch blocks
-        continue-on-error: true
-        env: { V31_PROBE: source-mismatch }
-        run: node tests/v31-probe.mjs
-      - name: V0.31 probe - 1mm frame drift blocks
-        continue-on-error: true
-        env: { V31_PROBE: moved-frame }
-        run: node tests/v31-probe.mjs
-      - name: V0.31 probe - 90 rotation blocks
-        continue-on-error: true
-        env: { V31_PROBE: rotation-90 }
-        run: node tests/v31-probe.mjs
-      - name: V0.31 probe - 180 rotation blocks
-        continue-on-error: true
-        env: { V31_PROBE: rotation-180 }
-        run: node tests/v31-probe.mjs
-      - name: V0.31 probe - 270 rotation blocks
-        continue-on-error: true
-        env: { V31_PROBE: rotation-270 }
-        run: node tests/v31-probe.mjs
-      - name: V0.31 probe - positive sequence in one process
-        continue-on-error: true
-        env: { V31_PROBE: sequence-positive }
-        run: node tests/v31-probe.mjs
-      - name: V0.31 probe - exact positive details
-        continue-on-error: true
+      - name: V0.31 enforce - exact positive details
         env: { V31_PROBE: exact-positive-details }
         run: node tests/v31-probe.mjs
-      - name: V0.31 probe - negative sequence in one process
-        continue-on-error: true
-        env: { V31_PROBE: sequence-negative }
-        run: node tests/v31-probe.mjs
-      - name: V0.31 probe - exact negative details
-        continue-on-error: true
+      - name: V0.31 enforce - exact negative details
         env: { V31_PROBE: exact-negative-details }
         run: node tests/v31-probe.mjs
-      - name: V0.31 probe - full sequence in one process
-        continue-on-error: true
+      - name: V0.31 enforce - full sequence in one process
         env: { V31_PROBE: sequence-all }
         run: node tests/v31-probe.mjs
-      - name: V0.31 probe - release metadata
-        continue-on-error: true
+      - name: V0.31 enforce - release metadata
         env: { V31_PROBE: meta }
         run: node tests/v31-probe.mjs
-
       - name: V0.31 Production PDF digital-decode and geometry-acceptance tests
         run: node tests/v31.mjs
