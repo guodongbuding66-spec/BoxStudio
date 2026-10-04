@@ -16,21 +16,34 @@ try{
 
   requireEl('#v35OpenReview').click();
   await tick();
-  requireEl('#boxstudio-v35-review');requireEl('#v35DielineSvg');requireEl('#v35Proof canvas');
+  requireEl('#boxstudio-v35-review');requireEl('#v35DielineSvg');const proofCanvas=requireEl('#v35Proof canvas');
   if(document.querySelectorAll('[data-v35-panel]').length<4)throw new Error('2D review did not render expected dieline panels.');
   if(document.querySelectorAll('.v35-sequence>div').length<1)throw new Error('Fold dependency sequence did not render.');
+
+  // Real 3D pointer hit: try several interior proof locations until a projected face is hit.
+  const rect=proofCanvas.getBoundingClientRect(),fractions=[[.5,.5],[.38,.5],[.62,.5],[.5,.38],[.5,.62],[.35,.35],[.65,.65]];
+  for(let i=0;i<fractions.length;i++){
+    const [fx,fy]=fractions[i],clientX=rect.left+rect.width*fx,clientY=rect.top+rect.height*fy,pointerId=40+i;
+    proofCanvas.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,clientX,clientY,pointerId,button:0,pointerType:'mouse'}));
+    proofCanvas.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,clientX,clientY,pointerId,button:0,pointerType:'mouse'}));
+    await tick();
+    if(saved().reviewV35?.lastSelectionSource==='3d')break;
+  }
+  let state=saved();
+  if(state.reviewV35?.lastSelectionSource!=='3d')throw new Error('Real 3D face pointer hit did not synchronize selection.');
+  if(state.editorV33?.focusPanelId!==state.reviewV35?.selectedPanelId)throw new Error('3D face selection did not synchronize V0.33 2D panel focus.');
 
   // 2D panel selection must persist into the shared review model used by the 3D proof.
   requireEl('[data-v35-panel="back"]').dispatchEvent(new MouseEvent('click',{bubbles:true}));
   await tick();
-  let state=saved();if(state.reviewV35?.selectedPanelId!=='back')throw new Error('2D panel selection did not persist.');
+  state=saved();if(state.reviewV35?.selectedPanelId!=='back')throw new Error('2D panel selection did not persist.');
   if(state.reviewV35?.lastSelectionSource!=='2d')throw new Error('2D selection source was not recorded.');
   if(state.editorV33?.focusPanelId!=='back')throw new Error('2D panel selection did not synchronize V0.33 panel focus.');
 
   // Select a real element, edit exact geometry, and require live revision + persistence.
   requireEl('[data-v35-element="origin"]').dispatchEvent(new MouseEvent('click',{bubbles:true}));
   await tick();
-  let x=requireEl('[data-v35-prop="x"]');x.value='84.5';x.dispatchEvent(new Event('change',{bubbles:true}));
+  const x=requireEl('[data-v35-prop="x"]');x.value='84.5';x.dispatchEvent(new Event('change',{bubbles:true}));
   await tick();
   state=saved();
   const origin=state.elements.find(item=>item.id==='origin');
@@ -52,6 +65,6 @@ try{
   if(requireEl('#v35FoldLabel').textContent.trim()!=='37%')throw new Error('Fold label did not update.');
 
   if(!document.body.textContent.includes('Graph-derived review sequence, not a factory machine program.'))throw new Error('Fold-order boundary disclosure is missing.');
-  const detail=`PASS v35 panel=${state.reviewV35.selectedPanelId} revision=${state.reviewV35.liveRevision} material=${state.structure.materialId} fold=${state.foldProgress}`;
+  const detail=`PASS v35 bidirectional panel=${state.reviewV35.selectedPanelId} revision=${state.reviewV35.liveRevision} material=${state.structure.materialId} fold=${state.foldProgress}`;
   document.body.dataset.v35E2e='pass';log.textContent=detail;await signal('/__v35_pass__','detail',detail);
 }catch(error){const message=String(error?.stack||error);document.body.dataset.v35E2e='fail';log.textContent=`FAIL ${message}`;console.error(error);await signal('/__v35_fail__','message',message)}
