@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>BoxStudio V0.33 Browser E2E</title></head>
+<body data-v33-e2e="running">
+  <div id="app">
+    <div class="workspace">
+      <div class="tabbar"><button class="active">Design</button><span class="spacer"></span></div>
+    </div>
+  </div>
+  <pre id="v33E2ELog"></pre>
+  <script type="module">
+    await import('../src/v33Ui.js');
+    await import('./v33-browser-e2e.js');
+  </script>
+</body>
+</html>
