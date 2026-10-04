@@ -8,6 +8,11 @@ import { runV31Acceptance, parsePdfMediaBoxV31 } from '../src/acceptanceV31.js';
 const clone=v=>structuredClone(v);
 function withTemplate(template){const s=clone(defaultState),preset=stateForTemplate(template,s.variables);s.structure=preset.structure;s.elements=preset.elements;s.variables=preset.variables;return s;}
 function group(state){return state.elements.find(e=>e.type==='barcode-qr-group');}
+function damageOneBarcodeBar(pdfBytes){
+  const text=Buffer.from(pdfBytes).toString('latin1'),re=/(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+re\s+f\b/g;let m;
+  while((m=re.exec(text))){const w=Number(m[3]),h=Number(m[4]);if(h>100&&w>0&&w<30){const relative=m[0].lastIndexOf('f'),at=m.index+relative,out=Uint8Array.from(pdfBytes);out[at]='S'.charCodeAt(0);return out;}}
+  throw new Error('Unable to locate a tall barcode bar in final Production PDF bytes.');
+}
 function accepted(state){
   const out=buildAcceptedProductionPdfV31(state);
   assert.equal(out.report.ok,true,out.report.summary);
@@ -19,7 +24,9 @@ function accepted(state){
   return out;
 }
 
-const base=clone(defaultState),baseOut=accepted(base);assert.equal(baseOut.report.digital.results.length,1);assert.equal(baseOut.report.digital.results[0].barcodeOk,true);assert.equal(baseOut.report.digital.results[0].qrOk,true);const media=parsePdfMediaBoxV31(baseOut.bytes);assert.ok(media.width>0&&media.height>0);
+const base=clone(defaultState),baseOut=accepted(base);assert.equal(baseOut.report.digital.results.length,1);assert.equal(baseOut.report.digital.results[0].barcodeOk,true);assert.equal(baseOut.report.digital.results[0].qrOk,true);assert.equal(baseOut.report.digital.results[0].raster.method,'production-pdf-paint-raster');assert.ok(baseOut.report.geometry.checks.some(x=>x.id==='text.sku.1'&&x.ok),'normal PDF text anchor must be independently measured');const media=parsePdfMediaBoxV31(baseOut.bytes);assert.ok(media.width>0&&media.height>0);
+
+const outlined=clone(defaultState);outlined.exportOptions.outlineText=true;outlined.exportOptions.fontMode='technical';const outlinedOut=accepted(outlined);assert.ok(outlinedOut.report.geometry.checks.some(x=>x.id.startsWith('text-outline.sku.')&&x.ok),'technical outlined text must be measured from final PDF paint geometry');
 
 const mailer=withTemplate('mailer-150010'),mailerOut=accepted(mailer);assert.equal(group(mailer).w,200);assert.equal(group(mailer).h,64);assert.equal(mailerOut.report.digital.results[0].ok,true);
 
@@ -34,6 +41,8 @@ for(const [type,value,qr] of cases){const s=clone(defaultState),g=group(s);g.bar
 
 const frozen=clone(defaultState),pdf=buildProductionPdfV27(frozen);
 const sourceChanged=clone(frozen);sourceChanged.variables.sku='DIFFERENT-SKU';const sourceReport=runV31Acceptance(sourceChanged,pdf);assert.equal(sourceReport.ok,false);assert.equal(sourceReport.digital.ok,false);assert.ok(sourceReport.digital.failures.length>0,'changed source must be rejected by digital decode gate');
+
+const damagedPdf=damageOneBarcodeBar(pdf),damagedReport=runV31Acceptance(frozen,damagedPdf);assert.equal(damagedReport.ok,false,'damaged final PDF must fail V0.31 acceptance');assert.equal(damagedReport.digital.ok,false,'damaged final PDF barcode must fail digital decode');assert.ok(damagedReport.digital.failures.some(x=>x.barcodeOk===false),'damaged final PDF must produce a barcode decode failure');
 
 const moved=clone(frozen);group(moved).x+=1;const movedReport=runV31Acceptance(moved,pdf);assert.equal(movedReport.ok,false);assert.equal(movedReport.geometry.ok,false);assert.ok(movedReport.geometry.failures.some(x=>String(x.id).startsWith('frame.')),'1 mm frame drift must exceed the 0.2 mm acceptance limit');
 
