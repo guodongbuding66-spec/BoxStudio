@@ -1,6 +1,7 @@
 import { generateGeometry, resolveElementRect, uniqueLines } from './geometry.js';
 import { renderTemplate, isPackageNoticeVisible } from './variables.js';
 import { flattenCurves } from './importDieline.js';
+import { vectorTextRects } from './vectorText.js';
 
 const PT = 72 / 25.4;
 const CODE39 = {
@@ -60,19 +61,29 @@ export function parsePdfPaintGeometryV31(pdfBytes){
   return{media,rects,lines,texts};
 }
 function rectError(a,b){return Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y),Math.abs(a.w-b.w),Math.abs(a.h-b.h));}
-function nearestRect(rects,target,{paint='S',maxSearch=12}={}){let best=null,bestError=Infinity;for(const r of rects){if(paint&&r.paint!==paint)continue;const e=rectError(r,target);if(e<bestError){best=r;bestError=e;}}return bestError<=maxSearch?{rect:best,error:bestError}:{rect:null,error:bestError};}
+function nearestRect(rects,target,{paint='S',black=null,maxSearch=12}={}){let best=null,bestError=Infinity;for(const r of rects){if(paint&&r.paint!==paint)continue;if(black!=null&&Boolean(r.black)!==Boolean(black))continue;const e=rectError(r,target);if(e<bestError){best=r;bestError=e;}}return bestError<=maxSearch?{rect:best,error:bestError}:{rect:null,error:bestError};}
 function linePairError(a,b){const direct=Math.max(Math.hypot(a.x1-b.x1,a.y1-b.y1),Math.hypot(a.x2-b.x2,a.y2-b.y2)),reverse=Math.max(Math.hypot(a.x1-b.x2,a.y1-b.y2),Math.hypot(a.x2-b.x1,a.y2-b.y1));return Math.min(direct,reverse);}
 function nearestLine(lines,target){let best=null,bestError=Infinity;for(const l of lines){const e=linePairError(l,target);if(e<bestError){best=l;bestError=e;}}return{line:best,error:bestError};}
 function visibleElements(state){if(state?.hiddenGroups?.marks)return[];return(state?.elements||[]).filter(e=>!(e.type==='notice'&&!isPackageNoticeVisible(state.variables||{})));}
 function nearestText(texts,target,used){let index=-1,bestError=Infinity;for(let i=0;i<texts.length;i++){if(used.has(i))continue;const t=texts[i],e=Math.max(Math.abs(t.x-target.x),Math.abs(t.baselineY-target.baselineY),Math.abs(t.sizeMm-target.sizeMm));if(e<bestError){index=i;bestError=e;}}if(index>=0)used.add(index);return{item:index>=0?texts[index]:null,error:bestError};}
+function sampleKeyRects(rects){if(rects.length<=3)return rects;return[rects[0],rects[Math.floor(rects.length/2)],rects.at(-1)];}
 export function geometryAcceptanceV31(state,pdfBytes,{toleranceMm=.2}={}){
   const actual=parsePdfPaintGeometryV31(pdfBytes),geo=generateGeometry(state.structure),checks=[],failures=[];
   const add=(id,error,detail,extra={})=>{const ok=Number.isFinite(error)&&error<=toleranceMm,item={id,ok,errorMm:round6(error),toleranceMm,detail,...extra};checks.push(item);if(!ok)failures.push(item);};
   add('page.width',Math.abs(actual.media.width-geo.width),`Preview ${geo.width} mm / PDF ${actual.media.width.toFixed(4)} mm`);add('page.height',Math.abs(actual.media.height-geo.height),`Preview ${geo.height} mm / PDF ${actual.media.height.toFixed(4)} mm`);
   for(const el of visibleElements(state).filter(e=>Math.abs(num(e.r))>.001)){const item={id:`rotation.${el.id}`,ok:false,errorMm:Infinity,toleranceMm,detail:`${el.id} rotation ${el.r}° is not applied by the current Production PDF serializer. Production is blocked instead of silently exporting mismatched geometry.`};checks.push(item);failures.push(item);}
   for(const el of visibleElements(state).filter(e=>e.type==='barcode-qr-group'||e.type==='shape'||e.type==='icon')){const rr=resolveElementRect(el,geo),target={x:rr.absX,y:rr.absY,w:num(el.w),h:num(el.h)},found=nearestRect(actual.rects,target,{paint:'S'});add(`frame.${el.id}`,found.rect?found.error:Infinity,found.rect?`Frame ${el.id} matched in Production PDF.`:`Frame ${el.id} not found in Production PDF.`,{expected:target,actual:found.rect});}
-  if(state?.exportOptions?.outlineText){const textEls=visibleElements(state).filter(e=>e.type==='text'||e.type==='notice');if(textEls.length){const item={id:'text.outline-independent-measurement',ok:false,errorMm:Infinity,toleranceMm,detail:'Independent Preview/PDF text-anchor measurement is unavailable while Production text is outlined; Production is blocked instead of silently skipping the required geometry check.'};checks.push(item);failures.push(item);}}
-  else{
+  if(state?.exportOptions?.outlineText){
+    if(String(state?.exportOptions?.fontMode||'technical')!=='technical'){
+      const item={id:'text.outline.ttf-independent-measurement',ok:false,errorMm:Infinity,toleranceMm,detail:'TTF outline path readback is not yet supported by the V0.31 geometry verifier. Production is blocked rather than silently skipping text geometry.'};checks.push(item);failures.push(item);
+    }else{
+      for(const el of visibleElements(state).filter(e=>e.type==='text'||e.type==='notice')){
+        const rr=resolveElementRect(el,geo),size=num(el.fontSize,4.5),content=renderTemplate(el.template||'',state.variables||{}),expected=vectorTextRects(content,rr.absX+3,rr.absY,size,{bold:Boolean(el.bold)}),samples=sampleKeyRects(expected);
+        if(!samples.length){add(`text-outline.${el.id}`,0,`Outlined text ${el.id} has no visible ink to measure.`);continue;}
+        samples.forEach((target,i)=>{const found=nearestRect(actual.rects,target,{paint:'f',black:true,maxSearch:2});add(`text-outline.${el.id}.${i+1}`,found.rect?found.error:Infinity,found.rect?`Outlined text key point ${el.id} #${i+1} matched in Production PDF.`:`Outlined text key point ${el.id} #${i+1} not found in Production PDF.`,{expected:target,actual:found.rect});});
+      }
+    }
+  }else{
     const used=new Set();
     for(const el of visibleElements(state).filter(e=>e.type==='text'||e.type==='notice')){const rr=resolveElementRect(el,geo),size=num(el.fontSize,4.5),content=renderTemplate(el.template||'',state.variables||{}),lineCount=Math.max(1,String(content).split('\n').length);for(let i=0;i<lineCount;i++){const target={x:rr.absX+3,baselineY:rr.absY+(i+1)*size*1.15,sizeMm:size},found=nearestText(actual.texts,target,used);add(`text.${el.id}.${i+1}`,found.item?found.error:Infinity,found.item?`Text anchor ${el.id} line ${i+1} matched in Production PDF.`:`Text anchor ${el.id} line ${i+1} not found in Production PDF.`,{expected:target,actual:found.item});}}
   }
