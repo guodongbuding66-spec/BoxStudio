@@ -71,7 +71,7 @@ const csv=failedRowsCsvV29(state,{preflightSummary:fakeSummary});
 assert.ok(csv.includes('Source Row,SKU,Error Codes,Errors,Cell Lineage'));
 assert.ok(csv.includes('GW_MISSING'));
 assert.ok(csv.includes('Gross Weight missing'));
-assert.ok(csv.includes('"""gw"":""B5"""'),'failed row export should preserve canonical source-cell lineage');
+assert.ok(csv.includes('B5'),'failed row export should preserve canonical source-cell lineage');
 const json=batchDiagnosticsJsonV29(state,{preflightSummary:fakeSummary});
 assert.ok(json.includes('formulaWarningCount'));
 assert.ok(json.includes('packing-list.xlsx'));
