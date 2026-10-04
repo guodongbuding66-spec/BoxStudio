@@ -130,6 +130,22 @@ jobs:
         continue-on-error: true
         env: { V31_PROBE: rotation-270 }
         run: node tests/v31-probe.mjs
+      - name: V0.31 probe - positive sequence in one process
+        continue-on-error: true
+        env: { V31_PROBE: sequence-positive }
+        run: node tests/v31-probe.mjs
+      - name: V0.31 probe - negative sequence in one process
+        continue-on-error: true
+        env: { V31_PROBE: sequence-negative }
+        run: node tests/v31-probe.mjs
+      - name: V0.31 probe - full sequence in one process
+        continue-on-error: true
+        env: { V31_PROBE: sequence-all }
+        run: node tests/v31-probe.mjs
+      - name: V0.31 probe - release metadata
+        continue-on-error: true
+        env: { V31_PROBE: meta }
+        run: node tests/v31-probe.mjs
 
       - name: V0.31 Production PDF digital-decode and geometry-acceptance tests
         run: node tests/v31.mjs
