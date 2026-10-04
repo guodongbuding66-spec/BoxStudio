@@ -20,12 +20,12 @@
 
 | 最初开发文档要求 | 当前 | V0.31 状态 | 仍未关闭 |
 |---|---:|---|---|
-| Barcode / QR Digital Decode Required Check | ✅ 数字稿 | 读取实际 Production PDF 矢量码区 → 内存栅格化 → Barcode/QR 解码 → 与 source 比较；失败进入 blocking preflight | EXT：实体印刷扫描、ISO barcode grade、外部 RIP raster 仍需外部验证 |
-| Preview / PDF Fidelity | ✅ 核心关键点 | 解析 Production PDF MediaBox / rect / text anchor / line，与 Preview mm geometry 独立比较；默认阈值 `<=0.2 mm` | Cross-panel appearance 像素、转曲 glyph 全量可视差异仍由 serializer regression / 后续浏览器 E2E 补齐 |
+| Barcode / QR Digital Decode Required Check | ✅ 数字稿 | 读取最终 Production PDF 码区 → 内存栅格化 → Barcode/QR 解码 → 与 source 比较；直接篡改 final-PDF 条码 bar 的负例必须失败；Required Check 不可关闭为 warning-only，禁用即阻断 Production | EXT：实体印刷扫描、ISO barcode grade、外部 RIP raster 仍需外部验证 |
+| Preview / PDF Fidelity | ✅ 核心关键点 | 解析最终 Production PDF MediaBox / rect / text anchor / line，与 Preview mm geometry 独立比较；默认阈值 `<=0.2 mm`；technical outlined text 纳入 final-PDF glyph rect 读回；serializer 未实现的 rotation / 未独立读回的 TTF outline 均 fail-closed | Cross-panel appearance 像素级验证仍由 serializer regression / 后续浏览器 E2E 补齐 |
 | Current US Template real sample acceptance | 🟡 | 美线规则、CodeBlock、CRN、Origin、多包逻辑已数据化 | 真实原稿逐项叠加、尺寸测量、验收报告 |
 | K-only / print-color production acceptance | 🟡 / EXT | Print Profile、Spot、OutputIntent、DeviceLink subset 已存在 | Acrobat/callas/印厂 RIP 检查，确认无意外 RGB/彩色对象 |
 | PDF/X | 🟡 / EXT | 仍只称 `PDF/X-4 Candidate` | 第三方 Preflight / RIP 通过后才能称正式符合 |
-| Font fidelity | 🟡 | 用户 TTF glyf outline 可进入生产 PDF | 真实字体 metrics、CFF/CFF2/OTF 策略、文本 measurement 验收 |
+| Font fidelity | 🟡 | 用户 TTF glyf outline 可进入生产 PDF；V0.31 对尚未独立读回的 TTF outline geometry 采用 fail-closed | 真实字体 metrics、CFF/CFF2/OTF 策略、TTF glyph-path 独立 measurement 验收 |
 | Approved Revision immutable production source | 🟡 | Production Job fingerprint、revision、approval gate | 完整不可变 ArtworkSnapshot / TemplateSnapshot / RendererSnapshot + server persistence |
 | Production Export traceability | 🟡 | 本地 audit、serializer fingerprint、artifact metadata | append-only server audit、真实用户身份、不可篡改 hash/signature |
 | Browser Interaction E2E | ⬜ | 当前 CI 仍以 syntax/domain/serializer regression 为主 | 真实浏览器覆盖导入、编辑、3D、审批、批量、下载、恢复、迁移 |
@@ -43,7 +43,7 @@
 | Rule Engine | 🟡 | Customer/Packaging/Mark Rules | 通用 `SET_VALUE / SET_TEXT / SET_STYLE / SET_LAYOUT / REQUIRE / DISABLE` schema |
 | Computed Variable | 🟡 | Package Notice、尺寸格式等已有 | 正式 dependency graph / computed schema / error policy |
 | Proof PDF Profile | 🟡 | Proof/3D proof 基础已有 | 统一 watermark / revision / template / preflight-status policy |
-| Preflight | 🟡 | V0.31 已补 Digital Decode + Geometry Acceptance | 真实字体、image DPI、transparency、外部 Preflight Adapter |
+| Preflight | 🟡 | V0.31 已补不可旁路的 Digital Decode + Geometry Acceptance | 真实字体、image DPI、transparency、外部 Preflight Adapter |
 | Revision | 🟡 | 本地 Production Job revision | server immutable ArtworkRevision + full snapshots |
 | Audit | 🟡 | 本地 audit events | append-only server audit、old/new/reason/session/signature |
 | Search | ⬜ | — | SKU / Contract / PO / Factory / CRN / Customer / Template / Revision / Date / Status |
