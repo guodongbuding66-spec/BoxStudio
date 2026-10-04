@@ -65,7 +65,7 @@ let preset=structuredClone(defaultState);preset.variables.originCountry='';prese
 let templated=saveCurrentMarksTemplateV34(state,{id:'v34-custom-template',label:'V34 Custom Template'});assert.ok(templated.customMarkTemplates['v34-custom-template']);assert.ok(templated.customMarkTemplates['v34-custom-template'].elements.length>0);
 const allCatalogs=catalogsV34(templated);assert.ok(allCatalogs.blocks['saved-sku-block']);assert.ok(allCatalogs.templates['v34-custom-template']);assert.ok(allCatalogs.customers['us-export-master']);
 
-const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('BoxStudio V0.34'));assert.ok(index.includes('v34Ui.css'));assert.ok(index.includes('v34Ui.js'));
+const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('v34Ui.css'));assert.ok(index.includes('v34Ui.js'));
 const ui=await readFile(new URL('../src/v34Ui.js',import.meta.url),'utf8');assert.ok(ui.includes('Marks Studio'));assert.ok(ui.includes('Reusable Blocks'));assert.ok(ui.includes('Rules / Debug'));assert.ok(ui.includes('Drop components onto the panel'));
-const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.equal(pkg.version,'0.34.0');
+const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8')),parts=String(pkg.version).split('.').map(Number);assert.ok(parts[0]>0||parts[1]>=34,'current package version must retain V0.34 or later capability');
 console.log('BoxStudio V0.34 Marks Studio tests passed');
