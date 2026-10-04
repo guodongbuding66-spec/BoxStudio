@@ -1,0 +1,46 @@
+const log=document.getElementById('v33E2ELog');
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function waitFor(selector,timeout=5000){const start=performance.now();while(performance.now()-start<timeout){const el=document.querySelector(selector);if(el)return el;await sleep(30)}throw new Error(`Timeout waiting for ${selector}`)}
+async function signal(path,key,value){try{await fetch(`${path}?${key}=${encodeURIComponent(value)}`,{cache:'no-store'})}catch(error){console.error('E2E signal failed',error)}}
+
+await signal('/__v33_started__','detail','driver-loaded');
+try{
+  localStorage.clear();
+  await sleep(80);
+  const open=await waitFor('#v33OpenProfessional');
+  open.click();
+  await waitFor('#boxstudio-v33-workspace');
+  await waitFor('#v33Canvas');
+  const rowsBefore=document.querySelectorAll('[data-object-row]').length;
+  if(rowsBefore<2)throw new Error('Expected default project objects.');
+  const firstRow=document.querySelector('[data-object-row]');
+  firstRow.click();
+  await sleep(30);
+  if(document.querySelectorAll('.v33-object-row.selected').length<1)throw new Error('Object selection did not update.');
+  document.querySelector('[data-action="duplicate"]').click();
+  await sleep(40);
+  const rowsAfterDuplicate=document.querySelectorAll('[data-object-row]').length;
+  if(rowsAfterDuplicate<=rowsBefore)throw new Error('Duplicate did not add an object.');
+  const xInput=await waitFor('[data-v33-prop="x"]');
+  xInput.value='77';xInput.dispatchEvent(new Event('change',{bubbles:true}));
+  await sleep(40);
+  const saved=JSON.parse(localStorage.getItem('boxstudio-mvp-v32')||'null');
+  const selected=saved?.elements?.find(x=>x.id===saved.selectedId);
+  if(!selected||Math.abs(Number(selected.x)-77)>.001)throw new Error(`Numeric inspector did not persist x=77; got ${selected?.x}`);
+  const beforeTable=saved.elements.length;
+  document.querySelector('[data-action="add-table"]').click();
+  await sleep(50);
+  const savedTable=JSON.parse(localStorage.getItem('boxstudio-mvp-v32')||'null');
+  if(savedTable.elements.length<beforeTable+14)throw new Error('Table tool did not create flattened production primitives.');
+  if(!document.querySelector('[data-action="undo"]')||!document.querySelector('[data-action="group"]')||!document.querySelector('#v33PanelFocus'))throw new Error('Professional controls missing.');
+  const detail=`PASS isolated-real-ui rows=${rowsAfterDuplicate} tableElements=${savedTable.elements.length}`;
+  document.body.dataset.v33E2e='pass';
+  log.textContent=detail;
+  await signal('/__v33_pass__','detail',detail);
+}catch(error){
+  const message=String(error?.stack||error);
+  document.body.dataset.v33E2e='fail';
+  log.textContent=`FAIL ${message}`;
+  console.error(error);
+  await signal('/__v33_fail__','message',message);
+}
