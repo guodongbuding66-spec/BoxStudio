@@ -99,3 +99,6 @@ jobs:
 
       - name: V0.31 hardening - final-PDF damage, outlined text, rotation and fail-closed gates
         run: node tests/v31-hardening.mjs
+
+      - name: V0.32 parametric template core - five engines, size modes, board compensation and catalog
+        run: node tests/v32.mjs
