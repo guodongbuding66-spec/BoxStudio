@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { defaultState, STORAGE_KEY, LEGACY_STORAGE_KEYS } from '../src/model.js';
+import { defaultState, LEGACY_STORAGE_KEYS } from '../src/model.js';
 import { leadingZeroWidthV30, restoreLeadingZerosV30, parseXlsxStylesV30, formatCodeForStyleV30, restoreCellNumericTextV30, matrixToDatasetV30 } from '../src/batchImportV30.js';
 import { mappingHeaderSignatureV30, saveMappingProfileV30, resolveMappingProfileV30, applyMappingProfileV30, autoApplyMappingProfileV30 } from '../src/mappingProfilesV30.js';
 import { fieldFromPreflightIssueV30, issueCellHintV30, buildImportReviewRowsV30, filterImportReviewRowsV30 } from '../src/importReviewV30.js';
@@ -33,7 +33,7 @@ assert.equal(filterImportReviewRowsV30(reviewRows,{status:'failed',query:'B5'}).
 const table=failedRowsTableV30(state,{preflightSummary:fakeSummary});assert.equal(table.length,2);assert.ok(table[1].includes('B5'));
 const parts=failedRowsXlsxPartsV30(state,{preflightSummary:fakeSummary});assert.ok(parts['xl/workbook.xml'].includes('Failed Rows'));assert.ok(parts['xl/worksheets/sheet1.xml'].includes('B5'));assert.ok(parts['xl/worksheets/sheet1.xml'].includes('000123'));
 
-assert.equal(STORAGE_KEY,'boxstudio-mvp-v30');assert.ok(LEGACY_STORAGE_KEYS.includes('boxstudio-mvp-v29'));assert.equal(defaultState.exportOptions.productionSerializer,'v0.27-native-cubic-production');
-const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('BoxStudio V0.30'));assert.ok(index.includes('v30Ui.css'));assert.ok(index.includes('v30Ui.js'));
-const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.equal(pkg.version,'0.30.0');
+assert.ok(LEGACY_STORAGE_KEYS.includes('boxstudio-mvp-v30'),'V0.30 projects must remain migratable after later releases');
+const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('v30Ui.css'));assert.ok(index.includes('v30Ui.js'));
+const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.ok(Number(pkg.version.split('.')[1])>=30);
 console.log('BoxStudio V0.30 tests passed');
