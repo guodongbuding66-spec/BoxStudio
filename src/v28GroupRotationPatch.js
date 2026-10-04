@@ -1,0 +1,19 @@
+import { STORAGE_KEY, defaultState } from './model.js';
+import { getCrossSelection, selectionBounds } from './crossPanelTransformV21.js';
+import { rotateCrossSelection } from './crossPanelTransformV22.js';
+import { liveGroupRotationAssistV28 } from './liveAssistV28.js';
+
+const NS='http://www.w3.org/2000/svg',clone=v=>structuredClone(v),num=(v,d=0)=>{const n=Number(v);return Number.isFinite(n)?n:d};
+function readState(){try{const p=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');return p?{...clone(defaultState),...p,crossPanelEdit:{...defaultState.crossPanelEdit,...(p.crossPanelEdit||{})}}:clone(defaultState)}catch{return clone(defaultState)}}
+function writeState(s){s.savedAt=new Date().toISOString();localStorage.setItem(STORAGE_KEY,JSON.stringify(s));}
+function svgPoint(svg,e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const m=svg.getScreenCTM();return m?p.matrixTransform(m.inverse()):{x:0,y:0};}
+function make(tag,attrs={}){const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,String(v));return n;}
+function clearPreview(svg){svg.querySelector('#boxstudio-v28-group-rotation-guide')?.remove();for(const node of svg.querySelectorAll('[data-v27-id][data-v28-preview="1"]')){node.removeAttribute('transform');node.removeAttribute('data-v28-preview');}}
+function renderPreview(svg,ids,delta,center,guides=[]){clearPreview(svg);for(const id of ids){const node=svg.querySelector(`[data-v27-id="${CSS.escape(id)}"]`);if(!node)continue;node.setAttribute('transform',`rotate(${delta} ${center.x} ${center.y})`);node.setAttribute('data-v28-preview','1');}const root=make('g',{id:'boxstudio-v28-group-rotation-guide',class:'ui-only','pointer-events':'none'}),guide=guides[0],text=make('text',{x:center.x+10,y:center.y-12,fill:'#0f766e','font-size':10,'font-weight':800});text.textContent=guide?`GROUP ROTATE · ${guide.label} · Δ ${delta.toFixed(1)}°`:`GROUP ROTATE · Δ ${delta.toFixed(1)}°`;root.appendChild(text);svg.appendChild(root);}
+function install(){const svg=document.querySelector('#designSvg');if(!svg||svg.dataset.v28GroupRotationInstalled==='1')return;svg.dataset.v28GroupRotationInstalled='1';let drag=null;
+  svg.addEventListener('pointerdown',e=>{const handle=e.target.closest?.('[data-v27-group="rotate"]');if(!handle)return;const state=readState(),ids=getCrossSelection(state);if(ids.length<2)return;e.stopImmediatePropagation();e.preventDefault();const b=selectionBounds(state,ids),center={x:b.x+b.w/2,y:b.y+b.h/2},p=svgPoint(svg,e);drag={base:clone(state),ids,center,startAngle:Math.atan2(p.y-center.y,p.x-center.x)*180/Math.PI,pointerId:e.pointerId};svg.setPointerCapture?.(e.pointerId);},true);
+  svg.addEventListener('pointermove',e=>{if(!drag)return;e.stopImmediatePropagation();e.preventDefault();const p=svgPoint(svg,e),angle=Math.atan2(p.y-drag.center.y,p.x-drag.center.x)*180/Math.PI,raw=angle-drag.startAngle,edit=drag.base.crossPanelEdit||{},assist=liveGroupRotationAssistV28(drag.base,drag.ids,raw,{enabled:!e.altKey&&edit.rotationGuides!==false,toleranceDeg:num(edit.rotationGuideToleranceDeg,3),step:num(edit.angleStep,15),includeOrthogonal:true});drag.delta=assist.delta;drag.guides=assist.guides;renderPreview(svg,drag.ids,assist.delta,drag.center,assist.guides);},true);
+  const finish=e=>{if(!drag)return;e?.stopImmediatePropagation?.();e?.preventDefault?.();const delta=Number.isFinite(drag.delta)?drag.delta:0,next=rotateCrossSelection(drag.base,drag.ids,delta,{origin:drag.center,snap:false});writeState(next);clearPreview(svg);drag=null;location.reload();};
+  svg.addEventListener('pointerup',finish,true);svg.addEventListener('pointercancel',finish,true);
+}
+const observer=new MutationObserver(()=>install());observer.observe(document.documentElement,{childList:true,subtree:true});install();
