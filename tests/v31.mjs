@@ -8,7 +8,16 @@ import { runV31Acceptance, parsePdfMediaBoxV31 } from '../src/acceptanceV31.js';
 const clone=v=>structuredClone(v);
 function withTemplate(template){const s=clone(defaultState),preset=stateForTemplate(template,s.variables);s.structure=preset.structure;s.elements=preset.elements;s.variables=preset.variables;return s;}
 function group(state){return state.elements.find(e=>e.type==='barcode-qr-group');}
-function accepted(state){const out=buildAcceptedProductionPdfV31(state);assert.equal(out.report.ok,true,out.report.summary);assert.equal(out.report.digital.ok,true);assert.equal(out.report.geometry.ok,true);assert.ok(out.report.geometry.maxErrorMm<=.2);assert.ok(out.bytes.length>1000);return out;}
+function accepted(state){
+  const out=buildAcceptedProductionPdfV31(state);
+  assert.equal(out.report.ok,true,out.report.summary);
+  assert.equal(out.report.digital.ok,true);
+  assert.equal(out.report.geometry.ok,true);
+  assert.ok(out.report.geometry.maxErrorMm<=.2);
+  assert.ok(out.bytes instanceof Uint8Array,'accepted Production PDF must be Uint8Array bytes');
+  assert.equal(new TextDecoder().decode(out.bytes.subarray(0,8)),'%PDF-1.7','accepted output must be a PDF 1.7 document');
+  return out;
+}
 
 const base=clone(defaultState),baseOut=accepted(base);assert.equal(baseOut.report.digital.results.length,1);assert.equal(baseOut.report.digital.results[0].barcodeOk,true);assert.equal(baseOut.report.digital.results[0].qrOk,true);const media=parsePdfMediaBoxV31(baseOut.bytes);assert.ok(media.width>0&&media.height>0);
 
