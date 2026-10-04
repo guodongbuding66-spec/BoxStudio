@@ -37,7 +37,9 @@ const acceptance=runProductionAcceptanceV31(base);assert.equal(acceptance.ok,tru
 const checks=runPreflight(base);const decodeCheck=checks.find(x=>x.code==='DIGITAL_DECODE_V31'),geoCheck=checks.find(x=>x.code==='PREVIEW_PDF_GEOMETRY_V31');assert.equal(decodeCheck?.severity,'pass');assert.equal(geoCheck?.severity,'pass');
 const job=createProductionJob(base,{actor:'tester',role:'operator'});assert.equal(job.preflight.errorCount,0,JSON.stringify(job.preflight.errors));
 
-assert.equal(STORAGE_KEY,'boxstudio-mvp-v31');assert.ok(LEGACY_STORAGE_KEYS.includes('boxstudio-mvp-v30'));assert.equal(defaultState.exportOptions.v31RequiredChecks,true);assert.equal(defaultState.exportOptions.geometryToleranceMm,.2);assert.equal(defaultState.exportOptions.productionSerializer,'v0.27-native-cubic-production');
-const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('BoxStudio V0.31'));assert.ok(index.includes('v31Ui.css'));assert.ok(index.includes('v31Ui.js'));
-const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.equal(pkg.version,'0.31.0');
+assert.ok(STORAGE_KEY==='boxstudio-mvp-v31'||LEGACY_STORAGE_KEYS.includes('boxstudio-mvp-v31'),'V0.31 storage must remain current or a migration source');
+assert.ok(LEGACY_STORAGE_KEYS.includes('boxstudio-mvp-v30'));
+assert.equal(defaultState.exportOptions.v31RequiredChecks,true);assert.equal(defaultState.exportOptions.geometryToleranceMm,.2);assert.equal(defaultState.exportOptions.productionSerializer,'v0.27-native-cubic-production');
+const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('v31Ui.css'));assert.ok(index.includes('v31Ui.js'));
+const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.ok(Number(pkg.version.split('.')[1])>=31,'current package must be V0.31 or later');
 console.log('BoxStudio V0.31 tests passed');
