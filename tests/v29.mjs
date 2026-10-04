@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { defaultState, STORAGE_KEY } from '../src/model.js';
+import { defaultState, STORAGE_KEY, LEGACY_STORAGE_KEYS } from '../src/model.js';
 import { canonicalHeaderKeyV29, columnIndexV29, columnLettersV29, parseMergeRefV29, expandMergedCellsV29, detectHeaderRowV29, isFooterRowV29, matrixToDatasetV29, importDiagnosticsSummaryV29 } from '../src/batchImportV29.js';
 import { batchImportReviewV29, failedRowsCsvV29, batchDiagnosticsJsonV29 } from '../src/batchReviewV29.js';
 
@@ -76,13 +76,11 @@ const json=batchDiagnosticsJsonV29(state,{preflightSummary:fakeSummary});
 assert.ok(json.includes('formulaWarningCount'));
 assert.ok(json.includes('packing-list.xlsx'));
 
-assert.equal(STORAGE_KEY,'boxstudio-mvp-v29');
+assert.ok(STORAGE_KEY.startsWith('boxstudio-mvp-v'));
+assert.ok(STORAGE_KEY==='boxstudio-mvp-v29'||LEGACY_STORAGE_KEYS.includes('boxstudio-mvp-v29'),'V0.29 state must remain a supported migration source after later releases');
 assert.equal(defaultState.exportOptions.productionSerializer,'v0.27-native-cubic-production','import hardening must not silently change production PDF serializer');
 const index=await readFile(new URL('../index.html',import.meta.url),'utf8');
-assert.ok(index.includes('BoxStudio V0.29'));
 assert.ok(index.includes('v29Ui.css'));
 assert.ok(index.includes('v29Ui.js'));
-const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));
-assert.equal(pkg.version,'0.29.0');
 
 console.log('BoxStudio V0.29 tests passed');
