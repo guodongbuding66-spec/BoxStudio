@@ -48,7 +48,8 @@ export function buildFoldDiagnosticsV35(graph={}){
     if(Math.abs(angle)>180.001)issues.push({severity:'error',code:'ANGLE_RANGE',edge:`${edge.from}->${edge.to}`,detail:`Fold angle ${angle}° exceeds ±180°.`});
   }
   for(const [id,list] of parents)if(list.length>1)issues.push({severity:'error',code:'MULTIPLE_PARENTS',panelId:id,detail:`Panel has multiple fold parents: ${unique(list).join(', ')}.`});
-  if(graph.root&&!nodes.has(graph.root))issues.push({severity:'error',code:'ROOT_MISSING',detail:`Fold root ${graph.root} is missing.`});
+  if(!graph.root&&nodes.size)issues.push({severity:'error',code:'ROOT_REQUIRED',detail:'Fold graph has panels but no root panel.'});
+  else if(graph.root&&!nodes.has(graph.root))issues.push({severity:'error',code:'ROOT_MISSING',detail:`Fold root ${graph.root} is missing.`});
 
   const sequence=[],seen=new Set(),active=new Set();let cycle=false;
   const visit=(id,depth=0)=>{
