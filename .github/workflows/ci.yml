@@ -93,3 +93,6 @@ jobs:
 
       - name: V0.30 mapping-profile, leading-zero, import-review and XLSX-failure tests
         run: node tests/v30.mjs
+
+      - name: V0.31 Production PDF digital-decode and geometry-acceptance tests
+        run: node tests/v31.mjs
