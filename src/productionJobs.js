@@ -1,4 +1,4 @@
-import { runPreflight } from './preflight.js';
+import { runPreflight } from './preflightV31.js';
 import { assertProductionPermission, normalizeProductionRole } from './permissions.js';
 
 function clone(value){ return structuredClone(value); }
