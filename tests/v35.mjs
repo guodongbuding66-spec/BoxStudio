@@ -70,6 +70,7 @@ const hinge={x1:0,y1:0,x2:1,y2:0};
 const broken={root:'a',nodes:[{id:'a'},{id:'b'}],edges:[{from:'a',to:'b',angle:90,hinge},{from:'b',to:'a',angle:-90,hinge}]};
 const brokenReport=buildFoldDiagnosticsV35(broken);assert.equal(brokenReport.ok,false);assert.equal(brokenReport.cycle,true);assert.ok(brokenReport.issues.some(issue=>issue.code==='CYCLE'));
 const missingHinge=buildFoldDiagnosticsV35({root:'a',nodes:[{id:'a'},{id:'b'}],edges:[{from:'a',to:'b',angle:90}]});assert.equal(missingHinge.ok,false);assert.ok(missingHinge.issues.some(issue=>issue.code==='HINGE_MISSING'));
+const missingRoot=buildFoldDiagnosticsV35({nodes:[{id:'a'}],edges:[]});assert.equal(missingRoot.ok,false);assert.ok(missingRoot.issues.some(issue=>issue.code==='ROOT_REQUIRED'));
 
 const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('BoxStudio V0.35'));assert.ok(index.includes('v35Ui.css'));assert.ok(index.includes('v35Ui.js'));
 const ui=await readFile(new URL('../src/v35Ui.js',import.meta.url),'utf8');assert.ok(ui.includes('2D ↔ 3D Review'));assert.ok(ui.includes('Fold Direction / Dependency Order'));assert.ok(ui.includes('Graph-derived review sequence, not a factory machine program.'));
