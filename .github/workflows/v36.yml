@@ -1,0 +1,31 @@
+name: V0.36 Hosted Backend
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  hosted-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: V0.36 syntax checks
+        run: |
+          node --check server/domainV36.mjs
+          node --check server/httpV36.mjs
+          node --check src/hostedClientV36.js
+          node --check tests/v36.mjs
+
+      - name: V0.36 real HTTP auth/RBAC/immutable revision/audit integration
+        run: node tests/v36.mjs
