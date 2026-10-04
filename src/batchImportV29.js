@@ -33,6 +33,7 @@ export function canonicalHeaderKeyV29(value=''){
 }
 
 export function columnIndexV29(ref='A1'){const letters=(String(ref).match(/[A-Z]+/i)||['A'])[0].toUpperCase();let n=0;for(const ch of letters)n=n*26+(ch.charCodeAt(0)-64);return n-1;}
+export function columnLettersV29(index=0){let n=Math.max(0,Number(index)||0)+1,out='';while(n>0){const r=(n-1)%26;out=String.fromCharCode(65+r)+out;n=Math.floor((n-1)/26);}return out;}
 export function rowIndexV29(ref='A1'){const m=String(ref).match(/(\d+)/);return Math.max(0,(Number(m?.[1])||1)-1);}
 export function parseMergeRefV29(ref=''){const [a,b=a]=String(ref).split(':');return{r1:rowIndexV29(a),c1:columnIndexV29(a),r2:rowIndexV29(b),c2:columnIndexV29(b)};}
 
@@ -51,9 +52,9 @@ export function matrixToDatasetV29(matrix=[],{mergeRefs=[],fillDown=true,scanRow
   for(let ri=header.index+1;ri<expanded.length;ri++){
     const source=[...(expanded[ri]||[])];if(isFooterRowV29(source)){footerRow=ri+1;break;}if(!source.some(v=>!blank(v)))continue;
     if(fillDown){for(let ci=0;ci<headers.length;ci++){const key=canonical[ci];if(!FILL_DOWN_KEYS.has(key))continue;if(blank(source[ci])&&!blank(lastValues[ci])){source[ci]=lastValues[ci];fillDownCells++;}else if(!blank(source[ci]))lastValues[ci]=source[ci];}}
-    const obj={__row:ri+1};headers.forEach((h,ci)=>{obj[h]=source[ci]??''});rows.push(obj);
+    const obj={__row:ri+1,__lineage:{},__canonicalLineage:{}};headers.forEach((h,ci)=>{obj[h]=source[ci]??'';const ref=`${columnLettersV29(ci)}${ri+1}`;obj.__lineage[h]=ref;const key=canonical[ci];if(key&&!obj.__canonicalLineage[key])obj.__canonicalLineage[key]=ref;});rows.push(obj);
   }
-  return{headers,rows,headerRow:header.index+1,footerRow,importDiagnostics:{headerDetected:!header.fallback,headerFallback:Boolean(header.fallback),recognizedHeaders:header.recognized,mergedRanges:(mergeRefs||[]).length,fillDownCells,footerDetected:Boolean(footerRow),formulaWarnings:[...(formulaWarnings||[])]}};
+  return{headers,rows,headerRow:header.index+1,footerRow,importDiagnostics:{headerDetected:!header.fallback,headerFallback:Boolean(header.fallback),recognizedHeaders:header.recognized,mergedRanges:(mergeRefs||[]).length,fillDownCells,footerDetected:Boolean(footerRow),formulaWarnings:[...(formulaWarnings||[])],dataStartRow:header.index+2,dataEndRow:rows.length?rows.at(-1).__row:null}};
 }
 
-export function importDiagnosticsSummaryV29(dataset={}){const d=dataset.importDiagnostics||{};return{headerRow:dataset.headerRow||0,footerRow:dataset.footerRow||null,rows:(dataset.rows||[]).length,recognizedHeaders:Number(d.recognizedHeaders)||0,mergedRanges:Number(d.mergedRanges)||0,fillDownCells:Number(d.fillDownCells)||0,formulaWarningCount:(d.formulaWarnings||[]).length,headerFallback:Boolean(d.headerFallback),footerDetected:Boolean(d.footerDetected)};}
+export function importDiagnosticsSummaryV29(dataset={}){const d=dataset.importDiagnostics||{};return{headerRow:dataset.headerRow||0,footerRow:dataset.footerRow||null,rows:(dataset.rows||[]).length,recognizedHeaders:Number(d.recognizedHeaders)||0,mergedRanges:Number(d.mergedRanges)||0,fillDownCells:Number(d.fillDownCells)||0,formulaWarningCount:(d.formulaWarnings||[]).length,headerFallback:Boolean(d.headerFallback),footerDetected:Boolean(d.footerDetected),dataStartRow:Number(d.dataStartRow)||null,dataEndRow:Number(d.dataEndRow)||null};}
