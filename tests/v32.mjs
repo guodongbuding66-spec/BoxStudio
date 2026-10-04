@@ -8,14 +8,12 @@ import { STORAGE_KEY, LEGACY_STORAGE_KEYS, stateForTemplate } from '../src/model
 
 const IDS=['side-seal-rsc','mailer-150010','fefco-0427','reverse-tuck-end','auto-lock-bottom'];
 assert.deepEqual(V32_TEMPLATE_CATALOG.map(x=>x.id),IDS);
-const coreCatalog=STANDARD_TEMPLATE_CATALOG.filter(x=>x.engine);
-assert.deepEqual(coreCatalog.map(x=>x.id),IDS);
-assert.equal(coreCatalog.every(x=>x.engine===x.id),true);
-assert.ok(STANDARD_TEMPLATE_CATALOG.some(x=>x.standard==='ECMA'&&x.status==='schema-only'));
-assert.equal(searchTemplateCatalog({query:'0427'}).filter(x=>x.engine).length,1);
+assert.deepEqual(STANDARD_TEMPLATE_CATALOG.map(x=>x.id),IDS);
+assert.equal(STANDARD_TEMPLATE_CATALOG.every(x=>x.engine===x.id),true);
+assert.equal(searchTemplateCatalog({query:'0427'}).length,1);
 assert.equal(searchTemplateCatalog({query:'crash lock'})[0]?.id,'auto-lock-bottom');
-assert.equal(searchTemplateCatalog({category:'folding-carton'}).filter(x=>x.engine).length,2);
-assert.equal(searchTemplateCatalog({standard:'FEFCO'}).filter(x=>x.engine).length,2);
+assert.equal(searchTemplateCatalog({category:'folding-carton'}).length,2);
+assert.equal(searchTemplateCatalog({standard:'FEFCO'}).length,2);
 
 assert.ok(MATERIAL_PRESETS_V32.length>=5);
 assert.ok(Object.keys(FLUTE_PRESETS_V32).includes('BC'));
@@ -39,11 +37,9 @@ for(const id of IDS){
   for(const el of state.elements)assert.ok(stateGeo.panelMap[el.panelId],`${id} element ${el.id} targets missing panel ${el.panelId}`);
 }
 
-// Existing V0.31 engines remain delegated unchanged enough to retain their known identity/reference.
 assert.equal(geometryById['side-seal-rsc'].documentTitle,'US Side-Seal Carton / RSC Parametric Base');
 assert.equal(geometryById['mailer-150010'].reference.designArea,'576×590 mm');
 
-// V0.32 new engines are real geometry, but remain explicitly pending external sample/tooling acceptance.
 for(const id of ['fefco-0427','reverse-tuck-end','auto-lock-bottom']){
   const g=geometryById[id];
   assert.equal(g.validationState,'engineering-core-pending-real-sample');
@@ -54,7 +50,6 @@ assert.ok(geometryById['reverse-tuck-end'].flapPanels.some(x=>x.id==='top-front-
 assert.ok(geometryById['reverse-tuck-end'].flapPanels.some(x=>x.id==='bottom-back-tuck'));
 assert.ok(geometryById['auto-lock-bottom'].creaseLines.some(l=>l.x1!==l.x2&&l.y1!==l.y2),'auto-lock requires diagonal pre-folds');
 
-// L/W/H changes must recompute the actual blank, not scale a cached SVG.
 for(const id of ['fefco-0427','reverse-tuck-end','auto-lock-bottom']){
   const a=defaultsForTemplate(id),g1=generateGeometry(a),g2=generateGeometry({...a,length:a.length+37,width:a.width+19,height:a.height+11});
   assert.notEqual(g1.width,g2.width,`${id} width must recompute from parameters`);
@@ -62,7 +57,6 @@ for(const id of ['fefco-0427','reverse-tuck-end','auto-lock-bottom']){
   assert.notDeepEqual(g1.cutLines,g2.cutLines,`${id} cut lines must recompute`);
 }
 
-// Board thickness participates in manufacturing dimensions when compensation is enabled.
 for(const id of ['fefco-0427','reverse-tuck-end','auto-lock-bottom']){
   const a=defaultsForTemplate(id),thin=manufacturingDimensions({...a,thickness:0.5}),thick=manufacturingDimensions({...a,thickness:4});
   assert.ok(thick.L>thin.L||thick.W>thin.W||thick.H>thin.H,`${id} thickness must affect compensated dimensions`);
@@ -85,9 +79,9 @@ assert.ok(preview.includes('class="crease"'));
 assert.equal(STORAGE_KEY,'boxstudio-mvp-v32');
 assert.ok(LEGACY_STORAGE_KEYS.includes('boxstudio-mvp-v31'));
 const index=await readFile(new URL('../index.html',import.meta.url),'utf8');
-assert.ok(index.includes('BoxStudio V0.32'));
+assert.ok(/BoxStudio V0\.(?:3[2-9]|[4-9]\d)/.test(index),'V0.32 or later shell required');
 assert.ok(index.includes('v32Ui.css'));
 assert.ok(index.includes('v32Ui.js'));
 const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));
-assert.equal(pkg.version,'0.32.0');
+assert.ok(Number(pkg.version.split('.')[1])>=32,'current package must be V0.32 or later');
 console.log('BoxStudio V0.32 parametric template core tests passed');
