@@ -158,16 +158,52 @@ jobs:
           timeout 20s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --virtual-time-budget=10000 --dump-dom http://127.0.0.1:8766/tests/v34-browser-e2e.html >/tmp/boxstudio-v34-dom.log 2>/tmp/boxstudio-v34-chrome.log || true
           if test -f /tmp/boxstudio-v34-pass; then
             cat /tmp/boxstudio-v34-pass
-            exit 0
-          fi
-          if test -f /tmp/boxstudio-v34-fail; then
+          elif test -f /tmp/boxstudio-v34-fail; then
             cat /tmp/boxstudio-v34-fail
             cat /tmp/boxstudio-v34-chrome.log || true
             cat /tmp/boxstudio-v34-dom.log || true
             exit 1
+          else
+            echo 'V0.34 browser E2E ended without PASS/FAIL signal.'
+            cat /tmp/boxstudio-v34-http.log || true
+            cat /tmp/boxstudio-v34-chrome.log || true
+            cat /tmp/boxstudio-v34-dom.log || true
+            exit 1
           fi
-          echo 'V0.34 browser E2E ended without PASS/FAIL signal.'
-          cat /tmp/boxstudio-v34-http.log || true
-          cat /tmp/boxstudio-v34-chrome.log || true
-          cat /tmp/boxstudio-v34-dom.log || true
-          exit 1
+          kill "$SERVER_PID" 2>/dev/null || true
+          trap - EXIT
+
+      - name: V0.35 2D-3D linked review - selection, diagnostics, material and fold state
+        run: node tests/v35.mjs
+
+      - name: V0.35 browser interaction - 2D focus, exact edit, material and live fold proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v35-started /tmp/boxstudio-v35-pass /tmp/boxstudio-v35-fail
+          python3 tests/v35_e2e_server.py >/tmp/boxstudio-v35-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:8767/tests/v35-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 25s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --virtual-time-budget=15000 --dump-dom http://127.0.0.1:8767/tests/v35-browser-e2e.html >/tmp/boxstudio-v35-dom.log 2>/tmp/boxstudio-v35-chrome.log || true
+          if test -f /tmp/boxstudio-v35-pass; then
+            cat /tmp/boxstudio-v35-pass
+          elif test -f /tmp/boxstudio-v35-fail; then
+            cat /tmp/boxstudio-v35-fail
+            cat /tmp/boxstudio-v35-chrome.log || true
+            cat /tmp/boxstudio-v35-dom.log || true
+            exit 1
+          else
+            echo 'V0.35 browser E2E ended without PASS/FAIL signal.'
+            cat /tmp/boxstudio-v35-http.log || true
+            cat /tmp/boxstudio-v35-chrome.log || true
+            cat /tmp/boxstudio-v35-dom.log || true
+            exit 1
+          fi
+          kill "$SERVER_PID" 2>/dev/null || true
+          trap - EXIT
