@@ -1,7 +1,7 @@
 import { applyMasterTemplate } from './masterTemplates.js';
 import { rowToVariables, autoMapHeaders } from './batch.js';
 import { normalizeVariables } from './variables.js';
-import { runPreflight } from './preflight.js';
+import { runPreflight } from './preflightV31.js';
 
 function clone(value){ return structuredClone(value); }
 
