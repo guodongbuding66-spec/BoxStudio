@@ -5,6 +5,7 @@ import { buildFoldGraph } from '../src/foldgraph.js';
 import { dielineDocumentFromStateV38, moveNodeV38 } from '../src/dielineCadV38.js';
 import { buildStructuralTopologyV39, reconcileArtworkToTopologyV39, topologyProductionGateV39, V39_TOPOLOGY_SCHEMA } from '../src/structuralTopologyEngineV39.js';
 import { buildProductionContextV39, buildProductionPdfV39, productionStateFromTopologyV39, V39_PRODUCTION_SCHEMA } from '../src/productionPdfV39.js';
+import { buildProductionPdfV27 } from '../src/productionPdfV27.js';
 import { readFile } from 'node:fs/promises';
 
 const clone=v=>structuredClone(v);
@@ -52,16 +53,22 @@ const proxy=productionStateFromTopologyV39(minimal,topology);assert.equal(proxy.
 const proxyGeo=generateGeometry(proxy.state.structure);assert.equal(proxyGeo.panelMap.front.w,60);assert.equal(proxyGeo.panelMap.back.x,60);assert.equal(proxyGeo.panelMap.back.w,40);
 const proxyGraph=buildFoldGraph(proxyGeo);assert.equal(proxyGraph.root,'front');assert.equal(proxyGraph.edges.length,1);assert.equal(proxyGraph.edges[0].hinge.x1,60);
 
-// 4. Full Production PDF must use the edited topology for both dielines and artwork placement.
+// 4. Edited topology must reach the existing full Production PDF renderer without weakening production preflight.
 const gate=topologyProductionGateV39(minimal,topology);assert.equal(gate.ok,true,JSON.stringify(gate.errors));
-const context=buildProductionContextV39(minimal,{doc:edited});assert.equal(context.schema,V39_PRODUCTION_SCHEMA);assert.equal(context.ok,true,JSON.stringify(context.errors));assert.equal(context.summary.panels,2);
-const pdf=buildProductionPdfV39(minimal,{doc:edited}),text=new TextDecoder().decode(pdf);assert.ok(pdf.length>1000);assert.match(text,/%PDF-1\.7/);assert.match(text,/\/CutContour/);assert.match(text,/\/Crease/);
-const editedFoldX=(60*PT).toFixed(4),backShapeX=(65*PT).toFixed(4);assert.ok(text.includes(editedFoldX),`Edited crease x=60mm (${editedFoldX}pt) not present in Production PDF.`);assert.ok(text.includes(backShapeX),`Back-panel artwork x=65mm (${backShapeX}pt) not remapped through rebuilt panel origin.`);
+const editedPdf=buildProductionPdfV27(proxy.state),editedText=new TextDecoder().decode(editedPdf);assert.ok(editedPdf.length>1000);assert.match(editedText,/%PDF-1\.7/);assert.match(editedText,/\/CutContour/);assert.match(editedText,/\/Crease/);
+const editedFoldX=(60*PT).toFixed(4),backShapeX=(65*PT).toFixed(4);assert.ok(editedText.includes(editedFoldX),`Edited crease x=60mm (${editedFoldX}pt) not present in Production PDF.`);assert.ok(editedText.includes(backShapeX),`Back-panel artwork x=65mm (${backShapeX}pt) not remapped through rebuilt panel origin.`);
 
-// 5. Broken topology and orphan artwork fail closed.
+// 5. The V0.39 wrapper itself must keep all production mark/preflight rules active on a real valid project.
+const defaultContext=buildProductionContextV39(defaultStateCopy,{doc:defaultDoc});assert.equal(defaultContext.schema,V39_PRODUCTION_SCHEMA);assert.equal(defaultContext.ok,true,JSON.stringify(defaultContext.errors));assert.ok(defaultContext.summary.panels>=13);
+const pdf=buildProductionPdfV39(defaultStateCopy,{doc:defaultDoc}),text=new TextDecoder().decode(pdf);assert.ok(pdf.length>1000);assert.match(text,/%PDF-1\.7/);assert.match(text,/\/CutContour/);assert.match(text,/\/Crease/);
+
+// 6. A deliberately incomplete mark fixture remains blocked by V0.39 production Preflight.
+const incompleteContext=buildProductionContextV39(minimal,{doc:edited});assert.equal(incompleteContext.ok,false);assert.ok(incompleteContext.errors.some(x=>['rule.package.notice','rule.crn.bindings','rule.barcodeQr.missing','LEGACY_BARCODE_QR_GROUP'].includes(x.code)));
+assert.throws(()=>buildProductionPdfV39(minimal,{doc:edited}),e=>e?.code==='V39_PRODUCTION_BLOCKED');
+
+// 7. Broken topology and orphan artwork fail closed.
 const broken=simpleDoc();broken.edges=broken.edges.filter(e=>e.id!=='right');const brokenTopology=buildStructuralTopologyV39(minimal,{doc:broken});assert.equal(brokenTopology.ok,false);assert.ok(brokenTopology.errors.some(x=>x.code==='TOPOLOGY_NO_PANELS'));
 const orphanState=clone(minimal);orphanState.elements.push({id:'orphan',type:'shape',group:'marks',panelId:'deleted-panel',x:0,y:0,w:5,h:5,r:0});const orphanGate=topologyProductionGateV39(orphanState,topology);assert.equal(orphanGate.ok,false);assert.ok(orphanGate.errors.some(x=>x.code==='ARTWORK_PANEL_ORPHAN'));
-assert.throws(()=>buildProductionPdfV39(orphanState,{doc:edited}),e=>e?.code==='V39_PRODUCTION_BLOCKED');
 
 const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.equal(pkg.version,'0.39.0');assert.equal(pkg.scripts['test:v39'],'node tests/v39.mjs');
-console.log(`BoxStudio V0.39 unified topology + full Production PDF passed: defaultFaces=${defaultTopology.stats.faces}, editedFaces=${topology.stats.faces}, pdf=${pdf.length}`);
+console.log(`BoxStudio V0.39 unified topology + full Production PDF passed: defaultFaces=${defaultTopology.stats.faces}, editedFaces=${topology.stats.faces}, editedPdf=${editedPdf.length}, gatedPdf=${pdf.length}`);
