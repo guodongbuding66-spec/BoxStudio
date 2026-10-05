@@ -1,6 +1,6 @@
 {
-  "name": "boxstudio-v0.43",
-  "version": "0.43.0",
+  "name": "boxstudio-v0.44",
+  "version": "0.44.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +9,8 @@
     "test:v37": "node tests/v37.mjs",
     "test:v38": "node tests/v38.mjs",
     "test:v39": "node tests/v39.mjs",
-    "test:v43": "node tests/v43.mjs"
+    "test:v43": "node tests/v43.mjs",
+    "test:v44": "node tests/v44.mjs"
   },
   "dependencies": {
     "pg": "^8.13.1"
