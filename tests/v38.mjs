@@ -37,5 +37,5 @@ const changedType=setEdgeLineTypeV38(base,base.edges.find(e=>e.lineType==='CUT')
 const polygonDoc=structuredClone(simple);polygonDoc.panels=[{id:'poly',label:'POLY',kind:'panel',points:[[10,10],[90,10],[80,50],[20,50]]}];polygonDoc.zones={bleed:[],safe:[],glue:[]};const polygonPreflight=runPreflightV38(state,{doc:polygonDoc});assert.ok(polygonPreflight.warnings.some(x=>x.code==='POLYGON_OFFSET_REVIEW'),'Polygon bleed/safe must remain fail-visible until a true offset engine exists.');
 const forced=structuredClone(base);forced.edges.push({id:'bad-v38',a:base.nodes[0].id,b:'missing-node',lineType:'CUT',curve:'line'});const gate=productionGateV38(state,{doc:forced});assert.equal(gate.ok,false);assert.ok(gate.blockingCodes.includes('NODE_REFERENCE_MISSING'));
 
-const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.equal(pkg.version,'0.38.0');assert.equal(pkg.scripts['test:v38'],'node tests/v38.mjs');
+const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));const [major,minor]=String(pkg.version).split('.').map(Number);assert.ok(major>0||(major===0&&minor>=38),`V0.38 regression requires package version >= 0.38.0; got ${pkg.version}`);assert.equal(pkg.scripts['test:v38'],'node tests/v38.mjs');
 console.log('BoxStudio V0.38 semantic dieline CAD, preflight, SVG/DXF/PDF tests passed');
