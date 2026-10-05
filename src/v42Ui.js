@@ -4,11 +4,11 @@ import { V32_TEMPLATE_CATALOG } from './parametricTemplatesV32.js';
 
 const VERSION='V0.42';
 const clone=v=>structuredClone(v);
-const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
 const n=(v,d=0)=>Number.isFinite(Number(v))?Number(v):d;
 const clamp=(v,min,max)=>Math.min(max,Math.max(min,v));
 const NS='http://www.w3.org/2000/svg';
-let observer=null,detailHost=null,foldAnimation=0;
+let observer=null,detailHost=null,foldTimer=0;
 
 const CONTROL_SPECS=Object.freeze([
   {id:'flapTaper',label:'Flap taper',unit:'mm',max:30,step:.5,help:'Inset the free edge of supported tuck flaps.'},
@@ -92,20 +92,25 @@ function injectPanelLabels(){
 }
 
 function enhanceInspector(){
-  document.querySelectorAll('.v40-inspector-content .panel-section').forEach(section=>{if(section.dataset.v42Collapse)return;const title=section.querySelector('h4');if(!title)return;section.dataset.v42Collapse='ready';title.title='Click to collapse';title.onclick=()=>section.classList.toggle('v42-collapsed')});
+  document.querySelectorAll('.v40-inspector-content .panel-section').forEach(section=>{if(section.dataset.v42Collapse)return;const title=section.querySelector('h4,h3');if(!title)return;section.dataset.v42Collapse='ready';title.title='Click to collapse';title.onclick=()=>section.classList.toggle('v42-collapsed')});
   const workspace=document.querySelector('.workspace.v40-shell'),right=document.querySelector('.v40-rightdeck');if(!workspace||!right||right.querySelector('.v42-resize-handle'))return;
   const saved=Number(localStorage.getItem('boxstudio-v42-inspector-width'));if(Number.isFinite(saved)&&saved>=280&&saved<=520)workspace.style.setProperty('--v42-inspector-width',`${saved}px`);
   const handle=document.createElement('div');handle.className='v42-resize-handle';handle.title='Drag to resize Inspector / 3D panel';right.prepend(handle);
   let dragging=false;handle.onpointerdown=e=>{dragging=true;handle.setPointerCapture?.(e.pointerId);document.body.classList.add('v42-resizing')};handle.onpointermove=e=>{if(!dragging)return;const rect=workspace.getBoundingClientRect(),width=clamp(rect.right-e.clientX,280,520);workspace.style.setProperty('--v42-inspector-width',`${Math.round(width)}px`);localStorage.setItem('boxstudio-v42-inspector-width',String(Math.round(width)))};handle.onpointerup=handle.onpointercancel=()=>{dragging=false;document.body.classList.remove('v42-resizing')};
 }
 
-function setFold(range,value){range.value=String(clamp(value,0,100));range.dispatchEvent(new Event('input',{bubbles:true}))}
+function setFold(range,value){range.value=String(Math.round(clamp(value,0,100)));range.dispatchEvent(new Event('input',{bubbles:true}))}
+function stopFoldAnimation(){if(foldTimer){clearInterval(foldTimer);foldTimer=0}}
+function playFold(range){
+  stopFoldAnimation();let current=Number(range.value);if(current>=99){setFold(range,0);current=0}
+  foldTimer=setInterval(()=>{current=Math.min(100,current+4);setFold(range,current);if(current>=100){stopFoldAnimation();setFold(range,100)}},40);
+}
 function decorateFoldStrip(){
   const bar=document.querySelector('.v41-fold-strip');if(!bar||bar.querySelector('.v42-fold-controls'))return;const range=bar.querySelector('[data-v41-fold]');if(!range)return;
   const controls=document.createElement('div');controls.className='v42-fold-controls';controls.innerHTML=`${[0,50,100].map(v=>`<button data-v42-fold-step="${v}">${v}</button>`).join('')}<button class="play" data-v42-fold-play title="Play assembly">▶</button>`;bar.insertBefore(controls,bar.querySelector('[data-v41-review]'));
-  controls.querySelectorAll('[data-v42-fold-step]').forEach(b=>b.onclick=()=>{cancelAnimationFrame(foldAnimation);setFold(range,Number(b.dataset.v42FoldStep))});
-  controls.querySelector('[data-v42-fold-play]').onclick=()=>{cancelAnimationFrame(foldAnimation);if(Number(range.value)>=99)setFold(range,0);const start=performance.now(),from=Number(range.value),duration=1400;const tick=now=>{const t=clamp((now-start)/duration,0,1),eased=t*t*(3-2*t);setFold(range,from+(100-from)*eased);if(t<1)foldAnimation=requestAnimationFrame(tick)};foldAnimation=requestAnimationFrame(tick)};
-  range.addEventListener('pointerdown',()=>cancelAnimationFrame(foldAnimation));
+  controls.querySelectorAll('[data-v42-fold-step]').forEach(b=>b.onclick=()=>{stopFoldAnimation();setFold(range,Number(b.dataset.v42FoldStep))});
+  controls.querySelector('[data-v42-fold-play]').onclick=()=>playFold(range);
+  range.addEventListener('pointerdown',stopFoldAnimation);
 }
 
 function freePolicy(){document.body.dataset.v42Free='true';document.body.dataset.v42ApprovalRequired='false'}
