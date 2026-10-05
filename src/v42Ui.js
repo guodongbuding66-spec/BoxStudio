@@ -4,7 +4,7 @@ import { V32_TEMPLATE_CATALOG } from './parametricTemplatesV32.js';
 
 const VERSION='V0.42';
 const clone=v=>structuredClone(v);
-const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const n=(v,d=0)=>Number.isFinite(Number(v))?Number(v):d;
 const clamp=(v,min,max)=>Math.min(max,Math.max(min,v));
 const NS='http://www.w3.org/2000/svg';
