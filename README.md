@@ -1,313 +1,320 @@
-# BoxStudio V0.31
+# BoxStudio V0.40
 
-BoxStudio 是浏览器内运行的包装纸盒结构、2D 刀版、唛头 Artwork、3D 折叠校样、Excel 批量生产、印前检查、生产审批与生产文件导出原型。
+BoxStudio 是一个**所有人免费使用、无需登录、无需审核**的浏览器纸盒设计与生产文件工具。
 
-当前主线：**参数化结构 + Panel-aware Geometry + Rules / Master Templates + Cross-panel Artwork + Folded 3D Proof + Recoverable Web Worker Batch + Production Approval + ICC / Spot / Overprint + Resilient Excel Import + Production PDF Required Checks**。
+核心目标：
 
-## V0.31：Production Acceptance
+> 从选择盒型、输入尺寸开始，在一个项目内完成参数化结构、2D 包装设计、唛头编辑、刀版 CAD、3D 成盒检查、Preflight 与生产文件导出。
 
-V0.31 对照最初 V1/V2/V3 开发文档，关闭了两个长期 P0 数字稿检查缺口。
+产品参考方向：
 
-### 1. Barcode / QR Digital Decode Required Check
+- **Pacdora**：模板驱动、低门槛尺寸/材料/纸厚设置、即时 3D、生产格式导出；
+- **Packform / ds.mxder.com**：毫米级画布、结构节点、直线/圆弧/Bézier、可编辑刀版、2D↔3D；
+- **BoxStudio 差异化**：Shipping Mark / 唛头工作区、变量规则、条码/QR、批量数据、专业 Preflight 与统一生产几何链。
 
-新增：
+BoxStudio 借鉴成熟产品的工作流和交互原则，不复制第三方品牌、文案、图标或受版权保护的视觉资产。
 
-```text
-src/digitalDecodeV31.js
-src/digitalDecodeGateV31.js
-```
+---
 
-流程不是只验证编码器输入，而是：
+## 免费使用原则
 
-```text
-Production PDF bytes
-→ 解析实际 Barcode / QR 矢量矩形
-→ 对码区进行内存栅格化
-→ 独立解码
-→ 与源数据比较
-→ PASS / blocking ERROR
-```
+V0.40 起，默认产品路径固定为：
 
-当前回归覆盖：
+- ¥0 / 免费；
+- 不要求注册或登录；
+- 不需要 Approver；
+- 不需要 Production Approval；
+- 不需要订阅；
+- Templates、2D、Marks、Dieline CAD、3D、Preflight、PDF/SVG/DXF 与 Production PDF 均直接可用；
+- **生产导出的硬门只有客观的结构/印前检查错误。**
 
-- Code 39
-- EAN-13
-- UPC-A
-- ITF-14
-- GS1-128 / Code128-B + FNC1 + checksum
-- QR Version 1–4 / ECL L / byte mode
+V0.36/V0.37 的 Hosted Auth/RBAC/Approval/PostgreSQL 代码继续保留，作为未来可选团队协作基础，但**不进入普通用户默认工作流**。
 
-GS1-128 使用 canonical Code128 symbol table 做逐符号 raster-run pattern fitting，避免简单最小线宽量化造成的误判。
+---
 
-**边界：**这是生成 PDF 数字稿的 artifact check，不是实体印刷条码 ISO Grade，也不是硬件扫描枪验收。
-
-### 2. Preview / PDF Geometry Acceptance
-
-新增：
+## 主工作流
 
 ```text
-src/geometryAcceptanceV31.js
+1 选择盒型
+      ↓
+2 尺寸 / 材料 / 纸厚
+      ↓
+3 平面设计
+      ↓
+Shipping Marks / Barcode / QR
+      ↓
+Dieline CAD
+      ↓
+4 3D 检查
+      ↓
+5 Preflight
+      ↓
+6 导出
 ```
 
-系统会从当前 Preview 的 mm Geometry 建立关键点，再从生成后的 Production PDF 中重新解析坐标进行比较：
+用户可以走简单流程，也可以随时进入专业 CAD/Prepress 层。
 
-- MediaBox 物理尺寸
-- Barcode/QR Group 等核心矩形
-- Text / Notice anchor（非转曲模式）
-- Artwork line
-- CUT / CREASE / PERF / GLUE key lines
+---
 
-默认验收阈值：
+## Template Center
+
+当前具备 5 个真实参数化结构核心：
+
+- Side-Seal / FEFCO 0201 RSC
+- Mailer / Flip-top 150010
+- FEFCO 0427
+- Reverse Tuck End
+- Auto-lock Bottom
+
+支持：
+
+- 搜索 / 分类；
+- FEFCO / Model ID；
+- 刀版缩略预览；
+- L / W / H；
+- Internal / External / Manufacturing Dimension；
+- Material / Flute / Thickness；
+- 结构参数变化后重新计算真实几何。
+
+0427 / RTE / Auto-lock 已形成工程几何核心，但在真实 CAD 叠图、纸板补偿与工厂样箱验证完成前，不标记为 factory tooling certified。
+
+---
+
+## Professional 2D Editor
+
+当前能力包括：
+
+- 毫米坐标；
+- 多选；
+- Group / Ungroup；
+- Copy / Paste / Duplicate；
+- Front / Back / Forward / Backward；
+- Align / Distribute；
+- X / Y / W / H / Rotation / Panel；
+- 直接拖动 / Resize / Rotate；
+- Layers / Hide / Lock；
+- Panel Focus / Fit All；
+- Undo / Redo；
+- Table；
+- SVG Vector Image；
+- Artwork / Marks / Dieline 分层。
+
+---
+
+## Shipping Marks Studio
+
+唛头是 BoxStudio 的核心功能，不是普通文本框。
+
+组件包括：
+
+- SKU
+- N.W. / G.W.
+- Package Dimensions
+- Origin / Destination
+- CRN
+- Contract No.
+- Package X / Total Packages
+- Barcode
+- QR Code
+- This Side Up / Fragile / Keep Dry
+- Custom Symbol
+
+支持：
+
+- `{{variable}}` 数据绑定；
+- Variable Picker；
+- Missing Variable；
+- Reusable Blocks；
+- Customer Preset；
+- SHOW / HIDE 条件规则；
+- Package Count / Country / Customer / 任意变量条件；
+- 规则可见性进入真实 Production Artwork Plan。
+
+---
+
+## 2D ↔ 3D
+
+- 2D Panel → 3D 高亮；
+- 3D 点击 → 2D Panel Focus；
+- 2D artwork 修改后刷新 3D proof；
+- Fold 0–100%；
+- Fold direction / dependency diagnostics；
+- Material / Flute / Thickness preview；
+- Canvas hit-test 已处理 CSS 缩放坐标映射。
+
+3D 用于结构、方向和外观 Review；生产几何仍以 2D mm 数据为权威来源。
+
+---
+
+## Professional Dieline CAD
+
+V0.38+ 的刀版不是背景图片，而是语义结构文档：
 
 ```text
-<= 0.2 mm
+Node
+Edge
+Panel
+CUT
+CREASE
+PERF
+GLUE
+BLEED
+SAFE
 ```
 
-这对应最初 V3 PoC E 的 Preview/PDF Fidelity 目标。
+支持：
 
-### 3. Required Checks 进入生产链路
+- 节点数值编辑；
+- 节点直接拖动；
+- CUT / CREASE / PERF / GLUE 转换；
+- Line；
+- Cubic Bézier；
+- Arc；
+- C1/C2 控制柄；
+- Add Node；
+- de Casteljau 精确 Cubic Split；
+- 安全 Delete Node；
+- SVG / DXF / Dieline PDF。
 
-新增：
+Native Arc Split 仍 fail-closed；需要先转换后再拆点。
+
+---
+
+## Unified Structural Topology
+
+V0.39 已关闭“编辑刀版后下游仍使用旧模板几何”的问题。
+
+现在数据链为：
 
 ```text
-src/preflightV31.js
+Edited CUT / CREASE
+→ Planarization
+→ Intersection / T-junction nodes
+→ Bounded Panels
+→ Fold adjacency / Hinges
+→ Artwork panel reconciliation
+→ Production Preflight
+→ Full Production PDF
 ```
 
-required checks：
+如果原 Panel 身份无法可靠保持：
 
 ```text
-DIGITAL_DECODE_V31
-PREVIEW_PDF_GEOMETRY_V31
+PANEL_REMAP_REQUIRED
 ```
 
-并已接入：
+直接阻断生产，不会把 artwork 猜测映射到最近的面。
 
-- Production Job create / revise preflight
-- Production submit / approve blocking gate
-- Batch preflight
-- V0.31 Production Acceptance UI
+---
 
-### 4. V0.31 Workspace
+## V0.40 Production Offset Engine
 
-新增：
+V0.40 开始，复杂 Panel 的 Bleed / Safe 不再只显示矩形占位提示。
 
-```text
-src/v31Ui.js
-src/v31Ui.css
-```
+支持：
 
-提供：
+- Polygon outward Bleed Offset；
+- Polygon inward Safe Offset；
+- Miter Join；
+- Round Join；
+- Bevel Join；
+- Miter Limit；
+- Self-intersection detection；
+- 有限自动 repair；
+- 无法修复时 fail-closed；
+- Dieline CAD 中真实 polygon overlay；
+- Offset 结果进入 V0.40 Production Preflight；
+- Full Production PDF 仅由客观 Preflight gate 控制。
 
-- Run Required Checks
-- Digital Decode PASS / FAIL
-- Geometry PASS / FAIL
-- 最大几何误差显示
-- Export Checked PDF
-- Export Approved Checked PDF
-- Approved export audit event
+---
 
-旧 V0.27 直接生产按钮在当前 V0.31 Workspace 下隐藏，当前可见生产路径要求先通过 V0.31 acceptance。
+## Preflight
 
-## V0.30 / V0.29 Excel & Batch
+当前覆盖包括：
 
-当前已经具备：
+- 结构断点 / 缺 Node；
+- Degenerate Edge；
+- Duplicate Edge；
+- CUT Intersection；
+- Open CUT Endpoint；
+- Fold Graph / Hinge；
+- Panel remap / orphan artwork；
+- Bleed / Safe；
+- Artwork 跨折线 / 越界；
+- Raster effective DPI；
+- 字体；
+- Barcode / QR；
+- 变量 / 唛头规则；
+- Digital Decode；
+- Preview ↔ Production PDF geometry acceptance。
 
-- `.xlsx` / `.csv` / `.tsv`
-- Multi-sheet
-- Header Detection
-- 双语 Alias
-- Mapping
-- Persistent local Mapping Profiles
-- merged-cell expansion
-- controlled Fill Down
-- TOTAL / SUBTOTAL / 合计 footer stop
-- formula-without-cache diagnostics
-- XLSX pure-zero `numFmt` leading-zero recovery subset
-- Import Review
-- source row / cell lineage
-- Dry Run
-- Web Worker Batch PDF
-- Pause / Resume / Cancel / Retry
-- Partial Failure
-- `failed_rows.csv` / `failed_rows.xlsx`
-- IndexedDB recoverable artifacts
-- Recovered ZIP
+---
 
-## Structure / Dieline
+## Export
 
-- Side-Seal / RSC 参数化结构
-- Mailer 150010
-- SVG / DXF / PDF / PDF-compatible AI 导入
-- CUT / CREASE / PERF / GLUE
-- Bezier / Arc
-- Polygon Panel
-- Panel / Fold Graph
-- CREASE → Fold Candidate
-- Bleed / Safe Area
-- Topology Repair
-- Single mm Geometry Source of Truth
+### Dieline
 
-## Marks / Artwork
+- SVG
+- DXF
+- 1:1 PDF
 
-- SKU / N.W. / G.W. / Package Meas / CRN / Contract No.
-- Origin / Destination / multi-package notice
-- Barcode + QR locked group
-- Shipping Icons
-- Variables / rules
-- Safe SVG Import
-- SVG Fill / Gradient / Clip subset
-- Cross-panel Artwork
-- Z-order
-- Multi-select / Align / Distribute
-- Shared transform
-- Bezier Cross Clip
-- Smart spacing / alignment / size / rotation guides
-- Persistent user guides
-- text baseline assist
+### Production
 
-## 3D / Proof
-
-- hinge-pivot Fold 0–100%
-- polygon UV
-- panel texture atlas
-- Cross-panel Fragment → Folded 3D Texture
-- seam / bleed continuity diagnostics
-
-3D 只用于 Review / Orientation Check；2D Geometry / Production PDF 才是生产源。
-
-## Production PDF / Prepress
-
-当前生产 serializer：
-
-```text
-v0.27-native-cubic-production
-```
-
-支持路线包括：
-
+- Full Production PDF
+- CutContour / Crease / Perforation / Glue semantic spot lines
 - Vector Barcode / QR
-- Text / Notice / Icons
-- user TTF glyf outline subset
-- CUT / CREASE / PERF / GLUE
-- Spot Separation
-- Overprint
-- Native axial / radial gradient
-- varying-alpha Soft Mask
+- User TTF outline subset
+- Spot Separation / Overprint
+- Gradient / Soft Mask
 - Cross-panel clipping
-- native cubic Bezier clip
 - OutputIntent
-- RGB→CMYK DeviceLink verified subset: `mft1/LUT8`, `mft2/LUT16`
+- ICC DeviceLink verified subset
 
-PDF/X 当前仍严格称为：
+PDF/X 当前仍严格称为 **PDF/X-4 Candidate**；没有第三方 Acrobat/callas/印厂 RIP 验证前，不声称正式 PDF/X 合规。
 
-```text
-PDF/X-4 Candidate
-```
+---
 
-未经过 Acrobat / callas / 印厂 RIP 第三方认证前，不称正式 PDF/X 合规。
+## Batch / Data
 
-## Approval / Persistence
+- XLSX / CSV / TSV；
+- Multi-sheet；
+- Header detection；
+- 双语 Alias；
+- Mapping Profiles；
+- source row/cell lineage；
+- Dry Run；
+- Web Worker Batch PDF；
+- Pause / Resume / Cancel / Retry；
+- Partial Failure；
+- failed rows export；
+- IndexedDB recoverable artifacts。
 
-已有：
+---
 
-- Production Job Draft / Submitted / Approved / Rejected
-- revision
-- stale-approval fingerprint gate
-- local Viewer / Operator / Approver / Admin permissions
-- approved export audit events
-- Local Project Library
-- Revision Envelope
-- JSON import/export
-- REST adapter foundation
-- `If-Match` revision protection
-- three-way merge foundation
+## Optional Hosted Foundation
 
-当前仍是浏览器/本地协作基础，不等于 hosted Auth / RBAC / server immutable audit。
+仓库仍保留 V0.36/V0.37：
 
-## 自动测试
+- Auth / RBAC；
+- Immutable Revision；
+- Approval workflow；
+- Audit hash chain；
+- PostgreSQL persistence；
+- Idempotency；
+- Immutable Production Archive。
 
-GitHub Actions 当前执行：
+这些现在是**可选基础设施**，不是 BoxStudio 免费设计器的前置条件。
 
-```text
-Syntax
-Smoke
-V0.10
-...
-V0.31
-```
+---
 
-V0.31 已验证：
+## Reference / Product Direction
 
-- 5 类 Barcode Production-PDF round trip
-- QR Production-PDF round trip
-- GS1-128 canonical pattern matching + checksum
-- Preview/PDF key-point geometry acceptance `<=0.2 mm`
-- stale PDF geometry failure
-- required checks进入 preflight
-- Production Job blocking integration
-- storage migration / UI wiring
+详见：
 
-验证通过的 V0.31 run：
+- `docs/BOXSTUDIO_DEVELOPMENT_SPEC_CURRENT.md`
+- `docs/V0.40_REFERENCE_RESTUDY.md`
+- `docs/UNFINISHED_BASELINE_AUDIT_CURRENT.md`
 
-```text
-37181531606
-```
+当前研发原则：
 
-详细报告：
-
-```text
-docs/V0.31_TEST_REPORT.md
-```
-
-## 数据存储
-
-当前主状态：
-
-```text
-boxstudio-mvp-v31
-```
-
-V0.30 及支持的更早版本继续作为 Migration Source。
-
-## 对照最初开发文档的未完成清单
-
-持续维护：
-
-```text
-docs/UNFINISHED_BASELINE_AUDIT_CURRENT.md
-```
-
-该文档明确区分：
-
-- 已完成；
-- 部分完成；
-- 未实现；
-- 必须依赖第三方 / 印厂 / 实体样品的 EXT 验收。
-
-下一主线：
-
-```text
-V0.32  Production Bundle + SHA-256 + immutable snapshot schema
-V0.33  Master Data + Content Library domain
-V0.34  Hosted Backend + Auth/RBAC + Database
-V0.35  Template Publish + Artwork Workflow + Server Audit
-V0.36  Compare + Impact Analysis + Search + Dashboard
-V0.37  External Preflight + advanced ICC/CMM
-V0.38  ERP / API / Webhook / SSO enterprise adapters
-```
-
-并行质量轨：Browser Interaction E2E、当前美线真实样稿叠加验收、外部 PDF/X/RIP、实体 Barcode/QR 扫描、工厂纸板折弯/印刷补偿验证。
-
-## 运行
-
-```bash
-python -m http.server 8080
-```
-
-打开：
-
-```text
-http://localhost:8080
-```
-
-不要直接使用 `file://`。
+> 先把模板、结构、2D、唛头、Dieline CAD、3D、Preflight、生产导出做到真正好用，再扩展外围企业系统。
