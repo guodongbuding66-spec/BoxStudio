@@ -1,0 +1,65 @@
+name: V0.45 Live Curve Constraints
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  live-curve-constraints:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Syntax and live curve constraint regression
+        run: |
+          node --check src/curveConstraintsV45.js
+          node --check src/preflightV45.js
+          node --check src/v45Ui.js
+          node --check tests/v45.mjs
+          node --check tests/v45-browser-e2e.js
+          node tests/v44.mjs
+          node tests/v45.mjs
+          grep -q "v45Ui.js" index.html
+          grep -q "v45Ui.css" index.html
+          grep -q "liveContinuity:true" src/v45Ui.js
+          grep -q "filletChamfer:true" src/v45Ui.js
+          grep -q "dimensionConstraints:true" src/v45Ui.js
+      - name: Real Chrome live constraints and corner workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v45-started /tmp/boxstudio-v45-pass /tmp/boxstudio-v45-fail
+          python3 tests/v45_e2e_server.py >/tmp/boxstudio-v45-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8775/tests/v45-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 100s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --virtual-time-budget=70000 --dump-dom http://127.0.0.1:8775/tests/v45-browser-e2e.html >/tmp/boxstudio-v45-dom.log 2>/tmp/boxstudio-v45-chrome.log || true
+          if test -f /tmp/boxstudio-v45-pass; then
+            cat /tmp/boxstudio-v45-pass
+          elif test -f /tmp/boxstudio-v45-fail; then
+            cat /tmp/boxstudio-v45-fail
+            cat /tmp/boxstudio-v45-chrome.log || true
+            cat /tmp/boxstudio-v45-dom.log || true
+            exit 1
+          else
+            echo 'V0.45 browser E2E ended without PASS/FAIL signal.'
+            cat /tmp/boxstudio-v45-http.log || true
+            cat /tmp/boxstudio-v45-chrome.log || true
+            cat /tmp/boxstudio-v45-dom.log || true
+            exit 1
+          fi
+          kill "$SERVER_PID" 2>/dev/null || true
+          trap - EXIT
