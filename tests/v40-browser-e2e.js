@@ -1,5 +1,5 @@
 import { STORAGE_KEY } from '../src/model.js';
-const frame=document.getElementById('appFrame'),win=frame.contentWindow,doc=frame.contentDocument;
+const win=window,doc=document;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function waitFor(fn,label,timeout=12000){const end=Date.now()+timeout;while(Date.now()<end){try{const v=fn();if(v)return v}catch{}await sleep(50)}throw new Error(`Timed out: ${label}`)}
 function assert(ok,msg){if(!ok)throw new Error(msg)}
@@ -42,5 +42,5 @@ try{
   await waitFor(()=>!doc.querySelector('#boxstudio-v35-review'),'2D/3D review close');
 
   const detail=`PASS free=true approval=false shell=4-zone preview=persistent structure=${before}->${after} cad=ok split=ok export=anonymous`;
-  document.getElementById('log').textContent=detail;document.body.dataset.v40E2e='pass';await signal('/__v40_pass__',detail);
-}catch(error){const detail=`FAIL ${error?.stack||error}`;document.getElementById('log').textContent=detail;document.body.dataset.v40E2e='fail';await signal('/__v40_fail__',detail);throw error}
+  doc.getElementById('log').textContent=detail;doc.body.dataset.v40E2e='pass';await signal('/__v40_pass__',detail);
+}catch(error){const detail=`FAIL ${error?.stack||error}`;doc.getElementById('log').textContent=detail;doc.body.dataset.v40E2e='fail';await signal('/__v40_fail__',detail);throw error}
