@@ -20,11 +20,14 @@ function clickTab(name){document.querySelector(`.tabbar [data-tab="${name}"]`)?.
 function clickTool(name){document.querySelector(`.toolbar [data-tool="${name}"]`)?.click()}
 function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function stopPreview(){try{previewController?.dispose?.()}catch{}previewController=null}
+function structureLabel(state){const t=state?.structure?.template;return t==='mailer-150010'?'Mailer 150010':t==='imported'?'Imported Dieline':String(t||'Box structure')}
 
 function topbar(){
   const top=document.querySelector('.topbar');if(!top||top.dataset.v40Ready)return;
   top.dataset.v40Ready='1';
-  const brand=top.querySelector('.brand');if(brand)brand.innerHTML=`BOXSTUDIO <small>${VERSION} · FREE</small>`;
+  const state=readState(),brand=top.querySelector('.brand');if(brand)brand.innerHTML=`BOXSTUDIO <small>${VERSION} · FREE</small>`;
+  const project=document.createElement('div');project.className='v40-project-context';project.innerHTML=`<b>${esc(state.projectName||'Untitled packaging project')}</b><span>${esc(structureLabel(state))} · ${esc(state.structure?.length)} × ${esc(state.structure?.width)} × ${esc(state.structure?.height)} mm</span>`;
+  if(brand)brand.after(project);else top.prepend(project);
   const host=top.querySelector('#v36OpenHosted');if(host)host.style.display='none';
   const controls=document.createElement('div');controls.className='v40-top-controls';controls.innerHTML=`
     <button data-v40-view="2d" class="active">2D</button>
@@ -97,7 +100,7 @@ function setupRightDeck(right){
   right.append(head,preview,inspector);
   const setMode=mode=>{activeRight=mode;head.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.v40Right===mode));preview.hidden=mode!=='preview';inspector.hidden=mode!=='inspector';if(mode==='preview')mountPreview(preview)};
   head.querySelectorAll('button').forEach(b=>b.onclick=()=>setMode(b.dataset.v40Right));
-  const state=readState();setMode(state.selectedId?'inspector':activeRight);
+  setMode(activeRight);
 }
 
 function modePanel(workspace){
