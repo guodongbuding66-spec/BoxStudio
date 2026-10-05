@@ -4,7 +4,7 @@ import { applyLiveContinuityV45, setCubicHandleLengthV45, setCircularArcRadiusV4
 import { runPreflightV45 } from './preflightV45.js';
 
 const VERSION='V0.45',clone=v=>structuredClone(v),esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let observer=null,queued=false,pendingLiveEdge=null,applying=false;
+let observer=null,queued=false,pendingLiveEdge=null,applying=false,liveTimer=null;
 function readState(){try{const p=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');return p?{...clone(defaultState),...p,structure:{...defaultState.structure,...(p.structure||{})}}:clone(defaultState)}catch{return clone(defaultState)}}
 function writeDoc(doc){const state=readState();state.dielineV38=doc;state.savedAt=new Date().toISOString();localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
 function click(el){el?.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:window}))}
@@ -16,6 +16,7 @@ function reopen(doc,selection={}){applying=true;closeCad();writeDoc(doc);openDie
 function sameDoc(a,b){try{return JSON.stringify(a)===JSON.stringify(b)}catch{return false}}
 
 function applyLive(edgeId){if(applying||!edgeId)return;const doc=getDielineDocumentV38();if(!doc)return;try{const result=applyLiveContinuityV45(doc,edgeId);if(result.applied.length&& !sameDoc(result.doc,doc))reopen(result.doc,{edgeId})}catch(error){console.warn('[V0.45 live continuity]',error)}}
+function scheduleLive(edgeId){if(!edgeId)return;if(liveTimer)clearTimeout(liveTimer);liveTimer=setTimeout(()=>{liveTimer=null;applyLive(edgeId)},0)}
 
 function showPreflight(){
   document.querySelector('#boxstudio-v45-preflight')?.remove();const state=readState(),doc=getDielineDocumentV38(),report=runPreflightV45(state,{doc}),host=document.createElement('div');host.id='boxstudio-v45-preflight';host.innerHTML=`<div class="v45-modal"><header><div><b>V0.45 Curve Constraint Preflight</b><span>${report.ok?'PASS':'BLOCKED'} · ${report.summary.errors} errors · ${report.summary.warnings} warnings</span></div><button data-v45-close>×</button></header><div class="v45-preflight-list">${report.checks.filter(x=>x.severity!=='pass').slice(0,40).map(x=>`<div class="${x.severity}"><b>${esc(x.code)}</b><span>${esc(x.detail||x.title)}</span></div>`).join('')||'<div class="pass"><b>PASS</b><span>No V0.45 curve-constraint blockers.</span></div>'}</div><footer>Fillets: ${report.summary.v45Fillets||0} · Chamfers: ${report.summary.v45Chamfers||0}</footer></div>`;document.body.appendChild(host);host.querySelector('[data-v45-close]').onclick=()=>host.remove();
@@ -35,7 +36,7 @@ function schedule(){if(queued)return;queued=true;queueMicrotask(()=>{queued=fals
 observer=new MutationObserver(schedule);observer.observe(document.body,{subtree:true,childList:true});decorate();
 
 document.addEventListener('pointerdown',event=>{if(applying)return;const control=event.target?.closest?.('#boxstudio-v38-cad [data-v38-control]');if(control)pendingLiveEdge=selectedEdgeId()},true);
-document.addEventListener('pointerup',()=>{const edgeId=pendingLiveEdge;pendingLiveEdge=null;if(edgeId)queueMicrotask(()=>applyLive(edgeId))});
-document.addEventListener('change',event=>{if(applying)return;if(event.target?.matches?.('#boxstudio-v38-cad [data-v38-handle]')){const edgeId=selectedEdgeId();if(edgeId)queueMicrotask(()=>applyLive(edgeId))}});
+document.addEventListener('pointerup',()=>{const edgeId=pendingLiveEdge;pendingLiveEdge=null;if(edgeId)scheduleLive(edgeId)});
+document.addEventListener('change',event=>{if(applying)return;if(event.target?.matches?.('#boxstudio-v38-cad [data-v38-handle]')){const edgeId=selectedEdgeId();if(edgeId)scheduleLive(edgeId)}});
 
 window.BoxStudioV45={version:VERSION,liveContinuity:true,filletChamfer:true,dimensionConstraints:true,applyLiveContinuity:applyLiveContinuityV45,applyCornerOperation:applyCornerOperationV45,setCubicHandleLength:setCubicHandleLengthV45,setCircularArcRadius:setCircularArcRadiusV45,curveDimensions:curveDimensionDiagnosticsV45,runPreflight:runPreflightV45};
