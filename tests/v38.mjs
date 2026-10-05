@@ -32,7 +32,10 @@ const pdf=buildDielinePdfV38(cubic),pdfText=new TextDecoder().decode(pdf);assert
 const summary=exportSummaryV38(cubic);assert.equal(summary.widthMm,100);assert.equal(summary.cut,4);
 const roundtrip=geometryFromDielineDocumentV38(cubic);assert.equal(roundtrip.cutCurves.length,1);assert.equal(roundtrip.cutLines.length,3);
 
-const state=structuredClone(defaultState),preflight=runPreflightV38(state);assert.equal(preflight.schema,'boxstudio-preflight-v38');assert.ok(preflight.checks.length>10);assert.equal(preflight.summary.total,preflight.checks.length);const forced=structuredClone(base);forced.edges.push({id:'bad-v38',a:base.nodes[0].id,b:'missing-node',lineType:'CUT',curve:'line'});const gate=productionGateV38(state,{doc:forced});assert.equal(gate.ok,false);assert.ok(gate.blockingCodes.includes('NODE_REFERENCE_MISSING'));
+const state=structuredClone(defaultState),preflight=runPreflightV38(state);assert.equal(preflight.schema,'boxstudio-preflight-v38');assert.ok(preflight.checks.length>10);assert.equal(preflight.summary.total,preflight.checks.length);
+const changedType=setEdgeLineTypeV38(base,base.edges.find(e=>e.lineType==='CUT').id,'CREASE'),changedPreflight=runPreflightV38(state,{doc:changedType});assert.ok(changedPreflight.warnings.some(x=>x.code==='FOLD_GRAPH_REVIEW_REQUIRED'),'Edited CUT/CREASE semantics must require hinge/fold review.');
+const polygonDoc=structuredClone(simple);polygonDoc.panels=[{id:'poly',label:'POLY',kind:'panel',points:[[10,10],[90,10],[80,50],[20,50]]}];polygonDoc.zones={bleed:[],safe:[],glue:[]};const polygonPreflight=runPreflightV38(state,{doc:polygonDoc});assert.ok(polygonPreflight.warnings.some(x=>x.code==='POLYGON_OFFSET_REVIEW'),'Polygon bleed/safe must remain fail-visible until a true offset engine exists.');
+const forced=structuredClone(base);forced.edges.push({id:'bad-v38',a:base.nodes[0].id,b:'missing-node',lineType:'CUT',curve:'line'});const gate=productionGateV38(state,{doc:forced});assert.equal(gate.ok,false);assert.ok(gate.blockingCodes.includes('NODE_REFERENCE_MISSING'));
 
 const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.equal(pkg.version,'0.38.0');assert.equal(pkg.scripts['test:v38'],'node tests/v38.mjs');
 console.log('BoxStudio V0.38 semantic dieline CAD, preflight, SVG/DXF/PDF tests passed');
