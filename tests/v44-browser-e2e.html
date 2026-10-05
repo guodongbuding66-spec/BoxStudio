@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><title>BoxStudio V0.44 Curve Topology E2E</title>
+  <link rel="stylesheet" href="../src/styles.css">
+  <link rel="stylesheet" href="../src/profileUi.css">
+  <link rel="stylesheet" href="../src/v33Ui.css">
+  <link rel="stylesheet" href="../src/v34Ui.css">
+  <link rel="stylesheet" href="../src/v35Ui.css">
+  <link rel="stylesheet" href="../src/v36Ui.css">
+  <link rel="stylesheet" href="../src/v38Ui.css">
+  <link rel="stylesheet" href="../src/v39Ui.css">
+  <link rel="stylesheet" href="../src/v40Ui.css">
+  <link rel="stylesheet" href="../src/v41Ui.css">
+  <link rel="stylesheet" href="../src/v42Ui.css">
+  <link rel="stylesheet" href="../src/v43Ui.css">
+  <link rel="stylesheet" href="../src/v44Ui.css">
+</head>
+<body data-v44-e2e="running">
+<div id="app"></div><pre id="log"></pre>
+<script src="../vendor/jszip.min.js"></script>
+<script type="module">
+  import { STORAGE_KEY, defaultState } from '../src/model.js';
+  import { defaultsForTemplate } from '../src/geometry.js';
+  const initial=structuredClone(defaultState);initial.page='editor';initial.editorTab='Structure';initial.structure={...defaultsForTemplate('fefco-0427'),flapTaper:8,notch:6,shoulder:10,relief:4,cornerRadius:8};initial.savedAt=new Date().toISOString();
+  localStorage.clear();sessionStorage.clear();localStorage.setItem(STORAGE_KEY,JSON.stringify(initial));
+  await fetch('/__v44_started__',{method:'POST',body:'V0.44 browser started'}).catch(()=>{});
+  await import('../src/app.js');
+  await import('../src/v35Ui.js');
+  await import('../src/v36Ui.js');
+  await import('../src/v38Ui.js');
+  await import('../src/v39Ui.js');
+  await import('../src/v40Ui.js');
+  await import('../src/v41Ui.js');
+  await import('../src/v42Ui.js');
+  await import('../src/v43Ui.js');
+  await import('../src/v44Ui.js');
+  await import('./v44-browser-e2e.js');
+</script>
+</body>
+</html>
