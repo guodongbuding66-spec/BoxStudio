@@ -23,6 +23,39 @@ jobs:
           node --check src/dielineCadV38.js
           node --check src/preflightV38.js
           node --check src/productionExportV38.js
+          node --check src/v38Ui.js
           node --check tests/v38.mjs
+          node --check tests/v38-browser-e2e.js
       - name: V0.38 semantic dieline CAD, production preflight and export regression
         run: node tests/v38.mjs
+      - name: V0.38 real browser CAD interaction
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v38-started /tmp/boxstudio-v38-pass /tmp/boxstudio-v38-fail
+          python3 tests/v38_e2e_server.py >/tmp/boxstudio-v38-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 50); do
+            if curl -fsS http://127.0.0.1:8768/tests/v38-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 25s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --virtual-time-budget=15000 --dump-dom http://127.0.0.1:8768/tests/v38-browser-e2e.html >/tmp/boxstudio-v38-dom.log 2>/tmp/boxstudio-v38-chrome.log || true
+          if test -f /tmp/boxstudio-v38-pass; then
+            cat /tmp/boxstudio-v38-pass
+          elif test -f /tmp/boxstudio-v38-fail; then
+            cat /tmp/boxstudio-v38-fail
+            cat /tmp/boxstudio-v38-chrome.log || true
+            cat /tmp/boxstudio-v38-dom.log || true
+            exit 1
+          else
+            echo 'V0.38 browser E2E ended without PASS/FAIL signal.'
+            cat /tmp/boxstudio-v38-http.log || true
+            cat /tmp/boxstudio-v38-chrome.log || true
+            cat /tmp/boxstudio-v38-dom.log || true
+            exit 1
+          fi
+          kill "$SERVER_PID" 2>/dev/null || true
+          trap - EXIT
