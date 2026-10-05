@@ -11,6 +11,7 @@ const signal=async(kind,text)=>{try{await fetch(`/__v43_${kind}__`,{method:'POST
 const state=()=>JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
 const stage=()=>Number(sessionStorage.getItem('boxstudio-v43-stage')||0);
 const setStage=n=>sessionStorage.setItem('boxstudio-v43-stage',String(n));
+const click=node=>node.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:window}));
 
 try{
   await waitFor(()=>window.BoxStudioV43,'V0.43 API');
@@ -37,7 +38,7 @@ try{
     openDielineCadV38();const cad=await waitFor(()=>document.querySelector('#boxstudio-v38-cad'),'Dieline CAD');
     let doc=getDielineDocumentV38(),cubic=doc.edges.find(e=>e.lineType==='CUT'&&e.curve==='cubic');if(!cubic)throw new Error('Generated cubic edge did not reach Dieline CAD.');
     const cubicPath=await waitFor(()=>cad.querySelector(`[data-v38-edge="${cubic.id}"]`),'cubic CAD path');if(!/\bC\b/.test(cubicPath.getAttribute('d')||''))throw new Error('CAD canvas did not render cubic path.');
-    cubicPath.click();await waitFor(()=>cad.querySelector('[data-v38-curve="arc"]'),'Arc conversion');cad.querySelector('[data-v38-curve="arc"]').click();
+    click(cubicPath);await waitFor(()=>cad.querySelector('[data-v38-curve="arc"]'),'Arc conversion');cad.querySelector('[data-v38-curve="arc"]').click();
     let rx=await waitFor(()=>document.querySelector('#boxstudio-v38-cad [data-v38-arc="rx"]'),'Arc RX');rx.value='10';rx.dispatchEvent(new Event('change',{bubbles:true}));
     let ry=await waitFor(()=>document.querySelector('#boxstudio-v38-cad [data-v38-arc="ry"]'),'Arc RY');ry.value='10';ry.dispatchEvent(new Event('change',{bubbles:true}));
     const advancedArc=await waitFor(()=>document.querySelector('#boxstudio-v38-cad .v43-arc-advanced'),'V0.43 Arc Inspector');const rotation=advancedArc.querySelector('[data-v43-arc="rotation"]');rotation.value='15';rotation.dispatchEvent(new Event('change',{bubbles:true}));
