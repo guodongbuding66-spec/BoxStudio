@@ -1,6 +1,6 @@
 import { buildProductionPdfV27, productionPdfV27Diagnostics } from './productionPdfV27.js';
 import { runPreflightV38 } from './preflightV38.js';
-import { buildStructuralTopologyV39, reconcileArtworkToTopologyV39, topologyProductionGateV39 } from './structuralTopologyV39.js';
+import { buildStructuralTopologyV39, reconcileArtworkToTopologyV39, topologyProductionGateV39 } from './structuralTopologyEngineV39.js';
 import { downloadBytes } from './export.js';
 
 const clone=v=>structuredClone(v);
