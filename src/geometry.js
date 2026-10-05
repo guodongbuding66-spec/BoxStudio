@@ -23,6 +23,9 @@ export const defaultStructure={...TEMPLATE_DEFAULTS['side-seal-rsc']};
 
 const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
 const clamp=(v,min,max=Infinity)=>Math.min(max,Math.max(min,v));
+const line=(x1,y1,x2,y2,type='CUT')=>({x1,y1,x2,y2,type});
+const close=(a,b)=>Math.abs(Number(a)-Number(b))<1e-6;
+const sameSegment=(a,b)=>((close(a.x1,b.x1)&&close(a.y1,b.y1)&&close(a.x2,b.x2)&&close(a.y2,b.y2))||(close(a.x1,b.x2)&&close(a.y1,b.y2)&&close(a.x2,b.x1)&&close(a.y2,b.y1)));
 
 export function defaultsForTemplate(template='side-seal-rsc'){
   return structuredClone(TEMPLATE_DEFAULTS[template]||TEMPLATE_DEFAULTS['side-seal-rsc']);
@@ -70,8 +73,70 @@ function withGuidesV32(g){
   };
 }
 
+function removePanelOuterCuts(g,p,freeY){
+  const targets=[
+    line(p.x,freeY,p.x+p.w,freeY),
+    line(p.x,p.y,p.x,p.y+p.h),
+    line(p.x+p.w,p.y,p.x+p.w,p.y+p.h),
+  ];
+  g.cutLines=(g.cutLines||[]).filter(candidate=>!targets.some(target=>sameSegment(candidate,target)));
+}
+
+function applyTuckShapeV42(g,s,panelId){
+  const p=g.panelMap?.[panelId];if(!p)return null;
+  const parent=p.parent?g.panelMap?.[p.parent]:null;
+  const above=parent?((p.y+p.h/2)<(parent.y+parent.h/2)):true;
+  const freeY=above?p.y:p.y+p.h,foldY=above?p.y+p.h:p.y;
+  const taper=clamp(num(s.flapTaper),0,Math.min(p.w*.2,p.h*.55,30));
+  const notch=clamp(num(s.notch),0,Math.min(p.h*.45,25));
+  const shoulder=clamp(num(s.shoulder),0,Math.min(p.w*.16,30));
+  if(!(taper||notch||shoulder))return {panelId,taper:0,notch:0,shoulder:0};
+  removePanelOuterCuts(g,p,freeY);
+  const leftFree=p.x+taper,rightFree=p.x+p.w-taper,direction=above?1:-1;
+  p.points=above?[[p.x,foldY],[leftFree,freeY],[rightFree,freeY],[p.x+p.w,foldY]]:[[p.x,foldY],[p.x+p.w,foldY],[rightFree,freeY],[leftFree,freeY]];
+  g.cutLines.push(line(p.x,foldY,leftFree,freeY),line(p.x+p.w,foldY,rightFree,freeY));
+  if(notch>0){
+    const notchWidth=Math.min(Math.max(12,notch*3),Math.max(12,(rightFree-leftFree)*.38)),cx=(leftFree+rightFree)/2,nl=cx-notchWidth/2,nr=cx+notchWidth/2,ny=freeY+direction*notch;
+    g.cutLines.push(line(leftFree,freeY,nl,freeY),line(nl,freeY,nl,ny),line(nl,ny,nr,ny),line(nr,ny,nr,freeY),line(nr,freeY,rightFree,freeY));
+  }else g.cutLines.push(line(leftFree,freeY,rightFree,freeY));
+  if(shoulder>0){
+    const depth=Math.min(p.h*.18,Math.max(2,shoulder*.35)),sy=foldY+(above?-depth:depth);
+    g.cutLines.push(line(p.x+shoulder,foldY,p.x+shoulder,sy),line(p.x+p.w-shoulder,foldY,p.x+p.w-shoulder,sy));
+  }
+  return {panelId,taper,notch,shoulder};
+}
+
+function applyReliefV42(g,s){
+  const relief=clamp(num(s.relief),0,20);if(!relief)return 0;
+  const base=g.panelMap?.base;if(!base)return 0;
+  const d=Math.min(relief,Math.max(1,Math.min(base.w,base.h)*.08));
+  const pts=[[base.x,base.y,-1,-1],[base.x+base.w,base.y,1,-1],[base.x,base.y+base.h,-1,1],[base.x+base.w,base.y+base.h,1,1]];
+  pts.forEach(([x,y,sx,sy])=>g.cutLines.push(line(x,y,x+sx*d,y+sy*d)));
+  return d;
+}
+
+export function applyAdvancedStructureV42(geometry,input={}){
+  if(!geometry)return geometry;
+  const s=normalizeStructure(input),g=structuredClone(geometry),applied=[];
+  if(s.template==='fefco-0427'){
+    const tuck=applyTuckShapeV42(g,s,'lid-tuck');if(tuck&&(tuck.taper||tuck.notch||tuck.shoulder))applied.push(tuck);
+    const relief=applyReliefV42(g,s);if(relief)applied.push({kind:'roll-relief',depth:relief});
+  }else if(s.template==='reverse-tuck-end'){
+    for(const id of ['top-front-tuck','bottom-back-tuck']){const tuck=applyTuckShapeV42(g,s,id);if(tuck&&(tuck.taper||tuck.notch||tuck.shoulder))applied.push(tuck)}
+  }else if(s.template==='auto-lock-bottom'){
+    const tuck=applyTuckShapeV42(g,s,'top-front-tuck');if(tuck&&(tuck.taper||tuck.notch||tuck.shoulder))applied.push(tuck);
+  }
+  const cornerMode=s.cornerRadius>0?'metadata-only-line-engine':'off';
+  g.advancedV42={cornerRadius:s.cornerRadius,cornerRadiusMode:cornerMode,flapTaper:s.flapTaper,relief:s.relief,notch:s.notch,shoulder:s.shoulder,applied};
+  g.engineeringNotes=[...(g.engineeringNotes||[])];
+  if(s.cornerRadius>0)g.engineeringNotes.push(`Requested corner radius ${s.cornerRadius} mm is stored for the V0.42 structure model but is not emitted as a production arc by the current line-segment generator.`);
+  if(applied.length)g.engineeringNotes.push('V0.42 advanced tuck/relief controls modified semantic CUT geometry. Real-sample tooling acceptance is still required.');
+  return g;
+}
+
 export function generateGeometry(input={}){
   const s=normalizeStructure(input);
   if(!isV32EngineTemplate(s.template))return legacy.generateGeometry(s.template==='imported'?input:s);
-  return withGuidesV32(generateAdditionalTemplateV32(s));
+  const base=generateAdditionalTemplateV32(s);
+  return withGuidesV32(applyAdvancedStructureV42(base,s));
 }
