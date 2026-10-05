@@ -1,0 +1,27 @@
+name: V0.39 Unified Topology Production
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  topology-production:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: V0.39 syntax checks
+        run: |
+          node --check src/structuralTopologyEngineV39.js
+          node --check src/productionPdfV39.js
+          node --check tests/v39.mjs
+      - name: V0.39 edited dieline to panels, fold graph, artwork and full Production PDF
+        run: node tests/v39.mjs
