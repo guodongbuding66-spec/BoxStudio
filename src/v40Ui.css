@@ -6,6 +6,8 @@ body.v40-editor .topbar .nav{display:none}
 body.v40-editor .topbar .brand{min-width:180px;font-size:13px;letter-spacing:.08em}
 body.v40-editor .topbar .brand small{color:#67d899;border:1px solid #315c43;border-radius:4px;padding:2px 5px;letter-spacing:.04em}
 body.v40-editor #v36OpenHosted{display:none!important}
+.v40-project-context{display:flex;flex-direction:column;min-width:180px;max-width:300px;padding:0 10px;border-left:1px solid #323842;line-height:1.25}
+.v40-project-context b{font-size:11px;color:#e2e6eb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v40-project-context span{font-size:9px;color:#808a98;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .v40-top-controls{display:flex;align-items:center;gap:3px;margin-left:8px}
 .v40-top-controls button{height:32px;padding:0 10px;border:1px solid transparent;border-radius:5px;background:transparent;color:#aeb6c2;font:inherit;font-size:12px;cursor:pointer}
 .v40-top-controls button:hover,.v40-top-controls button.active{color:#fff;background:#292e37;border-color:#343b46}
@@ -61,6 +63,6 @@ body.v40-editor .status{height:30px;white-space:nowrap;overflow:hidden}
 body.v40-editor .save-state{font-size:10px;white-space:nowrap}
 body.v40-editor #quickExport{display:none}
 
-@media(max-width:1280px){.workspace.v40-shell{grid-template-columns:64px 240px minmax(320px,1fr) 320px}.v40-tool-label{font-size:8px}.v40-mode-panel{font-size:11px}}
-@media(max-width:1000px){.workspace.v40-shell{grid-template-columns:62px 220px minmax(300px,1fr)}.v40-rightdeck{display:none}.v40-top-controls [data-v40-view="split"]{display:none}}
+@media(max-width:1280px){.workspace.v40-shell{grid-template-columns:64px 240px minmax(320px,1fr) 320px}.v40-tool-label{font-size:8px}.v40-mode-panel{font-size:11px}.v40-project-context{max-width:220px}}
+@media(max-width:1000px){.workspace.v40-shell{grid-template-columns:62px 220px minmax(300px,1fr)}.v40-rightdeck{display:none}.v40-top-controls [data-v40-view="split"]{display:none}.v40-project-context{display:none}}
 @media(max-width:760px){.workspace.v40-shell{grid-template-columns:58px minmax(0,1fr)}.v40-mode-panel{display:none}.v40-top-controls [data-v40-view="3d"]{display:none}.v40-top-controls [data-v40-action="preflight"]{display:none}.topbar .save-state{display:none}}
