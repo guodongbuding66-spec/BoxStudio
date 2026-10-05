@@ -23,6 +23,11 @@ function decorateTop(cad){
   const top=cad.querySelector('.v38-top');if(top&&!top.querySelector('[data-v44-preflight]')){const button=document.createElement('button');button.dataset.v44Preflight='';button.textContent='Curve Preflight';button.onclick=showPreflight;const close=top.querySelector('[data-v38-action="close"]');top.insertBefore(button,close)}
 }
 
+function decorateLegacyTopologyControls(cad){
+  const insert=cad.querySelector('[data-v38-action="insert-node"]');if(insert&&!insert.dataset.v44NativeSplit){insert.dataset.v44NativeSplit='true';insert.title='V0.44 native split at 50% for Line / Cubic / Arc';insert.onclick=()=>{const id=selectedEdgeId();if(!id)return;try{const result=splitEdgeV44(getDielineDocumentV38(),id,.5);reopen(result.doc,{nodeId:result.nodeId})}catch(error){alert(error.message)}}}
+  const nodeId=selectedNodeId(),remove=cad.querySelector('[data-v38-action="delete-node"]');if(!nodeId||!remove)return;const verdict=canMergeSplitNodeV44(getDielineDocumentV38(),nodeId);if(verdict.ok&&!remove.dataset.v44LosslessMerge){remove.dataset.v44LosslessMerge='true';remove.textContent='− Lossless Merge Split';remove.title='Restore the exact source curve captured by V0.44 split provenance';remove.onclick=()=>{try{const result=mergeSplitNodeV44(getDielineDocumentV38(),nodeId);reopen(result.doc,{edgeId:result.edgeId})}catch(error){alert(error.message)}}}
+}
+
 function decorateEdge(cad){
   const id=selectedEdgeId(),section=findInspector('Edge');if(!id||!section||section.querySelector('.v44-edge-tools'))return;const doc=getDielineDocumentV38();let length=0;try{length=curveLengthV44(doc,id)}catch{}
   const box=document.createElement('div');box.className='v44-edge-tools';box.innerHTML=`<div class="v44-head"><b>Professional Curve</b><span>${length.toFixed(3)} mm path length</span></div><div class="v44-split-row"><label>Split position <input data-v44-split-t type="number" min="1" max="99" step="1" value="50"> %</label><button data-v44-split>Split Native</button></div><small>Line, Cubic and Arc stay native. The new node carries reversible provenance for lossless merge.</small>`;section.appendChild(box);box.querySelector('[data-v44-split]').onclick=()=>{const t=Math.min(.99,Math.max(.01,Number(box.querySelector('[data-v44-split-t]').value||50)/100));try{const result=splitEdgeV44(getDielineDocumentV38(),id,t);reopen(result.doc,{nodeId:result.nodeId})}catch(error){alert(error.message)}};
@@ -36,8 +41,8 @@ function decorateNode(cad){
   const mergeButton=box.querySelector('[data-v44-merge]');if(mergeButton&&!mergeButton.disabled)mergeButton.onclick=()=>{try{const result=mergeSplitNodeV44(getDielineDocumentV38(),id);reopen(result.doc,{edgeId:result.edgeId})}catch(error){alert(error.message)}};
 }
 
-function decorate(){document.title='BoxStudio V0.44';document.body.dataset.v44CurveTopology='true';const cad=document.querySelector('#boxstudio-v38-cad');if(!cad)return;decorateTop(cad);decorateEdge(cad);decorateNode(cad)}
+function decorate(){document.title='BoxStudio V0.44';document.body.dataset.v44CurveTopology='true';const cad=document.querySelector('#boxstudio-v38-cad');if(!cad)return;decorateTop(cad);decorateLegacyTopologyControls(cad);decorateEdge(cad);decorateNode(cad)}
 function schedule(){if(queued)return;queued=true;queueMicrotask(()=>{queued=false;decorate()})}
 observer=new MutationObserver(schedule);observer.observe(document.body,{subtree:true,childList:true});decorate();
 
-window.BoxStudioV44={version:VERSION,nativeArcSplit:true,nativeCubicSplit:true,reversibleSplitMerge:true,continuityModes:['corner','g1','c1','g2'],splitEdge:splitEdgeV44,mergeSplitNode:mergeSplitNodeV44,setNodeContinuity:setNodeContinuityV44,continuityDiagnostics:continuityDiagnosticsV44,runPreflight:runPreflightV44};
+window.BoxStudioV44={version:VERSION,nativeArcSplit:true,nativeCubicSplit:true,reversibleSplitMerge:true,legacyNodeControlsUpgraded:true,continuityModes:['corner','g1','c1','g2'],splitEdge:splitEdgeV44,mergeSplitNode:mergeSplitNodeV44,setNodeContinuity:setNodeContinuityV44,continuityDiagnostics:continuityDiagnosticsV44,runPreflight:runPreflightV44};
