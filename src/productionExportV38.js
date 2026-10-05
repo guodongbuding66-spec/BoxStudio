@@ -4,6 +4,7 @@ import { geometryFromDielineDocumentV38 } from './dielineCadV38.js';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
 const f=value=>Number(value||0).toFixed(3);
 const PT=72/25.4;
+const utf8Length=value=>new TextEncoder().encode(String(value)).length;
 export const V38_DEFAULT_SPOTS=Object.freeze({CUT:'CutContour',CREASE:'Crease',PERF:'Perforation',GLUE:'Glue',BLEED:'Bleed',SAFE:'Safe'});
 
 function nodeMap(doc){return new Map((doc.nodes||[]).map(node=>[node.id,node]))}
@@ -27,14 +28,14 @@ export function buildDxfV38(doc,{curveSteps=24}={}){
 }
 
 function pdfName(value='Spot'){return String(value).replace(/[^A-Za-z0-9_.-]/g,'_')}
-function buildPdf(objects){let body='%PDF-1.7\n%BoxStudio V0.38\n',offsets=[0];for(let i=0;i<objects.length;i++){offsets[i+1]=Buffer.byteLength(body,'utf8');body+=`${i+1} 0 obj\n${objects[i]}\nendobj\n`}const xref=Buffer.byteLength(body,'utf8');body+=`xref\n0 ${objects.length+1}\n0000000000 65535 f \n`;for(let i=1;i<offsets.length;i++)body+=`${String(offsets[i]).padStart(10,'0')} 00000 n \n`;body+=`trailer\n<< /Size ${objects.length+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;return new TextEncoder().encode(body)}
-function spotObjects(name,cmyk,fnRef){return`[/Separation /${pdfName(name)} /DeviceCMYK ${fnRef} 0 R]`}
+function buildPdf(objects){let body='%PDF-1.7\n%BoxStudio V0.38\n',offsets=[0];for(let i=0;i<objects.length;i++){offsets[i+1]=utf8Length(body);body+=`${i+1} 0 obj\n${objects[i]}\nendobj\n`}const xref=utf8Length(body);body+=`xref\n0 ${objects.length+1}\n0000000000 65535 f \n`;for(let i=1;i<offsets.length;i++)body+=`${String(offsets[i]).padStart(10,'0')} 00000 n \n`;body+=`trailer\n<< /Size ${objects.length+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;return new TextEncoder().encode(body)}
+function spotObjects(name,fnRef){return`[/Separation /${pdfName(name)} /DeviceCMYK ${fnRef} 0 R]`}
 export function buildDielinePdfV38(doc,{spotNames=V38_DEFAULT_SPOTS,curveSteps=32}={}){
   const widthPt=doc.width*PT,heightPt=doc.height*PT,types=['CUT','CREASE','PERF','GLUE'],resourceNames={CUT:'CSCUT',CREASE:'CSCREASE',PERF:'CSPERF',GLUE:'CSGLUE'},segments=[];
   for(const type of types)for(const edge of (doc.edges||[]).filter(e=>e.lineType===type))for(const l of edgeSegments(doc,edge,curveSteps))segments.push({type,...l});
   const commands=[];for(const s of segments){const dash=s.type==='CUT'?'[] 0 d':'[5 3] 0 d',w=s.type==='CUT'?.35:.28;commands.push(`q /${resourceNames[s.type]} CS 1 SCN ${f(w)} w ${dash} ${f(s.x1*PT)} ${f(heightPt-s.y1*PT)} m ${f(s.x2*PT)} ${f(heightPt-s.y2*PT)} l S Q`)}const stream=commands.join('\n')+'\n';
-  const objects=[];objects.push('<< /Type /Catalog /Pages 2 0 R >>');objects.push('<< /Type /Pages /Kids [3 0 R] /Count 1 >>');objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${f(widthPt)} ${f(heightPt)}] /TrimBox [0 0 ${f(widthPt)} ${f(heightPt)}] /Resources << /ColorSpace << /CSCUT 5 0 R /CSCREASE 6 0 R /CSPERF 7 0 R /CSGLUE 8 0 R >> >> /Contents 4 0 R >>`);objects.push(`<< /Length ${Buffer.byteLength(stream,'utf8')} >>\nstream\n${stream}endstream`);
-  objects.push(spotObjects(spotNames.CUT,[0,1,0,0],9));objects.push(spotObjects(spotNames.CREASE,[1,0,0,0],10));objects.push(spotObjects(spotNames.PERF,[0,0,1,0],11));objects.push(spotObjects(spotNames.GLUE,[1,0,1,0],12));
+  const objects=[];objects.push('<< /Type /Catalog /Pages 2 0 R >>');objects.push('<< /Type /Pages /Kids [3 0 R] /Count 1 >>');objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${f(widthPt)} ${f(heightPt)}] /TrimBox [0 0 ${f(widthPt)} ${f(heightPt)}] /Resources << /ColorSpace << /CSCUT 5 0 R /CSCREASE 6 0 R /CSPERF 7 0 R /CSGLUE 8 0 R >> >> /Contents 4 0 R >>`);objects.push(`<< /Length ${utf8Length(stream)} >>\nstream\n${stream}endstream`);
+  objects.push(spotObjects(spotNames.CUT,9));objects.push(spotObjects(spotNames.CREASE,10));objects.push(spotObjects(spotNames.PERF,11));objects.push(spotObjects(spotNames.GLUE,12));
   objects.push('<< /FunctionType 2 /Domain [0 1] /C0 [0 0 0 0] /C1 [0 1 0 0] /N 1 >>');objects.push('<< /FunctionType 2 /Domain [0 1] /C0 [0 0 0 0] /C1 [1 0 0 0] /N 1 >>');objects.push('<< /FunctionType 2 /Domain [0 1] /C0 [0 0 0 0] /C1 [0 0 1 0] /N 1 >>');objects.push('<< /FunctionType 2 /Domain [0 1] /C0 [0 0 0 0] /C1 [1 0 1 0] /N 1 >>');return buildPdf(objects);
 }
 
