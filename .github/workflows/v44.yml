@@ -1,0 +1,65 @@
+name: V0.44 Professional Curve Editing
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  curve-topology:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Syntax and curve topology regression
+        run: |
+          node --check src/curveEditingV44.js
+          node --check src/preflightV44.js
+          node --check src/v44Ui.js
+          node --check tests/v44.mjs
+          node --check tests/v44-browser-e2e.js
+          node tests/v43.mjs
+          node tests/v44.mjs
+          grep -q "v44Ui.js" index.html
+          grep -q "v44Ui.css" index.html
+          grep -q "nativeArcSplit:true" src/v44Ui.js
+          grep -q "reversibleSplitMerge:true" src/v44Ui.js
+          grep -q "continuityModes" src/v44Ui.js
+      - name: Real Chrome professional curve workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v44-started /tmp/boxstudio-v44-pass /tmp/boxstudio-v44-fail
+          python3 tests/v44_e2e_server.py >/tmp/boxstudio-v44-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8774/tests/v44-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 100s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --virtual-time-budget=70000 --dump-dom http://127.0.0.1:8774/tests/v44-browser-e2e.html >/tmp/boxstudio-v44-dom.log 2>/tmp/boxstudio-v44-chrome.log || true
+          if test -f /tmp/boxstudio-v44-pass; then
+            cat /tmp/boxstudio-v44-pass
+          elif test -f /tmp/boxstudio-v44-fail; then
+            cat /tmp/boxstudio-v44-fail
+            cat /tmp/boxstudio-v44-chrome.log || true
+            cat /tmp/boxstudio-v44-dom.log || true
+            exit 1
+          else
+            echo 'V0.44 browser E2E ended without PASS/FAIL signal.'
+            cat /tmp/boxstudio-v44-http.log || true
+            cat /tmp/boxstudio-v44-chrome.log || true
+            cat /tmp/boxstudio-v44-dom.log || true
+            exit 1
+          fi
+          kill "$SERVER_PID" 2>/dev/null || true
+          trap - EXIT
