@@ -1,0 +1,46 @@
+import { STORAGE_KEY } from '../src/model.js';
+const win=window,doc=document;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function waitFor(fn,label,timeout=12000){const end=Date.now()+timeout;while(Date.now()<end){try{const v=fn();if(v)return v}catch{}await sleep(50)}throw new Error(`Timed out: ${label}`)}
+function assert(ok,msg){if(!ok)throw new Error(msg)}
+async function signal(path,detail){await fetch(`${path}?${path.includes('fail')?'message':'detail'}=${encodeURIComponent(detail)}`).catch(()=>{})}
+try{
+  await waitFor(()=>win.BoxStudioV40?.freeAccess,'BoxStudioV40 bootstrap');
+  const shell=await waitFor(()=>doc.querySelector('.workspace.v40-shell'),'V0.40 editor shell');
+  assert(doc.title==='BoxStudio V0.40','title was not upgraded to V0.40');
+  assert(doc.body.dataset.v40Free==='true','free-access marker missing');
+  assert(doc.body.dataset.v40ApprovalRequired==='false','approval must not gate default workflow');
+  assert(shell.querySelector('.v40-mode-panel'),'left mode panel missing');
+  assert(shell.querySelector('.v40-rightdeck'),'right 3D/inspector deck missing');
+  assert(doc.querySelector('.v40-project-context')?.innerText.trim(),'project context missing from top bar');
+  const preview=shell.querySelector('.v40-preview-content');assert(preview&&!preview.hidden,'3D Preview must be the default persistent right deck');
+  assert(shell.querySelector('[data-v40-right="preview"]')?.classList.contains('active'),'3D Preview tab must start active');
+  assert(doc.querySelector('.v40-top-controls [data-v40-view="split"]'),'Split control missing');
+  const hosted=doc.querySelector('#v36OpenHosted');if(hosted)assert(win.getComputedStyle(hosted).display==='none','Hosted/RBAC launcher must not be in default editor flow');
+
+  (await waitFor(()=>doc.querySelector('.v40-top-controls [data-v40-action="preflight"]'),'Preflight top control')).click();
+  await waitFor(()=>doc.querySelector('.tabbar [data-tab="Preflight"]')?.classList.contains('active'),'Preflight tab');
+  assert(doc.body.innerText.includes('Quality check')||doc.body.innerText.includes('Preflight'),'Preflight did not render');
+  (await waitFor(()=>doc.querySelector('.v40-top-controls [data-v40-action="export"]'),'Export top control after redraw')).click();
+  await waitFor(()=>doc.querySelector('.tabbar [data-tab="Export"]')?.classList.contains('active'),'Export tab');
+  await waitFor(()=>doc.querySelector('[data-v40-production-pdf]'),'free production export control');
+  assert(doc.querySelector('.v40-mode-panel').innerText.includes('No paywall'),'free export policy is not visible');
+
+  (await waitFor(()=>doc.querySelector('.tabbar [data-tab="Structure"]'),'Structure tab after redraw')).click();
+  const length=await waitFor(()=>doc.querySelector('[data-v40-structure="length"]'),'V0.40 structure mirror');
+  const before=Number(length.value),after=before+7.5;length.value=String(after);length.dispatchEvent(new Event('change',{bubbles:true}));
+  await waitFor(()=>{try{return Math.abs(JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}').structure?.length-after)<0.001}catch{return false}},'mirrored structure persistence');
+
+  const cad=await waitFor(()=>doc.querySelector('[data-v40-open-cad]'),'Dieline CAD launcher');cad.click();
+  await waitFor(()=>doc.querySelector('#boxstudio-v38-cad'),'Dieline CAD open');
+  (await waitFor(()=>doc.querySelector('#boxstudio-v38-cad [data-v38-action="close"]'),'Dieline CAD close control')).click();
+  await waitFor(()=>!doc.querySelector('#boxstudio-v38-cad'),'Dieline CAD close');
+
+  (await waitFor(()=>doc.querySelector('.v40-top-controls [data-v40-view="split"]'),'Split top control after redraw')).click();
+  await waitFor(()=>doc.querySelector('#boxstudio-v35-review'),'2D/3D review open');
+  (await waitFor(()=>doc.querySelector('#boxstudio-v35-review #v35Close'),'2D/3D close control')).click();
+  await waitFor(()=>!doc.querySelector('#boxstudio-v35-review'),'2D/3D review close');
+
+  const detail=`PASS free=true approval=false shell=4-zone preview=persistent structure=${before}->${after} cad=ok split=ok export=anonymous`;
+  doc.getElementById('log').textContent=detail;doc.body.dataset.v40E2e='pass';await signal('/__v40_pass__',detail);
+}catch(error){const detail=`FAIL ${error?.stack||error}`;doc.getElementById('log').textContent=detail;doc.body.dataset.v40E2e='fail';await signal('/__v40_fail__',detail);throw error}

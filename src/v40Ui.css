@@ -1,0 +1,68 @@
+/* BoxStudio V0.40 — Pacdora/Packform convergence. Uses original BoxStudio visual language, not third-party assets. */
+body.v40-editor{background:#14171c}
+body.v40-editor .app{grid-template-rows:52px minmax(0,1fr)}
+body.v40-editor .topbar{padding:0 10px 0 14px;gap:10px;background:#181b21;border-color:#2b3038}
+body.v40-editor .topbar .nav{display:none}
+body.v40-editor .topbar .brand{min-width:180px;font-size:13px;letter-spacing:.08em}
+body.v40-editor .topbar .brand small{color:#67d899;border:1px solid #315c43;border-radius:4px;padding:2px 5px;letter-spacing:.04em}
+body.v40-editor #v36OpenHosted{display:none!important}
+.v40-project-context{display:flex;flex-direction:column;min-width:180px;max-width:300px;padding:0 10px;border-left:1px solid #323842;line-height:1.25}
+.v40-project-context b{font-size:11px;color:#e2e6eb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v40-project-context span{font-size:9px;color:#808a98;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v40-top-controls{display:flex;align-items:center;gap:3px;margin-left:8px}
+.v40-top-controls button{height:32px;padding:0 10px;border:1px solid transparent;border-radius:5px;background:transparent;color:#aeb6c2;font:inherit;font-size:12px;cursor:pointer}
+.v40-top-controls button:hover,.v40-top-controls button.active{color:#fff;background:#292e37;border-color:#343b46}
+.v40-top-controls .v40-export-top{background:#f3f5f7;color:#16191e;font-weight:750;border-color:#f3f5f7;margin-left:3px}
+.v40-divider{width:1px;height:20px;background:#343943;margin:0 5px}
+
+.workspace.v40-shell{grid-template-columns:72px 286px minmax(360px,1fr) 360px;min-width:0;background:#191d23}
+.v40-rail{padding:7px 5px;gap:2px;background:#15181e;border-right:1px solid #2b3038;overflow:auto}
+.v40-rail .tool{height:54px;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0 2px;font-size:16px;border-radius:6px}
+.v40-rail .tool:hover,.v40-rail .tool.active{background:#282e37}
+.v40-tool-icon{font-size:17px;line-height:18px;color:#d4d9e0}
+.v40-tool-label{font-size:9px;line-height:11px;letter-spacing:.01em;color:#8e98a7;max-width:62px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v40-rail .tool.active .v40-tool-label,.v40-rail .tool:hover .v40-tool-label{color:#fff}
+
+.v40-mode-panel{min-width:0;background:#181b21;border-right:1px solid #2b3038;overflow:auto;padding-bottom:24px;color:#dfe3e9}
+.v40-mode-head{height:58px;display:flex;align-items:center;gap:8px;padding:0 13px;border-bottom:1px solid #2b3038;position:sticky;top:0;background:#181b21;z-index:2}
+.v40-mode-head>div{min-width:0;display:flex;flex-direction:column;gap:2px;flex:1}
+.v40-mode-head b{font-size:13px}.v40-mode-head span{font-size:10px;color:#8792a1}
+.v40-mode-head button,.v40-mode-panel section button{border:1px solid #353c47;background:#232831;color:#c9d0da;border-radius:5px;padding:7px 9px;font:inherit;font-size:11px;cursor:pointer}
+.v40-mode-panel section button:hover{background:#2e3540;color:#fff}
+.v40-mode-panel section button.primary{background:#f2f4f7;color:#171a20;border-color:#f2f4f7;font-weight:750}
+.v40-mode-panel section{padding:12px 13px;border-bottom:1px solid #282e37;display:flex;flex-direction:column;gap:8px}
+.v40-mode-panel h4{margin:0 0 3px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#7f8998}
+.v40-mode-panel p{font-size:11px;color:#909aa9;line-height:1.55;margin:0}
+.v40-field{display:grid;grid-template-columns:92px 1fr;align-items:center;gap:7px}
+.v40-field>span{font-size:11px;color:#9aa4b2}
+.v40-field input,.v40-field select{width:100%;height:30px;background:#111318;color:#edf0f4;border:1px solid #343b46;border-radius:4px;padding:0 7px;font:inherit;font-size:11px}
+.v40-field input:focus,.v40-field select:focus{outline:1px solid #6e8fff;border-color:#6e8fff}
+.v40-component-grid{display:grid!important;grid-template-columns:1fr 1fr;gap:6px!important}
+.v40-component-grid button{min-height:38px;text-align:left}
+.v40-free-card{border:1px solid #315743;background:#16231d;border-radius:6px;padding:10px;color:#aee7c2}
+.v40-free-card b{font-size:11px}.v40-free-card p{margin-top:5px;color:#8fc7a4}
+
+.v40-shell>.main{min-width:0;background:#20242b}
+.v40-shell>.main>.tabbar{height:42px;background:#181b21;border-color:#2b3038}
+.v40-shell>.main>.tabbar [data-tab]{font-size:11px}
+.v40-shell>.main>.tabbar [data-tab].active{background:#2b313b;color:#fff}
+.v40-shell .canvas-shell{background:#22272e}
+.v40-shell .canvas-wrap{padding:34px 44px 72px}
+
+.v40-rightdeck{padding:0!important;background:#181b21!important;overflow:hidden!important;display:grid;grid-template-rows:42px minmax(0,1fr);min-width:0}
+.v40-right-tabs{display:flex;align-items:center;padding:0 8px;border-bottom:1px solid #2b3038;background:#181b21;gap:4px}
+.v40-right-tabs button{height:29px;padding:0 9px;border:0;border-radius:4px;background:transparent;color:#8f99a8;font:inherit;font-size:11px;cursor:pointer}
+.v40-right-tabs button.active,.v40-right-tabs button:hover{background:#292f38;color:#fff}
+.v40-preview-content,.v40-inspector-content{min-height:0;overflow:auto;position:relative}
+.v40-preview-content{background:radial-gradient(circle at 50% 42%,#2a3038 0,#1d2128 55%,#171a20 100%)}
+.v40-preview-content canvas{width:100%!important;height:100%!important;display:block}
+.v40-preview-loading{height:100%;min-height:240px;display:grid;place-items:center;text-align:center;color:#8d97a5;font-size:11px;padding:24px}
+.v40-inspector-content>.panel-section:first-child{border-top:0}
+.v40-inspector-content .panel-section{padding:11px 12px}
+
+body.v40-editor .status{height:30px;white-space:nowrap;overflow:hidden}
+body.v40-editor .save-state{font-size:10px;white-space:nowrap}
+body.v40-editor #quickExport{display:none}
+
+@media(max-width:1280px){.workspace.v40-shell{grid-template-columns:64px 240px minmax(320px,1fr) 320px}.v40-tool-label{font-size:8px}.v40-mode-panel{font-size:11px}.v40-project-context{max-width:220px}}
+@media(max-width:1000px){.workspace.v40-shell{grid-template-columns:62px 220px minmax(300px,1fr)}.v40-rightdeck{display:none}.v40-top-controls [data-v40-view="split"]{display:none}.v40-project-context{display:none}}
+@media(max-width:760px){.workspace.v40-shell{grid-template-columns:58px minmax(0,1fr)}.v40-mode-panel{display:none}.v40-top-controls [data-v40-view="3d"]{display:none}.v40-top-controls [data-v40-action="preflight"]{display:none}.topbar .save-state{display:none}}
