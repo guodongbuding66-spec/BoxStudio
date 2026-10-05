@@ -9,6 +9,7 @@ let observer=null,queued=false;
 function readState(){try{const p=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');return p?{...clone(defaultState),...p,structure:{...defaultState.structure,...(p.structure||{})}}:clone(defaultState)}catch{return clone(defaultState)}}
 function writeState(state){state.savedAt=new Date().toISOString();localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
 function currentGeometry(){try{return generateGeometry(readState().structure||{})}catch{return null}}
+function activate(node){if(!node)return false;if(typeof node.click==='function')node.click();else node.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:window}));return true}
 
 function decorateAdvanced(){
   const input=document.querySelector('[data-v42-advanced="cornerRadius"]'),label=input?.closest('label');if(label&&!label.dataset.v43Native){label.dataset.v43Native='true';label.classList.remove('metadata-only');label.classList.add('v43-native-control');const title=label.querySelector(':scope > span');if(title&&!title.querySelector('.v43-native-badge'))title.insertAdjacentHTML('beforeend',' <b class="v43-native-badge">NATIVE</b>');const help=label.querySelector('small');if(help)help.textContent='Production-native cubic fillets. SVG/PDF preserve cubic vectors; DXF exports SPLINE.'}
@@ -24,8 +25,9 @@ function decorateTemplateDetail(){
 }
 
 function selectedArcId(){return document.querySelector('#boxstudio-v38-cad .v38-edge.selected[data-v38-edge]')?.dataset.v38Edge||null}
+function restoreEdgeSelection(id){const edge=document.querySelector(`#boxstudio-v38-cad [data-v38-edge="${CSS.escape(id)}"]`);return activate(edge)}
 function applyArcPatch(id,patch){
-  if(!id)return;closeCad();const state=readState(),doc=state.dielineV38;if(!doc)return;const edge=edgeByIdV38(doc,id);if(!edge||edge.curve!=='arc')return;const arc={...edge.arc,...patch};state.dielineV38=setEdgeCurveV38(doc,id,'arc',arc);writeState(state);openDielineCadV38();document.querySelector(`#boxstudio-v38-cad [data-v38-edge="${CSS.escape(id)}"]`)?.click();
+  if(!id)return;closeCad();const state=readState(),doc=state.dielineV38;if(!doc)return;const edge=edgeByIdV38(doc,id);if(!edge||edge.curve!=='arc')return;const arc={...edge.arc,...patch};state.dielineV38=setEdgeCurveV38(doc,id,'arc',arc);writeState(state);openDielineCadV38();queueMicrotask(()=>restoreEdgeSelection(id));
 }
 function decorateCad(){
   const cad=document.querySelector('#boxstudio-v38-cad');if(!cad)return;const brand=cad.querySelector('.v38-brand span');if(brand&&!brand.dataset.v43){brand.dataset.v43='true';brand.textContent='Professional Dieline CAD · V0.43 Native Curves'}
