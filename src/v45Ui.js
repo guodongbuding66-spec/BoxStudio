@@ -1,6 +1,7 @@
 import { STORAGE_KEY, defaultState } from './model.js';
 import { closeCad, openDielineCadV38, getDielineDocumentV38 } from './v38Ui.js';
 import { applyLiveContinuityV45, setCubicHandleLengthV45, setCircularArcRadiusV45, curveDimensionDiagnosticsV45, cornerOperationEligibilityV45, applyCornerOperationV45 } from './curveConstraintsV45.js';
+import { continuityDiagnosticsV44 } from './curveEditingV44.js';
 import { runPreflightV45 } from './preflightV45.js';
 
 const VERSION='V0.45',clone=v=>structuredClone(v),esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -12,11 +13,12 @@ function selectedEdgeId(){return document.querySelector('#boxstudio-v38-cad .v38
 function selectedNodeId(){return document.querySelector('#boxstudio-v38-cad .v38-node.selected[data-v38-node]')?.dataset.v38Node||null}
 function findInspector(title){return[...document.querySelectorAll('#boxstudio-v38-cad .v38-right section')].find(s=>s.querySelector('.v38-section-head h3')?.textContent===title)||null}
 function restoreSelection({edgeId=null,nodeId=null}={}){const cad=document.querySelector('#boxstudio-v38-cad');if(!cad)return false;const target=edgeId?cad.querySelector(`[data-v38-edge="${CSS.escape(edgeId)}"]`):nodeId?cad.querySelector(`[data-v38-node="${CSS.escape(nodeId)}"]`):null;if(!target)return false;click(target);return true}
-function reopen(doc,selection={}){applying=true;closeCad();writeDoc(doc);openDielineCadV38();restoreSelection(selection)||queueMicrotask(()=>restoreSelection(selection));queueMicrotask(()=>{applying=false})}
+function reopen(doc,selection={}){applying=true;closeCad();writeDoc(doc);openDielineCadV38();restoreSelection(selection)||queueMicrotask(()=>restoreSelection(selection));setTimeout(()=>{applying=false},0)}
 function sameDoc(a,b){try{return JSON.stringify(a)===JSON.stringify(b)}catch{return false}}
 
-function applyLive(edgeId){if(applying||!edgeId)return;const doc=getDielineDocumentV38();if(!doc)return;try{const result=applyLiveContinuityV45(doc,edgeId);if(result.applied.length&& !sameDoc(result.doc,doc))reopen(result.doc,{edgeId})}catch(error){console.warn('[V0.45 live continuity]',error)}}
-function scheduleLive(edgeId){if(!edgeId)return;if(liveTimer)clearTimeout(liveTimer);liveTimer=setTimeout(()=>{liveTimer=null;applyLive(edgeId)},0)}
+function needsLiveRepair(doc,edgeId){const edge=(doc?.edges||[]).find(e=>e.id===edgeId);if(!edge||edge.curve!=='cubic')return false;for(const nodeId of [edge.a,edge.b]){const node=(doc.nodes||[]).find(n=>n.id===nodeId),mode=node?.continuityV44;if(!['g1','c1','g2'].includes(mode))continue;let d;try{d=continuityDiagnosticsV44(doc,nodeId)}catch{return true}if(!d.eligible||d.tangentErrorDeg>.0001)return true;if(mode==='c1'&&Math.abs((d.speedRatio??1)-1)>.00001)return true;if(mode==='g2'&&d.curvatureDelta>1e-7)return true}return false}
+function applyLive(edgeId){if(applying||!edgeId)return;const persisted=readState().dielineV38,doc=persisted?.schema==='boxstudio-dieline-v38'?persisted:getDielineDocumentV38();if(!doc||!needsLiveRepair(doc,edgeId))return;try{const result=applyLiveContinuityV45(doc,edgeId);if(result.applied.length&&!sameDoc(result.doc,doc))reopen(result.doc,{edgeId})}catch(error){console.warn('[V0.45 live continuity]',error)}}
+function scheduleLive(edgeId){if(!edgeId||applying)return;if(liveTimer)clearTimeout(liveTimer);liveTimer=setTimeout(()=>{liveTimer=null;applyLive(edgeId)},0)}
 
 function showPreflight(){
   document.querySelector('#boxstudio-v45-preflight')?.remove();const state=readState(),doc=getDielineDocumentV38(),report=runPreflightV45(state,{doc}),host=document.createElement('div');host.id='boxstudio-v45-preflight';host.innerHTML=`<div class="v45-modal"><header><div><b>V0.45 Curve Constraint Preflight</b><span>${report.ok?'PASS':'BLOCKED'} · ${report.summary.errors} errors · ${report.summary.warnings} warnings</span></div><button data-v45-close>×</button></header><div class="v45-preflight-list">${report.checks.filter(x=>x.severity!=='pass').slice(0,40).map(x=>`<div class="${x.severity}"><b>${esc(x.code)}</b><span>${esc(x.detail||x.title)}</span></div>`).join('')||'<div class="pass"><b>PASS</b><span>No V0.45 curve-constraint blockers.</span></div>'}</div><footer>Fillets: ${report.summary.v45Fillets||0} · Chamfers: ${report.summary.v45Chamfers||0}</footer></div>`;document.body.appendChild(host);host.querySelector('[data-v45-close]').onclick=()=>host.remove();
@@ -31,7 +33,7 @@ function decorateEdge(){const id=selectedEdgeId(),section=findInspector('Edge');
 function decorateNode(){const id=selectedNodeId(),section=findInspector('Node');if(!id||!section||section.querySelector('.v45-corner-tools'))return;const eligibility=cornerOperationEligibilityV45(getDielineDocumentV38(),id);if(!eligibility.ok)return;const box=document.createElement('div');box.className='v45-corner-tools';box.innerHTML=`<div class="v45-head"><b>Corner Tool</b><span>${eligibility.angleDeg.toFixed(2)}° · native topology</span></div><div class="v45-corner-row"><select data-v45-corner-mode><option value="fillet">Fillet / 圆角</option><option value="chamfer">Chamfer / 倒角</option></select><label><input data-v45-corner-value type="number" min="0.1" step="0.1" value="5"><em>mm</em></label><button data-v45-corner-apply>Apply</button></div><small>Fillet inserts a real CUT Arc; Chamfer inserts a real CUT Line. Both trim the two source edges.</small>`;section.appendChild(box);box.querySelector('[data-v45-corner-apply]').onclick=()=>{const mode=box.querySelector('[data-v45-corner-mode]').value,valueMm=Number(box.querySelector('[data-v45-corner-value]').value);try{const result=applyCornerOperationV45(getDielineDocumentV38(),id,{mode,valueMm});reopen(result.doc,{edgeId:result.connectorEdgeId})}catch(error){alert(error.message)}}
 }
 
-function decorate(){document.title='BoxStudio V0.45';document.body.dataset.v45LiveConstraints='true';const cad=document.querySelector('#boxstudio-v38-cad');if(!cad)return;decorateTop(cad);decorateEdge();decorateNode()}
+function decorate(){document.title='BoxStudio V0.45';document.body.dataset.v45LiveConstraints='true';const cad=document.querySelector('#boxstudio-v38-cad');if(!cad)return;decorateTop(cad);decorateEdge();decorateNode();const edgeId=selectedEdgeId();if(edgeId)scheduleLive(edgeId)}
 function schedule(){if(queued)return;queued=true;queueMicrotask(()=>{queued=false;decorate()})}
 observer=new MutationObserver(schedule);observer.observe(document.body,{subtree:true,childList:true});decorate();
 
