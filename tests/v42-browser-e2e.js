@@ -46,7 +46,12 @@ try{
     foldControls.querySelector('[data-v42-fold-step="50"]').click();await sleep(80);if(Number(state().foldProgress)!==50)throw new Error('50% fold step did not persist.');
     foldControls.querySelector('[data-v42-fold-play]').click();await waitFor(()=>Number(state().foldProgress)>=99,'assembly animation',5000);
     if(!document.querySelector('.v42-resize-handle'))throw new Error('Resizable Inspector handle missing.');
-    const text=`PASS template=${s.structure.template} taper=${s.structure.flapTaper} notch=${s.structure.notch} shoulder=${s.structure.shoulder} relief=${s.structure.relief} radiusMode=${g.advancedV42.cornerRadiusMode} fold=${state().foldProgress}`;
+    document.querySelector('[data-v40-right="inspector"]')?.click();
+    const collapsible=await waitFor(()=>document.querySelector('.v40-inspector-content .panel-section[data-v42-collapse]'),'collapsible inspector section');
+    const heading=collapsible.querySelector('h3,h4');if(!heading)throw new Error('Inspector collapse heading missing.');heading.click();
+    if(!collapsible.classList.contains('v42-collapsed'))throw new Error('Inspector section did not collapse.');
+    if(getComputedStyle(heading).display==='none')throw new Error('Collapsed Inspector heading became hidden.');
+    const text=`PASS template=${s.structure.template} taper=${s.structure.flapTaper} notch=${s.structure.notch} shoulder=${s.structure.shoulder} relief=${s.structure.relief} radiusMode=${g.advancedV42.cornerRadiusMode} fold=${state().foldProgress} inspector=collapsed`;
     document.body.dataset.pass=text;sessionStorage.setItem('boxstudio-v42-stage','done');await signal('pass',text);
   }else if(sessionStorage.getItem('boxstudio-v42-stage')!=='done')throw new Error(`Unexpected V0.42 E2E stage: ${currentStage}`);
 }catch(error){const text=`FAIL stage=${sessionStorage.getItem('boxstudio-v42-stage')} ${error?.stack||error}`;document.body.dataset.fail=text;await signal('fail',text);throw error;}
