@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
 import { defaultState } from '../src/model.js';
 import { defaultsForTemplate, generateGeometry } from '../src/geometry.js';
-import { dielineDocumentFromGeometryV38 } from '../src/dielineCadV38.js';
+import { dielineDocumentFromGeometryV38, dielineDocumentFromStateV38, setEdgeCurveV38 } from '../src/dielineCadV38.js';
 import { buildDielineSvgV38, buildDxfV38, buildDielinePdfV38 } from '../src/productionExportV38.js';
 import { buildStructuralTopologyV39 } from '../src/structuralTopologyEngineV39.js';
 import { runPreflightV43 } from '../src/preflightV43.js';
 import { arcToCubicsV43, nativeArcForDxfV43, svgArcCenterV43 } from '../src/curvedGeometryV43.js';
+import { buildProductionPdfV43, productionPdfV43Diagnostics } from '../src/productionPdfV43.js';
 
 const state=structuredClone(defaultState);
 state.structure={...defaultsForTemplate('fefco-0427'),flapTaper:8,notch:6,shoulder:10,relief:4,cornerRadius:8};
@@ -58,4 +59,10 @@ for(const template of ['reverse-tuck-end','auto-lock-bottom']){
   assert.ok((g.cutCurves||[]).some(c=>c.type==='C'),`${template} must emit cubic CUT curves`);
 }
 
-console.log(`BoxStudio V0.43 native curves passed: cubics=${cubicEdges.length} faces=${topology.stats.faces} nativeEdges=${preflight.nativeEdges}`);
+// Final artwork + spot-dieline Production PDF must preserve structural curves when V0.43 opts in.
+const productionState=structuredClone(defaultState),productionDoc=dielineDocumentFromStateV38(productionState),lineEdge=productionDoc.edges.find(e=>e.lineType==='CUT'&&e.curve==='line');
+assert.ok(lineEdge,'default production fixture needs a CUT line');const byId=new Map(productionDoc.nodes.map(n=>[n.id,n])),a=byId.get(lineEdge.a),b=byId.get(lineEdge.b),c1={x:a.x+(b.x-a.x)/3,y:a.y+(b.y-a.y)/3},c2={x:a.x+2*(b.x-a.x)/3,y:a.y+2*(b.y-a.y)/3},productionCurvedDoc=setEdgeCurveV38(productionDoc,lineEdge.id,'cubic',{c1,c2});
+const finalPdf=buildProductionPdfV43(productionState,{doc:productionCurvedDoc}),finalText=new TextDecoder().decode(finalPdf),finalDiag=productionPdfV43Diagnostics(productionState,{doc:productionCurvedDoc});
+assert.ok(finalPdf.length>1000);assert.match(finalText,/\/CutContour/);assert.match(finalText,/\sc\s/,'final Artwork + Dieline Production PDF must contain native cubic structural commands');assert.equal(finalDiag.ok,true);assert.equal(finalDiag.nativeStructuralCurves,true);assert.ok(finalDiag.nativeStructuralCurveObjects>=1);assert.equal(finalDiag.baseDiagnostics.nativeStructuralCurves,true);
+
+console.log(`BoxStudio V0.43 native curves passed: cubics=${cubicEdges.length} faces=${topology.stats.faces} nativeEdges=${preflight.nativeEdges} productionPdf=${finalPdf.length}`);
