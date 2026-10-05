@@ -12,6 +12,9 @@ try{
   assert(doc.body.dataset.v40ApprovalRequired==='false','approval must not gate default workflow');
   assert(shell.querySelector('.v40-mode-panel'),'left mode panel missing');
   assert(shell.querySelector('.v40-rightdeck'),'right 3D/inspector deck missing');
+  assert(doc.querySelector('.v40-project-context')?.innerText.trim(),'project context missing from top bar');
+  const preview=shell.querySelector('.v40-preview-content');assert(preview&&!preview.hidden,'3D Preview must be the default persistent right deck');
+  assert(shell.querySelector('[data-v40-right="preview"]')?.classList.contains('active'),'3D Preview tab must start active');
   assert(doc.querySelector('.v40-top-controls [data-v40-view="split"]'),'Split control missing');
   const hosted=doc.querySelector('#v36OpenHosted');if(hosted)assert(win.getComputedStyle(hosted).display==='none','Hosted/RBAC launcher must not be in default editor flow');
 
@@ -38,6 +41,6 @@ try{
   doc.querySelector('#boxstudio-v35-review #v35Close').click();
   await waitFor(()=>!doc.querySelector('#boxstudio-v35-review'),'2D/3D review close');
 
-  const detail=`PASS free=true approval=false shell=4-zone structure=${before}->${after} cad=ok split=ok export=anonymous`;
+  const detail=`PASS free=true approval=false shell=4-zone preview=persistent structure=${before}->${after} cad=ok split=ok export=anonymous`;
   document.getElementById('log').textContent=detail;document.body.dataset.v40E2e='pass';await signal('/__v40_pass__',detail);
 }catch(error){const detail=`FAIL ${error?.stack||error}`;document.getElementById('log').textContent=detail;document.body.dataset.v40E2e='fail';await signal('/__v40_fail__',detail);throw error}
