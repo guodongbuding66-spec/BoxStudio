@@ -1,1 +1,37 @@
-<!doctype html><meta charset="utf-8"><title>V0.41 E2E</title><iframe id="appFrame" src="/index.html" style="width:1440px;height:960px;border:0"></iframe><script type="module" src="./v41-browser-e2e.js"></script>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><title>BoxStudio V0.41 Reference Interaction E2E</title>
+  <link rel="stylesheet" href="../src/styles.css">
+  <link rel="stylesheet" href="../src/profileUi.css">
+  <link rel="stylesheet" href="../src/v33Ui.css">
+  <link rel="stylesheet" href="../src/v34Ui.css">
+  <link rel="stylesheet" href="../src/v35Ui.css">
+  <link rel="stylesheet" href="../src/v36Ui.css">
+  <link rel="stylesheet" href="../src/v38Ui.css">
+  <link rel="stylesheet" href="../src/v39Ui.css">
+  <link rel="stylesheet" href="../src/v40Ui.css">
+  <link rel="stylesheet" href="../src/v41Ui.css">
+</head>
+<body data-v41-e2e="running">
+<div id="app"></div>
+<pre id="log"></pre>
+<script src="../vendor/jszip.min.js"></script>
+<script type="module">
+  import { STORAGE_KEY, defaultState } from '../src/model.js';
+  if(!sessionStorage.getItem('boxstudio-v41-stage')){
+    const initial=structuredClone(defaultState);initial.page='editor';initial.editorTab='Design';initial.savedAt=new Date().toISOString();
+    localStorage.clear();localStorage.setItem(STORAGE_KEY,JSON.stringify(initial));sessionStorage.setItem('boxstudio-v41-stage','0');
+    await fetch('/__v41_started__',{method:'POST',body:'V0.41 browser started'}).catch(()=>{});
+  }
+  await import('../src/app.js');
+  await import('../src/v35Ui.js');
+  await import('../src/v36Ui.js');
+  await import('../src/v38Ui.js');
+  await import('../src/v39Ui.js');
+  await import('../src/v40Ui.js');
+  await import('../src/v41Ui.js');
+  await import('./v41-browser-e2e.js');
+</script>
+</body>
+</html>
