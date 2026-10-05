@@ -3,7 +3,7 @@ import { defaultState } from '../src/model.js';
 import { generateGeometry } from '../src/geometry.js';
 import { buildFoldGraph } from '../src/foldgraph.js';
 import { dielineDocumentFromStateV38, moveNodeV38 } from '../src/dielineCadV38.js';
-import { buildStructuralTopologyV39, reconcileArtworkToTopologyV39, topologyProductionGateV39, V39_TOPOLOGY_SCHEMA } from '../src/structuralTopologyEngineV39.js';
+import { buildStructuralTopologyV39, reconcileArtworkToTopologyV39, topologyProductionGateV39, V39_TOPOLOGY_SCHEMA } from '../src/structuralTopologyV39.js';
 import { buildProductionContextV39, buildProductionPdfV39, productionStateFromTopologyV39, V39_PRODUCTION_SCHEMA } from '../src/productionPdfV39.js';
 import { buildProductionPdfV27 } from '../src/productionPdfV27.js';
 import { readFile } from 'node:fs/promises';
@@ -66,8 +66,8 @@ const pdf=buildProductionPdfV39(defaultStateCopy,{doc:defaultDoc}),text=new Text
 const incompleteContext=buildProductionContextV39(minimal,{doc:edited});assert.equal(incompleteContext.ok,false);assert.ok(incompleteContext.errors.some(x=>['rule.package.notice','rule.crn.bindings','rule.barcodeQr.missing','LEGACY_BARCODE_QR_GROUP'].includes(x.code)));
 assert.throws(()=>buildProductionPdfV39(minimal,{doc:edited}),e=>e?.code==='V39_PRODUCTION_BLOCKED');
 
-// 7. Broken topology and orphan artwork fail closed.
-const broken=simpleDoc();broken.edges=broken.edges.filter(e=>e.id!=='right');const brokenTopology=buildStructuralTopologyV39(minimal,{doc:broken});assert.equal(brokenTopology.ok,false);assert.ok(brokenTopology.errors.some(x=>x.code==='TOPOLOGY_NO_PANELS'));
+// 7. Broken topology and removed panel identity fail closed instead of silently nearest-remapping.
+const broken=simpleDoc();broken.edges=broken.edges.filter(e=>e.id!=='right');const brokenTopology=buildStructuralTopologyV39(minimal,{doc:broken});assert.equal(brokenTopology.ok,false);assert.ok(brokenTopology.errors.some(x=>x.code==='PANEL_REMAP_REQUIRED'||x.code==='TOPOLOGY_NO_PANELS'));
 const orphanState=clone(minimal);orphanState.elements.push({id:'orphan',type:'shape',group:'marks',panelId:'deleted-panel',x:0,y:0,w:5,h:5,r:0});const orphanGate=topologyProductionGateV39(orphanState,topology);assert.equal(orphanGate.ok,false);assert.ok(orphanGate.errors.some(x=>x.code==='ARTWORK_PANEL_ORPHAN'));
 
 const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.equal(pkg.version,'0.39.0');assert.equal(pkg.scripts['test:v39'],'node tests/v39.mjs');
