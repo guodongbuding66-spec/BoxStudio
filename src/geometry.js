@@ -1,6 +1,7 @@
 export * from './geometryLegacyV31.js';
 import * as legacy from './geometryLegacyV31.js';
 import { generateAdditionalTemplateV32, isV32EngineTemplate } from './parametricTemplatesV32.js';
+import { cubicFilletV43 } from './curvedGeometryV43.js';
 
 const ADVANCED_DEFAULTS={cornerRadius:0,flapTaper:0,relief:0,notch:0,shoulder:0};
 const V32_DEFAULTS={
@@ -129,14 +130,41 @@ export function applyAdvancedStructureV42(geometry,input={}){
   const cornerMode=s.cornerRadius>0?'metadata-only-line-engine':'off';
   g.advancedV42={cornerRadius:s.cornerRadius,cornerRadiusMode:cornerMode,flapTaper:s.flapTaper,relief:s.relief,notch:s.notch,shoulder:s.shoulder,applied};
   g.engineeringNotes=[...(g.engineeringNotes||[])];
-  if(s.cornerRadius>0)g.engineeringNotes.push(`Requested corner radius ${s.cornerRadius} mm is stored for the V0.42 structure model but is not emitted as a production arc by the current line-segment generator.`);
+  if(s.cornerRadius>0)g.engineeringNotes.push(`Requested corner radius ${s.cornerRadius} mm is stored for the V0.42 structure model but is not emitted as a production arc by the V0.42 line-segment generator.`);
   if(applied.length)g.engineeringNotes.push('V0.42 advanced tuck/relief controls modified semantic CUT geometry. Real-sample tooling acceptance is still required.');
+  return g;
+}
+
+function touches(lineRecord,corner){return(close(lineRecord.x1,corner.x)&&close(lineRecord.y1,corner.y))||(close(lineRecord.x2,corner.x)&&close(lineRecord.y2,corner.y))}
+function otherEndpoint(lineRecord,corner){return close(lineRecord.x1,corner.x)&&close(lineRecord.y1,corner.y)?{x:lineRecord.x2,y:lineRecord.y2}:{x:lineRecord.x1,y:lineRecord.y1}}
+function roundCutCornerV43(g,corner,radius,panelId){
+  const incident=(g.cutLines||[]).filter(l=>touches(l,corner));if(incident.length!==2)return null;
+  const a=otherEndpoint(incident[0],corner),b=otherEndpoint(incident[1],corner),fillet=cubicFilletV43(a,corner,b,radius,{kind:'CUT',panelId});if(!fillet)return null;
+  const drop=new Set(incident);g.cutLines=(g.cutLines||[]).filter(l=>!drop.has(l));
+  g.cutLines.push(line(a.x,a.y,fillet.start.x,fillet.start.y),line(b.x,b.y,fillet.end.x,fillet.end.y));
+  g.cutCurves=[...(g.cutCurves||[]),fillet.curve];
+  return{panelId,radius:fillet.radius,corner:{x:corner.x,y:corner.y},curve:structuredClone(fillet.curve)};
+}
+function freeCornersForPanelV43(g,p){
+  if(!Array.isArray(p?.points)||p.points.length<4)return[];const parent=p.parent?g.panelMap?.[p.parent]:null,above=parent?((p.y+p.h/2)<(parent.y+parent.h/2)):true,freeY=above?p.y:p.y+p.h;
+  return p.points.map(q=>({x:num(q[0]),y:num(q[1])})).filter(q=>close(q.y,freeY)).sort((a,b)=>a.x-b.x).slice(0,2);
+}
+export function applyProductionCurvesV43(geometry,input={}){
+  if(!geometry)return geometry;const s=normalizeStructure(input),g=structuredClone(geometry),requested=clamp(num(s.cornerRadius),0,30),supported={
+    'fefco-0427':['lid-tuck'],
+    'reverse-tuck-end':['top-front-tuck','bottom-back-tuck'],
+    'auto-lock-bottom':['top-front-tuck'],
+  },panelIds=supported[s.template]||[],applied=[];
+  if(requested>0){for(const panelId of panelIds){const p=g.panelMap?.[panelId];if(!p)continue;const records=[];for(const corner of freeCornersForPanelV43(g,p)){const item=roundCutCornerV43(g,corner,requested,panelId);if(item){records.push(item);applied.push(item)}}if(records.length)p.productionCurvesV43=records.map(x=>structuredClone(x.curve))}}
+  g.advancedV43={cornerRadius:requested,cornerRadiusMode:applied.length?'production-native-cubic':'off',curvesAdded:applied.length,applied:applied.map(({curve,...rest})=>rest),meshPolicy:applied.length?'sample-native-curves-for-topology':'line-topology'};
+  g.engineeringNotes=[...(g.engineeringNotes||[])];
+  if(applied.length)g.engineeringNotes.push(`V0.43 emits ${applied.length} native cubic CUT fillet${applied.length===1?'':'s'} for ${requested} mm requested corner radius. SVG/PDF preserve cubic vectors; DXF emits SPLINE. 3D topology samples the same native curves only at mesh reconstruction time.`);
   return g;
 }
 
 export function generateGeometry(input={}){
   const s=normalizeStructure(input);
   if(!isV32EngineTemplate(s.template))return legacy.generateGeometry(s.template==='imported'?input:s);
-  const base=generateAdditionalTemplateV32(s);
-  return withGuidesV32(applyAdvancedStructureV42(base,s));
+  const base=generateAdditionalTemplateV32(s),v42=applyAdvancedStructureV42(base,s),v43=applyProductionCurvesV43(v42,s);
+  return withGuidesV32(v43);
 }
