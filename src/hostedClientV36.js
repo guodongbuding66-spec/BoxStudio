@@ -6,6 +6,7 @@ function join(base,path=''){
   return `${root}/${String(path||'').replace(/^\/+/, '')}`;
 }
 async function decode(response){const type=response.headers?.get?.('content-type')||'';if(response.status===204)return null;if(type.includes('application/json'))return response.json();const text=await response.text();try{return JSON.parse(text)}catch{return text}}
+const idemHeaders=options=>options?.idempotencyKey?{'idempotency-key':String(options.idempotencyKey)}:{};
 
 export function createHostedApiV36({baseUrl='/api/v1',fetchImpl=globalThis.fetch,storage=globalThis.localStorage}={}){
   if(typeof fetchImpl!=='function')throw new Error('Hosted API requires fetch.');
@@ -22,15 +23,17 @@ export function createHostedApiV36({baseUrl='/api/v1',fetchImpl=globalThis.fetch
     async logout(){try{return await request('auth/logout',{method:'POST'})}finally{setToken('')}},
     session(){return request('session')},
     listProjects(){return request('projects')},
-    createProject(payload){return request('projects',{method:'POST',body:payload})},
+    createProject(payload,options={}){return request('projects',{method:'POST',headers:idemHeaders(options),body:payload})},
     getProject(id){return request(`projects/${encodeURIComponent(id)}`)},
     listRevisions(id){return request(`projects/${encodeURIComponent(id)}/revisions`)},
     getRevision(id,revision){return request(`projects/${encodeURIComponent(id)}/revisions/${Number(revision)}`)},
-    createRevision(id,{state,expectedRevision,reason=''}){return request(`projects/${encodeURIComponent(id)}/revisions`,{method:'POST',headers:{'if-match':String(expectedRevision)},body:{state,reason}})},
-    submitRevision(id,revision,reason=''){return request(`projects/${encodeURIComponent(id)}/revisions/${Number(revision)}/submit`,{method:'POST',body:{reason}})},
-    approveRevision(id,revision,reason=''){return request(`projects/${encodeURIComponent(id)}/revisions/${Number(revision)}/approve`,{method:'POST',body:{reason}})},
-    rejectRevision(id,revision,reason=''){return request(`projects/${encodeURIComponent(id)}/revisions/${Number(revision)}/reject`,{method:'POST',body:{reason}})},
+    createRevision(id,{state,expectedRevision,reason=''},options={}){return request(`projects/${encodeURIComponent(id)}/revisions`,{method:'POST',headers:{'if-match':String(expectedRevision),...idemHeaders(options)},body:{state,reason}})},
+    submitRevision(id,revision,reason='',options={}){return request(`projects/${encodeURIComponent(id)}/revisions/${Number(revision)}/submit`,{method:'POST',headers:idemHeaders(options),body:{reason}})},
+    approveRevision(id,revision,reason='',options={}){return request(`projects/${encodeURIComponent(id)}/revisions/${Number(revision)}/approve`,{method:'POST',headers:idemHeaders(options),body:{reason}})},
+    rejectRevision(id,revision,reason='',options={}){return request(`projects/${encodeURIComponent(id)}/revisions/${Number(revision)}/reject`,{method:'POST',headers:idemHeaders(options),body:{reason}})},
     productionGate(id,revision){return request(`projects/${encodeURIComponent(id)}/revisions/${Number(revision)}/production-gate`,{method:'POST',body:{}})},
+    createProductionArchive(id,revision,reason='',options={}){return request(`projects/${encodeURIComponent(id)}/revisions/${Number(revision)}/archive`,{method:'POST',headers:idemHeaders(options),body:{reason}})},
+    getProductionArchive(id,revision){return request(`projects/${encodeURIComponent(id)}/revisions/${Number(revision)}/archive`)},
     audit({projectId=null,afterSeq=0}={}){const params=new URLSearchParams();if(projectId)params.set('projectId',projectId);if(afterSeq)params.set('afterSeq',String(afterSeq));return request(`audit${params.size?`?${params}`:''}`)},
     verifyAudit(){return request('audit/verify')},
   };
