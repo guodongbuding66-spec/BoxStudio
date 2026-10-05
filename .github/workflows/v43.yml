@@ -23,6 +23,8 @@ jobs:
           node --check src/curvedGeometryV43.js
           node --check src/geometry.js
           node --check src/productionExportV38.js
+          node --check src/productionPdfV23.js
+          node --check src/productionPdfV43.js
           node --check src/preflightV43.js
           node --check src/v43Ui.js
           node --check tests/v43.mjs
@@ -31,6 +33,7 @@ jobs:
           node tests/v43.mjs
           grep -q "v43Ui.js" index.html
           grep -q "v43Ui.css" index.html
+          grep -q "nativeStructuralCurves===true" src/productionPdfV23.js
           grep -q "cornerRadiusProductionCurve:true" src/v43Ui.js
           grep -q "dxfNativeArcSpline:true" src/v43Ui.js
           grep -q "pdfNativeCubic:true" src/v43Ui.js
