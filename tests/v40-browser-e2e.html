@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>BoxStudio V0.40 Free Editor E2E</title></head>
+<body data-v40-e2e="running">
+<iframe id="appFrame" style="width:1440px;height:900px;border:0"></iframe>
+<pre id="log"></pre>
+<script type="module">
+  import { STORAGE_KEY, defaultState } from '../src/model.js';
+  const initial=structuredClone(defaultState);initial.page='editor';initial.editorTab='Design';initial.savedAt=new Date().toISOString();
+  localStorage.clear();localStorage.setItem(STORAGE_KEY,JSON.stringify(initial));
+  await fetch('/__v40_started__?detail='+encodeURIComponent('V0.40 browser started')).catch(()=>{});
+  const frame=document.getElementById('appFrame');frame.src='../index.html';
+  frame.addEventListener('load',async()=>{await import('./v40-browser-e2e.js')},{once:true});
+</script>
+</body>
+</html>
