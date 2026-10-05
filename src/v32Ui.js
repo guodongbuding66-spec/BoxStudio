@@ -74,8 +74,7 @@ function renderTemplatePage(preserveFocus=false){
   if(preserveFocus){const i=host.querySelector('#v32TemplateSearch');i?.focus();i?.setSelectionRange(i.value.length,i.value.length);}
 }
 
-function updateVersionAndLabels(){
-  const brand=document.querySelector('.brand small');if(brand)brand.textContent=VERSION;document.title=`BoxStudio ${VERSION}`;
+function updateTemplateLabels(){
   const s=readState(),id=s.structure?.template,label=titleFor(id);
   document.querySelectorAll('.status span').forEach(el=>{if(/Side-Seal \/ RSC:|Mailer 150010:|FEFCO 0427:|Reverse Tuck End:|Auto-lock Bottom:/.test(el.textContent))el.textContent=`${label}: ${s.structure.length} × ${s.structure.width} × ${s.structure.height}`;});
   if(id&&id!=='side-seal-rsc')document.querySelectorAll('.card .eyebrow').forEach(el=>{if(/SIDE-SEAL|RSC/.test(el.textContent))el.textContent=label.toUpperCase();});
@@ -94,5 +93,5 @@ function installMaterialSummary(){
 }
 
 let scheduled=false;
-function sync(){if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;updateVersionAndLabels();renderTemplatePage();installMaterialSummary();});}
+function sync(){if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;updateTemplateLabels();renderTemplatePage();installMaterialSummary();});}
 const observer=new MutationObserver(sync);observer.observe(document.documentElement,{childList:true,subtree:true});sync();
