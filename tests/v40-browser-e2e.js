@@ -1,3 +1,4 @@
+import { STORAGE_KEY } from '../src/model.js';
 const frame=document.getElementById('appFrame'),win=frame.contentWindow,doc=frame.contentDocument;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function waitFor(fn,label,timeout=12000){const end=Date.now()+timeout;while(Date.now()<end){try{const v=fn();if(v)return v}catch{}await sleep(50)}throw new Error(`Timed out: ${label}`)}
@@ -25,7 +26,7 @@ try{
   doc.querySelector('.tabbar [data-tab="Structure"]').click();
   const length=await waitFor(()=>doc.querySelector('[data-v40-structure="length"]'),'V0.40 structure mirror');
   const before=Number(length.value),after=before+7.5;length.value=String(after);length.dispatchEvent(new Event('change',{bubbles:true}));
-  await waitFor(()=>{try{return Math.abs(JSON.parse(localStorage.getItem('boxstudio-v08-state')||'{}').structure?.length-after)<0.001}catch{return false}},'mirrored structure persistence');
+  await waitFor(()=>{try{return Math.abs(JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}').structure?.length-after)<0.001}catch{return false}},'mirrored structure persistence');
 
   const cad=await waitFor(()=>doc.querySelector('[data-v40-open-cad]'),'Dieline CAD launcher');cad.click();
   await waitFor(()=>doc.querySelector('#boxstudio-v38-cad'),'Dieline CAD open');
