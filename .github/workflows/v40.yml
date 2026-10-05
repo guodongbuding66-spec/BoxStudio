@@ -1,0 +1,62 @@
+name: V0.40 Free Access Production Geometry
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  free-production-geometry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: V0.40 syntax checks
+        run: |
+          node --check src/freeAccessV40.js
+          node --check src/offsetEngineV40.js
+          node --check src/preflightV40.js
+          node --check src/productionPdfV40.js
+          node --check src/v40Ui.js
+          node --check tests/v40.mjs
+          node --check tests/v40-browser-e2e.js
+      - name: V0.40 free access and production offsets
+        run: node tests/v40.mjs
+      - name: V0.40 real browser free workflow, offsets and full Production PDF
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v40-started /tmp/boxstudio-v40-pass /tmp/boxstudio-v40-fail
+          python3 tests/v40_e2e_server.py >/tmp/boxstudio-v40-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 50); do
+            if curl -fsS http://127.0.0.1:8770/tests/v40-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 35s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --virtual-time-budget=24000 --dump-dom http://127.0.0.1:8770/tests/v40-browser-e2e.html >/tmp/boxstudio-v40-dom.log 2>/tmp/boxstudio-v40-chrome.log || true
+          if test -f /tmp/boxstudio-v40-pass; then
+            cat /tmp/boxstudio-v40-pass
+          elif test -f /tmp/boxstudio-v40-fail; then
+            cat /tmp/boxstudio-v40-fail
+            cat /tmp/boxstudio-v40-chrome.log || true
+            cat /tmp/boxstudio-v40-dom.log || true
+            exit 1
+          else
+            echo 'V0.40 browser E2E ended without PASS/FAIL signal.'
+            cat /tmp/boxstudio-v40-http.log || true
+            cat /tmp/boxstudio-v40-chrome.log || true
+            cat /tmp/boxstudio-v40-dom.log || true
+            exit 1
+          fi
+          kill "$SERVER_PID" 2>/dev/null || true
+          trap - EXIT
