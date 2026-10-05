@@ -9,8 +9,8 @@
   const initial=structuredClone(defaultState);initial.page='editor';initial.editorTab='Design';initial.savedAt=new Date().toISOString();
   localStorage.clear();localStorage.setItem(STORAGE_KEY,JSON.stringify(initial));
   await fetch('/__v40_started__?detail='+encodeURIComponent('V0.40 browser started')).catch(()=>{});
-  const frame=document.getElementById('appFrame');frame.src='../index.html';
-  frame.addEventListener('load',async()=>{await import('./v40-browser-e2e.js')},{once:true});
+  document.getElementById('appFrame').src='../index.html';
+  await import('./v40-browser-e2e.js');
 </script>
 </body>
 </html>
