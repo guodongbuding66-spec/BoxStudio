@@ -1,0 +1,53 @@
+name: V0.37 Durable PostgreSQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  durable-postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: boxstudio
+          POSTGRES_PASSWORD: boxstudio_test
+          POSTGRES_DB: boxstudio
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U boxstudio -d boxstudio"
+          --health-interval=2s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      BOXSTUDIO_DATABASE_URL: postgresql://boxstudio:boxstudio_test@127.0.0.1:5432/boxstudio
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install PostgreSQL client dependency
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: V0.37 syntax checks
+        run: |
+          node --check server/postgresV37.mjs
+          node --check server/domainV37.mjs
+          node --check server/httpV37.mjs
+          node --check tests/v37.mjs
+
+      - name: Preserve V0.36 hosted regression
+        run: node tests/v36.mjs
+
+      - name: V0.37 PostgreSQL durability, idempotency, concurrency and immutable archive
+        run: node tests/v37.mjs
