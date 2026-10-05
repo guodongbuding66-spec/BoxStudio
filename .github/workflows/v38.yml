@@ -1,0 +1,28 @@
+name: V0.38 Dieline CAD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  dieline-cad:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: V0.38 syntax checks
+        run: |
+          node --check src/dielineCadV38.js
+          node --check src/preflightV38.js
+          node --check src/productionExportV38.js
+          node --check tests/v38.mjs
+      - name: V0.38 semantic dieline CAD, production preflight and export regression
+        run: node tests/v38.mjs
