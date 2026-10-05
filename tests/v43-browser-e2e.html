@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><title>BoxStudio V0.43 Native Curves E2E</title>
+  <link rel="stylesheet" href="../src/styles.css">
+  <link rel="stylesheet" href="../src/profileUi.css">
+  <link rel="stylesheet" href="../src/v33Ui.css">
+  <link rel="stylesheet" href="../src/v34Ui.css">
+  <link rel="stylesheet" href="../src/v35Ui.css">
+  <link rel="stylesheet" href="../src/v36Ui.css">
+  <link rel="stylesheet" href="../src/v38Ui.css">
+  <link rel="stylesheet" href="../src/v39Ui.css">
+  <link rel="stylesheet" href="../src/v40Ui.css">
+  <link rel="stylesheet" href="../src/v41Ui.css">
+  <link rel="stylesheet" href="../src/v42Ui.css">
+  <link rel="stylesheet" href="../src/v43Ui.css">
+</head>
+<body data-v43-e2e="running">
+<div id="app"></div><pre id="log"></pre>
+<script src="../vendor/jszip.min.js"></script>
+<script type="module">
+  import { STORAGE_KEY, defaultState } from '../src/model.js';
+  if(!sessionStorage.getItem('boxstudio-v43-stage')){
+    const initial=structuredClone(defaultState);initial.page='editor';initial.editorTab='Structure';initial.savedAt=new Date().toISOString();
+    localStorage.clear();localStorage.setItem(STORAGE_KEY,JSON.stringify(initial));sessionStorage.setItem('boxstudio-v43-stage','0');
+    await fetch('/__v43_started__',{method:'POST',body:'V0.43 browser started'}).catch(()=>{});
+  }
+  await import('../src/app.js');
+  await import('../src/v35Ui.js');
+  await import('../src/v36Ui.js');
+  await import('../src/v38Ui.js');
+  await import('../src/v39Ui.js');
+  await import('../src/v40Ui.js');
+  await import('../src/v41Ui.js');
+  await import('../src/v42Ui.js');
+  await import('../src/v43Ui.js');
+  await import('./v43-browser-e2e.js');
+</script>
+</body>
+</html>
