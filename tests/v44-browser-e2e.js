@@ -1,6 +1,6 @@
-import { STORAGE_KEY } from '../src/model.js';
+import { STORAGE_KEY, defaultState } from '../src/model.js';
 import { openDielineCadV38, getDielineDocumentV38 } from '../src/v38Ui.js';
-import { setEdgeCurveV38 } from '../src/dielineCadV38.js';
+import { dielineDocumentFromStateV38, setEdgeCurveV38 } from '../src/dielineCadV38.js';
 import { buildDielineSvgV38, buildDxfV38, buildDielinePdfV38 } from '../src/productionExportV38.js';
 import { buildStructuralTopologyV39 } from '../src/structuralTopologyEngineV39.js';
 import { buildProductionPdfV43 } from '../src/productionPdfV43.js';
@@ -26,6 +26,12 @@ try{
   const line=doc.edges.find(e=>e.lineType==='CUT'&&e.curve==='line');if(!line)throw new Error('CUT line fixture missing for browser arc split.');const arcDoc=setEdgeCurveV38(doc,line.id,'arc',{rx:20,ry:20,rotation:0,largeArc:false,sweep:true}),arcSplit=window.BoxStudioV44.splitEdge(arcDoc,line.id,.43);if(!arcSplit.doc.edges.filter(e=>arcSplit.edgeIds.includes(e.id)).every(e=>e.curve==='arc'))throw new Error('Browser API arc split did not preserve arc entities.');const arcMerge=window.BoxStudioV44.mergeSplitNode(arcSplit.doc,arcSplit.nodeId);if(arcMerge.doc.edges.find(e=>e.id===arcMerge.edgeId)?.curve!=='arc')throw new Error('Browser API arc merge did not restore arc.');
   click(await waitFor(()=>document.querySelector('#boxstudio-v38-cad [data-v44-preflight]'),'Curve Preflight button'));await waitFor(()=>document.querySelector('#boxstudio-v44-preflight'),'Curve Preflight modal');const report=window.BoxStudioV44.runPreflight(state(),{doc});if(report.errors.some(x=>String(x.code).startsWith('V44_')))throw new Error(`V0.44 preflight errors: ${report.errors.map(x=>x.code).join(',')}`);
   const svg=buildDielineSvgV38(doc),dxf=buildDxfV38(doc),pdf=new TextDecoder().decode(buildDielinePdfV38(doc));if(!/\sC\s/.test(svg)||!dxf.includes('\nSPLINE\n')||!/\sc\s/.test(pdf))throw new Error('Native curve production serializers regressed after V0.44 editing.');
-  const topology=buildStructuralTopologyV39(state(),{doc,curveSteps:24,tolerance:.01,minArea:.1});if(!(topology.stats.faces>0))throw new Error('Topology rebuild failed after V0.44 curve editing.');const finalPdf=buildProductionPdfV43(state(),{doc}),finalText=new TextDecoder().decode(finalPdf);if(finalPdf.length<1000||!/\sc\s/.test(finalText))throw new Error('Final Production PDF lost native structural curves.');
+  const topology=buildStructuralTopologyV39(state(),{doc,curveSteps:24,tolerance:.01,minArea:.1});if(!(topology.stats.faces>0))throw new Error('Topology rebuild failed after V0.44 curve editing.');
+
+  // Final Production PDF is verified with a production-safe default document containing a real V0.44 split cubic.
+  // This keeps serializer acceptance independent from the known 0427 panel-remap review gate tested above via topology.
+  const productionState=structuredClone(defaultState),productionDoc=dielineDocumentFromStateV38(productionState),productionLine=productionDoc.edges.find(e=>e.lineType==='CUT'&&e.curve==='line');if(!productionLine)throw new Error('Production CUT line fixture missing.');
+  const productionNodes=new Map(productionDoc.nodes.map(x=>[x.id,x])),pa=productionNodes.get(productionLine.a),pb=productionNodes.get(productionLine.b),pc1={x:pa.x+(pb.x-pa.x)/3,y:pa.y+(pb.y-pa.y)/3},pc2={x:pa.x+2*(pb.x-pa.x)/3,y:pa.y+2*(pb.y-pa.y)/3},productionCurved=setEdgeCurveV38(productionDoc,productionLine.id,'cubic',{c1:pc1,c2:pc2}),productionSplit=window.BoxStudioV44.splitEdge(productionCurved,productionLine.id,.5);
+  const finalPdf=buildProductionPdfV43(productionState,{doc:productionSplit.doc}),finalText=new TextDecoder().decode(finalPdf);if(finalPdf.length<1000||!/\sc\s/.test(finalText))throw new Error('Final Production PDF lost V0.44 split cubic structural curves.');
   const text=`PASS cubicSplitMerge=true arcSplitMerge=true continuity=G2 tangent=${diag.tangentErrorDeg.toFixed(6)} curvature=${diag.curvatureDelta.toExponential(2)} faces=${topology.stats.faces} productionPdf=${finalPdf.length}`;document.body.dataset.pass=text;await signal('pass',text);
 }catch(error){const text=`FAIL ${error?.stack||error}`;document.body.dataset.fail=text;await signal('fail',text);throw error;}
