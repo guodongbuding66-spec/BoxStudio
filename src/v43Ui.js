@@ -12,12 +12,15 @@ function currentGeometry(){try{return generateGeometry(readState().structure||{}
 
 function decorateAdvanced(){
   const input=document.querySelector('[data-v42-advanced="cornerRadius"]'),label=input?.closest('label');if(label&&!label.dataset.v43Native){label.dataset.v43Native='true';label.classList.remove('metadata-only');label.classList.add('v43-native-control');const title=label.querySelector(':scope > span');if(title&&!title.querySelector('.v43-native-badge'))title.insertAdjacentHTML('beforeend',' <b class="v43-native-badge">NATIVE</b>');const help=label.querySelector('small');if(help)help.textContent='Production-native cubic fillets. SVG/PDF preserve cubic vectors; DXF exports SPLINE.'}
-  document.querySelectorAll('.v42-legend span').forEach(span=>{if(span.querySelector('.meta'))span.innerHTML='<i class="meta v43-native-dot"></i> native curve production enabled in V0.43'});
+  document.querySelectorAll('.v42-legend span').forEach(span=>{if(span.dataset.v43NativeLegend)return;if(span.querySelector('.meta')){span.dataset.v43NativeLegend='true';span.innerHTML='<i class="meta v43-native-dot"></i> native curve production enabled in V0.43'}});
   const host=document.querySelector('.v42-advanced');if(host&&!host.querySelector('.v43-advanced-status')){const badge=document.createElement('div');badge.className='v43-advanced-status';badge.innerHTML='<b>V0.43 Curve Engine</b><span>Corner radius now changes production CUT geometry.</span>';host.appendChild(badge)}
 }
 
 function decorateTemplateDetail(){
-  const host=document.querySelector('#boxstudio-v42-detail');if(!host)return;const g=currentGeometry();if(g?.advancedV43?.cornerRadiusMode==='production-native-cubic'){const warning=host.querySelector('.v42-warning');if(warning){warning.classList.add('v43-native-warning');warning.textContent=`V0.43 production curve active: ${g.advancedV43.curvesAdded} native cubic CUT fillets are generated from the ${g.advancedV43.cornerRadius} mm radius setting.`}host.querySelectorAll('.v42-cap').forEach(row=>{if(row.querySelector('span')?.textContent?.includes('Corner radius')){row.classList.add('v43-native-cap');const small=row.querySelector('small');if(small)small.textContent='production-native cubic CUT geometry'}})}
+  const host=document.querySelector('#boxstudio-v42-detail');if(!host)return;const g=currentGeometry();if(g?.advancedV43?.cornerRadiusMode==='production-native-cubic'){
+    const warning=host.querySelector('.v42-warning');if(warning&&!warning.dataset.v43Native){warning.dataset.v43Native='true';warning.classList.add('v43-native-warning');warning.textContent=`V0.43 production curve active: ${g.advancedV43.curvesAdded} native cubic CUT fillets are generated from the ${g.advancedV43.cornerRadius} mm radius setting.`}
+    host.querySelectorAll('.v42-cap').forEach(row=>{if(row.dataset.v43NativeCap)return;if(row.querySelector('span')?.textContent?.includes('Corner radius')){row.dataset.v43NativeCap='true';row.classList.add('v43-native-cap');const small=row.querySelector('small');if(small)small.textContent='production-native cubic CUT geometry'}})
+  }
 }
 
 function selectedArcId(){return document.querySelector('#boxstudio-v38-cad .v38-edge.selected[data-v38-edge]')?.dataset.v38Edge||null}
