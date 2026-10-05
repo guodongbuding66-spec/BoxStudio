@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { defaultState } from '../src/model.js';
 import { defaultsForTemplate, generateGeometry } from '../src/geometry.js';
-import { dielineDocumentFromGeometryV38, setEdgeCurveV38 } from '../src/dielineCadV38.js';
+import { dielineDocumentFromGeometryV38, dielineDocumentFromStateV38, setEdgeCurveV38 } from '../src/dielineCadV38.js';
 import { buildDielineSvgV38, buildDxfV38, buildDielinePdfV38 } from '../src/productionExportV38.js';
 import { buildStructuralTopologyV39 } from '../src/structuralTopologyEngineV39.js';
 import { buildProductionPdfV43 } from '../src/productionPdfV43.js';
@@ -41,6 +41,14 @@ assert.ok(curveLengthV44(continuityDoc,'e1')>10,'curve length must exceed the ch
 const splitSvg=buildDielineSvgV38(split.doc),splitDxf=buildDxfV38(split.doc),splitPdfText=new TextDecoder().decode(buildDielinePdfV38(split.doc));assert.match(splitSvg,/data-curve="cubic"/);assert.match(splitDxf,/\nSPLINE\n/);assert.match(splitPdfText,/\sc\s/);
 const topology=buildStructuralTopologyV39(state,{doc:split.doc,curveSteps:24,tolerance:.01,minArea:.1});assert.ok(topology.stats.faces>0,'split native curves must still rebuild production topology');
 const preflight=runPreflightV44(state,{doc:split.doc});assert.equal(preflight.schema,'boxstudio-preflight-v44');assert.ok(preflight.checks.some(x=>x.code==='V44_SPLIT_REVERSIBLE'&&x.severity==='pass'));assert.equal(preflight.summary.splitNodes,1);assert.equal(preflight.summary.mergeableSplitNodes,1);
-const finalPdf=buildProductionPdfV43(state,{doc:split.doc}),finalText=new TextDecoder().decode(finalPdf);assert.ok(finalPdf.length>1000);assert.match(finalText,/\/CutContour/);assert.match(finalText,/\sc\s/,'full Production PDF must keep split cubic structural curves native');
+
+// Final Production PDF uses a production-safe baseline fixture so this serializer assertion is isolated
+// from the existing FEFCO 0427 panel-identity review gate. The structure is still a real split cubic.
+const productionState=structuredClone(defaultState),productionDoc=dielineDocumentFromStateV38(productionState),productionLine=productionDoc.edges.find(e=>e.lineType==='CUT'&&e.curve==='line');
+assert.ok(productionLine,'production fixture requires a CUT line');
+const productionNodes=new Map(productionDoc.nodes.map(x=>[x.id,x])),pa=productionNodes.get(productionLine.a),pb=productionNodes.get(productionLine.b),pc1={x:pa.x+(pb.x-pa.x)/3,y:pa.y+(pb.y-pa.y)/3},pc2={x:pa.x+2*(pb.x-pa.x)/3,y:pa.y+2*(pb.y-pa.y)/3};
+const productionCurved=setEdgeCurveV38(productionDoc,productionLine.id,'cubic',{c1:pc1,c2:pc2}),productionSplit=splitEdgeV44(productionCurved,productionLine.id,.5);
+assert.equal(canMergeSplitNodeV44(productionSplit.doc,productionSplit.nodeId).ok,true,'production split cubic must retain reversible provenance');
+const finalPdf=buildProductionPdfV43(productionState,{doc:productionSplit.doc}),finalText=new TextDecoder().decode(finalPdf);assert.ok(finalPdf.length>1000);assert.match(finalText,/\/CutContour/);assert.match(finalText,/\sc\s/,'full Production PDF must keep split cubic structural curves native');
 
 console.log(`BoxStudio V0.44 curve topology passed: split=${split.curve} arc=${arcSplit.curve} faces=${topology.stats.faces} G1=${g1d.tangentErrorDeg.toFixed(6)}deg G2=${g2d.curvatureDelta.toExponential(2)} productionPdf=${finalPdf.length}`);
