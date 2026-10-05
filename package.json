@@ -1,13 +1,14 @@
 {
-  "name": "boxstudio-v0.38",
-  "version": "0.38.0",
+  "name": "boxstudio-v0.39",
+  "version": "0.39.0",
   "private": true,
   "type": "module",
   "scripts": {
     "start:api": "node server/httpV37.mjs",
     "test:v36": "node tests/v36.mjs",
     "test:v37": "node tests/v37.mjs",
-    "test:v38": "node tests/v38.mjs"
+    "test:v38": "node tests/v38.mjs",
+    "test:v39": "node tests/v39.mjs"
   },
   "dependencies": {
     "pg": "^8.13.1"
