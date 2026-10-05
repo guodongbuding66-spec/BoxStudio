@@ -1,10 +1,10 @@
-# BoxStudio 当前未完成清单（V0.38）
+# BoxStudio 当前未完成清单（V0.39）
 
 **审计日期**：2026-10-05  
 **当前产品基准**：`docs/BOXSTUDIO_DEVELOPMENT_SPEC_CURRENT.md`  
-**当前软件阶段**：V0.38 — Professional Dieline CAD / Production Preflight / Dieline Export  
-**最新进度**：`docs/BASELINE_PROGRESS_V0.38.md`  
-**测试记录**：`docs/V0.38_TEST_REPORT.md`
+**当前软件阶段**：V0.39 — Unified Structural Topology + Full Production Export  
+**最新进度**：`docs/BASELINE_PROGRESS_V0.39.md`  
+**测试记录**：`docs/V0.39_TEST_REPORT.md`
 
 > 主原则保持不变：BoxStudio 首先是“参数化纸盒结构设计 + 专业 2D 包装设计 + 3D 成盒审校 + 唛头 + Preflight + 生产文件”的产品。Backend / ERP / SSO 只能服务于这条主线，不能再次取代它。
 
@@ -25,9 +25,9 @@
 
 # 1. 当前总体结论
 
-从 V0.32 到 V0.38，原始纸盒设计主线已经重新建立：
+从 V0.32 到 V0.39，原始纸盒设计主线已经形成一条真正可工作的软件链：
 
-- ✅ 5 个真实参数化盒型引擎 + Template Center；
+- ✅ 5 个真实参数化盒型 + Template Center；
 - ✅ Internal / External / Manufacturing 尺寸模式；
 - ✅ Material / Flute / Thickness 工程参数；
 - ✅ Professional 2D Editor；
@@ -35,15 +35,22 @@
 - ✅ 2D ↔ 3D linked review + Fold diagnostics + Material preview；
 - ✅ Hosted Auth/RBAC/Immutable Revision/Audit；
 - ✅ PostgreSQL durable persistence / idempotency / immutable archive；
-- ✅ V0.38 Semantic Dieline CAD；
-- ✅ V0.38 Dieline structural Preflight；
-- ✅ V0.38 1:1 SVG / DXF / Dieline PDF。
+- ✅ Semantic Dieline CAD；
+- ✅ Dieline structural Preflight；
+- ✅ 1:1 SVG / DXF / Dieline PDF；
+- ✅ **edited CUT/CREASE → planar topology → rebuilt Panels**；
+- ✅ **rebuilt Panels → crease adjacency → Fold Graph / hinge**；
+- ✅ **Artwork panel reconciliation / orphan fail-closed**；
+- ✅ **edited topology → existing full Production PDF pipeline**；
+- ✅ **CAD edit → topology rebuild → Full Production PDF real browser E2E**。
 
-因此，当前最大缺口已经不再是“有没有编辑器/后台/3D/刀版编辑”，而是：
+因此，V0.39 已经关闭 V0.38 最大的数据断层：
 
-> **任意 CAD 修改后的 Panel / Fold topology 自动重建、真实 Polygon/Bezier Offset、edited dieline 驱动完整 Artwork Production PDF、20–30 高频盒型、Raster production contract，以及真实 CAD / RIP / 工厂样箱验收仍未完成。**
+> **编辑刀版后，Panel / Fold / Artwork / Full Production PDF 不再必然继续读旧 parametric geometry。**
 
-这些应成为后续主线，而不是继续扩张企业后台。
+当前最大的核心缺口变为：
+
+> **真实 Polygon/Bezier Offset、Topology 人工 Review/Remap、Fold Angle/Hinge Override、结构工具、Raster production contract、20–30 高频盒型，以及真实 CAD / RIP / 工厂样箱验收。**
 
 ---
 
@@ -64,21 +71,21 @@
 - [x] Auto-lock Bottom engineering core；
 - [x] Internal / External / Manufacturing dimension modes；
 - [x] Material / flute presets；
-- [x] Thickness participates in geometry compensation；
+- [x] thickness compensation participates in geometry；
 - [x] deterministic regression fixtures。
 
 ### 仍未完成
 
 - [ ] 20–30 个高频生产盒型；
-- [ ] FEFCO / ECMA 更完整 catalog；
+- [ ] 更完整 FEFCO / ECMA catalog；
 - [ ] custom parametric template authoring；
 - [ ] factory-specific compensation profiles；
 - [ ] flute/material → real manufacturing allowance matrix；
-- [ ] 复杂锁底、展示盒、抽屉盒、天地盖、Sleeve/Tray 等完整生产矩阵。
+- [ ] 复杂锁底、展示盒、抽屉盒、天地盖、Sleeve/Tray 完整生产矩阵。
 
 ### EXT
 
-- [ ] 0427 / RTE / Auto-lock 与真实 CAD 叠图验收；
+- [ ] 0427 / RTE / Auto-lock 与真实 CAD 叠图；
 - [ ] 打样折盒；
 - [ ] 压线中心 / 刀模厂确认；
 - [ ] 不同纸板/楞型真实补偿矩阵。
@@ -116,7 +123,7 @@
 - [ ] cross-panel paste-target UX；
 - [ ] aspect-lock / anchor / transform-origin 完整化；
 - [ ] top-level layer reorder；
-- [ ] legacy clip/cross-panel/live-assist 与 V0.33 selection/history 的完全统一；
+- [ ] legacy clip/cross-panel/live-assist 与统一 selection/history 的彻底收口；
 - [ ] mobile/tablet editing acceptance；
 - [ ] 多模板 drag/resize/rotate 浏览器矩阵。
 
@@ -148,9 +155,9 @@
 - [ ] hosted customer/template administration；
 - [ ] template impact analysis after master update；
 - [ ] richer regulatory symbol catalogs；
-- [ ] DataMatrix and additional GS1 workflows；
+- [ ] DataMatrix and more GS1 workflows；
 - [ ] customer-specific validation packs；
-- [ ] package-set level mark template inheritance。
+- [ ] package-set mark template inheritance。
 
 ---
 
@@ -161,31 +168,36 @@
 ### 已完成
 
 - [x] 2D click → 3D highlight；
-- [x] 3D real canvas click → 2D Panel Focus；
+- [x] 3D canvas click → 2D Panel Focus；
 - [x] Split Review workspace；
 - [x] near-live artwork refresh；
 - [x] Fold 0–100%；
-- [x] Fold direction / dependency diagnostics；
+- [x] Fold diagnostics；
 - [x] cycle / missing hinge / missing root / multiple parent checks；
 - [x] Material / Flute / explicit thickness visual；
-- [x] browser canvas coordinate mapping regression；
+- [x] V0.39 rebuilt topology emits real shared-crease hinges；
+- [x] V0.39 imported geometry proxy feeds rebuilt fold candidates；
 - [x] real Headless Chrome 3D interaction gate。
 
 ### 仍未完成
 
+- [ ] dedicated Panel/Fold topology review UI；
+- [ ] fold angle override editor；
+- [ ] hinge override editor；
+- [ ] curved crease true hinge/bend model；
 - [ ] real bend radius；
 - [ ] crease compression / board spring-back；
 - [ ] physical fold allowance；
 - [ ] factory folding-machine sequence；
 - [ ] high-fidelity PBR paper/corrugated materials；
 - [ ] ICC-aware 3D soft proof；
-- [ ] high-resolution GLB/render export path。
+- [ ] high-resolution GLB/render export。
 
 ---
 
-# 6. Professional Dieline CAD
+# 6. Professional Dieline CAD / Structural Topology
 
-## 当前：✅ V0.38 core / 🟡 topology rebuild
+## 当前：✅ CAD core + ✅ V0.39 topology core / 🟡 review tools
 
 ### 已完成
 
@@ -195,33 +207,37 @@
 - [x] Edge selection；
 - [x] CUT / CREASE / PERF / GLUE conversion；
 - [x] Line / Cubic Bézier / Arc；
-- [x] C1/C2 numeric editing；
-- [x] visible draggable Bézier handles；
-- [x] Add Node；
-- [x] exact cubic split；
+- [x] C1/C2 numeric / direct handle editing；
+- [x] Add Node + exact cubic split；
 - [x] safe degree-2 straight-node delete；
 - [x] unsupported arc split fail-closed；
 - [x] edited document persistence；
-- [x] Bleed / Safe / Glue rectangular production zones；
 - [x] CAD workspace Preflight / SVG / DXF / Dieline PDF；
-- [x] real browser CAD interaction regression。
+- [x] CUT/CREASE sampling into planar segments；
+- [x] intersection / T-junction splitting；
+- [x] half-edge bounded-face enumeration；
+- [x] edited topology → rebuilt panel polygon/bbox；
+- [x] surviving panel semantic identity retention；
+- [x] crease-side panel adjacency；
+- [x] rebuilt Fold Graph / physical hinge；
+- [x] unresolved old Panel → `PANEL_REMAP_REQUIRED` fail-closed；
+- [x] orphan Artwork → `ARTWORK_PANEL_ORPHAN`；
+- [x] browser CAD edit → rebuilt topology persistence。
 
-### P0 未完成
+### P0/P1 仍未完成
 
-- [ ] **edited Edge topology → Panel polygon/rect 自动重建**；
-- [ ] **Panel topology → Fold Graph 自动重建**；
-- [ ] Fold hinge semantic editing / override；
-- [ ] arbitrary Polygon / Bézier Offset engine；
+- [ ] **true arbitrary Polygon / Bézier Offset engine**；
 - [ ] offset join / miter / round / self-intersection repair；
-- [ ] curved-node delete with tangent continuity；
+- [ ] Panel Remap UI；
+- [ ] Fold Angle Review / Override UI；
+- [ ] Hinge Override UI；
+- [ ] curved crease physical fold model；
 - [ ] native Arc split；
 - [ ] tangent/smooth/symmetric handle modes；
 - [ ] Slot / Notch / Tab structural tools；
 - [ ] Dimension annotation / constraint tools；
-- [ ] panel auto-detection hardening after imported CAD；
+- [ ] panel auto-detection hardening for messy external CAD；
 - [ ] custom structure authoring / reusable structural components。
-
-当前只要 CUT/CREASE 语义发生变化，Preflight 会发出 `FOLD_GRAPH_REVIEW_REQUIRED`，不会假定旧 Fold Graph 仍正确。
 
 ---
 
@@ -241,36 +257,38 @@
 - [x] duplicate / open endpoint warning；
 - [x] Bleed / Safe coverage；
 - [x] Artwork crossing edited CREASE；
-- [x] raster effective DPI when pixel metadata exists；
+- [x] raster effective DPI when metadata exists；
 - [x] missing DPI metadata warning；
 - [x] Polygon Offset review warning；
-- [x] Fold Graph re-review after semantic changes；
-- [x] Preflight visible in Dieline CAD UI。
+- [x] Fold Graph review after semantic changes；
+- [x] V0.39 topology errors enter Production gate；
+- [x] `PANEL_REMAP_REQUIRED` blocking；
+- [x] `ARTWORK_PANEL_ORPHAN` blocking；
+- [x] incomplete marks still block V0.39 full Production PDF。
 
 ### 仍未完成
 
-- [ ] true closed-contour/component analysis for every complex curved CUT path；
-- [ ] complete structural manufacturability rules per box family；
-- [ ] advanced font embeddability / outline / min-size policies；
+- [ ] complete manufacturability rules per box family；
+- [ ] advanced font embeddability / min-size policies；
 - [ ] OTF / CFF / CFF2 independent glyph-path measurement；
 - [ ] full raster alpha / overprint / color-space policies；
-- [ ] customer-specific barcode profile / quiet-zone policies；
+- [ ] customer barcode profile / quiet-zone policies；
 - [ ] issue → exact object / node / Excel cell unified navigator；
-- [ ] one-click guided fixes where safe；
+- [ ] safe guided fixes；
 - [ ] external preflight adapter。
 
 ### EXT
 
 - [ ] ISO barcode physical scanner grading；
 - [ ] real RIP raster/separation validation；
-- [ ] Acrobat / callas / third-party PDF/X validation；
+- [ ] Acrobat / callas / formal PDF/X validation；
 - [ ] press proof。
 
 ---
 
 # 8. Production Export
 
-## 当前：✅ strong foundation / 🟡 semantic unification
+## 当前：✅ software unified core / 🟡 export UX & external validation
 
 ### 已完成
 
@@ -279,22 +297,26 @@
 - [x] ICC / DeviceLink subset；
 - [x] PDF/X-4 Candidate subset；
 - [x] batch/multi-page PDF；
-- [x] V0.38 1:1 Dieline SVG；
-- [x] V0.38 DXF mm + CUT/CREASE/PERF/GLUE/BLEED/SAFE layers；
-- [x] V0.38 1:1 Dieline PDF；
+- [x] 1:1 Dieline SVG；
+- [x] DXF mm + semantic layers；
+- [x] 1:1 Dieline PDF；
 - [x] Separation Spot resources；
-- [x] browser-safe Dieline PDF builder。
+- [x] browser-safe Dieline PDF builder；
+- [x] **V0.39 edited `dielineV38` → rebuilt panels/folds → full Artwork Production PDF**；
+- [x] **panel-local artwork resolves through rebuilt panel origin**；
+- [x] **V0.39 reuses V0.27 production serializer rather than parallel degraded exporter**；
+- [x] **real browser Full Production PDF generation**。
 
-### P0 未完成
+### 仍未完成
 
-- [ ] **edited `dielineV38` + rebuilt Panel topology → full Artwork Production PDF**；
-- [ ] Production Artwork / Dieline / Bleed / Marks 使用完全统一语义模型；
-- [ ] Artwork Only / Dieline Only / Production Profile 统一 Export Center UX；
-- [ ] SVG round-trip import/export acceptance；
-- [ ] DXF third-party real-CAD round-trip；
+- [ ] unified Export Center UX；
+- [ ] Production / Artwork / Dieline / 3D profiles；
+- [ ] Artwork Only；
 - [ ] JPG；
 - [ ] GLB；
 - [ ] high-resolution 3D render；
+- [ ] SVG round-trip acceptance；
+- [ ] DXF third-party real-CAD round-trip；
 - [ ] export profiles / filename policies / per-template fixtures。
 
 ### EXT
@@ -314,7 +336,7 @@
 - [x] XLSX / CSV；
 - [x] multi-sheet；
 - [x] mapping / aliases / header detection；
-- [x] leading-zero and import review hardening；
+- [x] leading-zero / import-review hardening；
 - [x] source lineage；
 - [x] worker batch；
 - [x] partial failure / retry；
@@ -364,8 +386,6 @@
 - [ ] WAF / production ingress hardening；
 - [ ] cross-region HA。
 
-这些属于产品可靠性/企业部署，不应先于 Dieline/Panel/Export 核心缺口。
-
 ---
 
 # 11. Browser E2E 当前覆盖
@@ -376,14 +396,21 @@
 - [x] V0.34 Marks Studio；
 - [x] V0.35 2D↔3D Review；
 - [x] V0.36 Hosted Operator → Approver workflow；
-- [x] V0.38 Dieline CAD：CUT→CREASE、Cubic、Add Node、numeric edit、Node drag、Bezier handle drag、Preflight、SVG/DXF/PDF。
+- [x] V0.38 Dieline CAD；
+- [x] **V0.39 CAD node edit → Rebuild Topology → topology persistence → Full Production PDF**。
 
-仍缺完整用户旅程：
+V0.39 browser proof 已实际得到：
 
-- [ ] Template → Dimension → 2D Artwork → Marks → 3D → Dieline CAD → Preflight → Approval → Full Production Export；
-- [ ] file download content verification in browser；
+```text
+PASS cad-node=n3:120.0→121.5 panels=13 folds=12 pdf=23431
+```
+
+仍缺完整长旅程：
+
+- [ ] Template → Dimension → 2D Artwork → Marks → 3D → CAD → Topology → Preflight → Approval → Full Production Export；
+- [ ] downloaded file byte/content verification via browser filesystem；
 - [ ] multi-template E2E matrix；
-- [ ] import external CAD → repair → panel mapping → export；
+- [ ] external CAD import → repair → panel mapping → export；
 - [ ] mobile/tablet acceptance。
 
 ---
@@ -392,19 +419,19 @@
 
 ## P0 — 下一主线
 
-1. **Panel topology rebuild from edited semantic edges**；
-2. **Fold Graph rebuild / override**；
-3. **Polygon/Bezier Offset engine**；
-4. **edited Dieline → full Artwork Production PDF**；
-5. **end-to-end production browser acceptance**。
+1. **Polygon / Bézier Production Offset Engine**；
+2. **Topology Review UI：Panel Remap / Fold Angle / Hinge Override**；
+3. **Slot / Notch / Tab / Dimension / Constraint structural tools**；
+4. **Raster production contract：PNG/JPEG + DPI/ICC/alpha/crop**；
+5. **full end-to-end production journey browser acceptance**。
 
 ## P1
 
 6. 20–30 个高频盒型；
-7. Slot / Notch / Tab / Dimension / Constraint 工具；
-8. Raster artwork production contract；
-9. Export Center / JPG / GLB；
-10. `.boxproj` portable project。
+7. Export Center / Artwork Only / JPG / GLB；
+8. `.boxproj` portable project；
+9. multi-template topology/export fixtures；
+10. imported CAD panel detection / repair hardening。
 
 ## P2 / EXT
 
@@ -418,11 +445,23 @@
 
 # 13. 当前发布判断
 
-BoxStudio 已经从早期“很多独立功能模块”进入**可连成专业包装设计链路的软件阶段**。但在以下条件完成前，不应宣称完全替代 ArtiosCAD / Illustrator / Esko 的生产工作流：
+BoxStudio 已经进入**结构编辑与生产输出开始使用同一语义链路**的软件阶段。V0.39 的关键变化不是多一个导出按钮，而是：
 
-- edited edge → panel/fold topology 自动一致；
+```text
+edited Node / Edge
+→ rebuilt Panel topology
+→ rebuilt Fold adjacency / hinge
+→ reconciled Artwork
+→ Preflight
+→ existing mature Full Production PDF
+```
+
+但在以下条件完成前，仍不应宣称完全替代 ArtiosCAD / Illustrator / Esko 的生产工作流：
+
 - arbitrary curved bleed/safe offset；
-- edited topology 驱动 full artwork production export；
-- real-CAD / RIP / factory sample acceptance。
+- topology review/remap/fold override UX；
+- 20–30 高频 production structures；
+- robust raster production contract；
+- real-CAD / formal PDF/X / RIP / factory sample acceptance。
 
-V0.38 的意义是：**刀版第一次成为真正可编辑、可持久、可 Preflight、可生产导出的语义对象。下一步必须让 Panel、Fold、Artwork 与这个语义刀版彻底统一。**
+V0.39 的意义是：**V0.38 让刀版成为真正可编辑的语义对象；V0.39 让这个语义刀版第一次真正驱动 Panel、Fold、Artwork 和完整 Production PDF。**
