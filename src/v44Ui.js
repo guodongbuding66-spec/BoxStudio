@@ -8,7 +8,8 @@ let observer=null,queued=false;
 function readState(){try{const p=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');return p?{...clone(defaultState),...p,structure:{...defaultState.structure,...(p.structure||{})}}:clone(defaultState)}catch{return clone(defaultState)}}
 function writeDoc(doc){const state=readState();state.dielineV38=doc;state.savedAt=new Date().toISOString();localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
 function clickNode(el){el?.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:window}))}
-function reopen(doc,{nodeId=null,edgeId=null}={}){closeCad();writeDoc(doc);openDielineCadV38();requestAnimationFrame(()=>requestAnimationFrame(()=>{const cad=document.querySelector('#boxstudio-v38-cad');if(nodeId)clickNode(cad?.querySelector(`[data-v38-node="${CSS.escape(nodeId)}"]`));else if(edgeId)clickNode(cad?.querySelector(`[data-v38-edge="${CSS.escape(edgeId)}"]`))}))}
+function restoreSelection({nodeId=null,edgeId=null}={}){const cad=document.querySelector('#boxstudio-v38-cad');if(!cad)return false;const id=nodeId||edgeId;if(!id)return true;const attr=nodeId?'data-v38-node':'data-v38-edge',target=cad.querySelector(`[${attr}="${CSS.escape(id)}"]`);if(!target)return false;clickNode(target);return true}
+function reopen(doc,selection={}){closeCad();writeDoc(doc);openDielineCadV38();if(!restoreSelection(selection))queueMicrotask(()=>restoreSelection(selection))}
 function selectedEdgeId(){return document.querySelector('#boxstudio-v38-cad .v38-edge.selected[data-v38-edge]')?.dataset.v38Edge||null}
 function selectedNodeId(){return document.querySelector('#boxstudio-v38-cad .v38-node.selected[data-v38-node]')?.dataset.v38Node||null}
 function findInspector(title){return[...document.querySelectorAll('#boxstudio-v38-cad .v38-right section')].find(s=>s.querySelector('.v38-section-head h3')?.textContent===title)||null}
