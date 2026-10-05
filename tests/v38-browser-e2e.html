@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>BoxStudio V0.38 Dieline CAD E2E</title><link rel="stylesheet" href="../src/v38Ui.css"></head>
+<body data-v38-e2e="running">
+  <div id="app"><div class="workspace"><div class="three-toolbar"><button>Existing 3D control</button></div></div></div>
+  <pre id="v38E2ELog"></pre>
+  <script type="module">
+    localStorage.clear();
+    await import('../src/v38Ui.js');
+    await import('./v38-browser-e2e.js');
+  </script>
+</body>
+</html>
