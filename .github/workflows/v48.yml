@@ -1,0 +1,51 @@
+name: V0.48 Parametric Packaging Controls
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  parametric-packaging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Syntax
+        run: |
+          node --check src/parametricControlsV48.js
+          node --check src/preflightV48.js
+          node --check src/v48ParametricStudio.js
+          node --check tests/v48.mjs
+          node --check tests/v48-browser-e2e.js
+          python3 -m py_compile tests/v48_e2e_server.py
+      - name: V0.46 baseline
+        run: node tests/v46.mjs
+      - name: V0.47 free product baseline
+        run: node tests/v47.mjs
+      - name: V0.48 regression
+        run: node tests/v48.mjs
+      - name: Wiring and free policy
+        run: |
+          node -e "const p=require('./package.json'); if(p.version!=='0.48.0') throw new Error(p.version)"
+          grep -q 'v48ParametricStudio.css' index.html
+          grep -q 'v48ParametricStudio.js' index.html
+          grep -q 'Shipping Mark Studio' src/v48ParametricStudio.js
+          grep -q 'free:true' src/v48ParametricStudio.js
+      - name: Real Chrome V0.48 workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v48-started /tmp/boxstudio-v48-pass /tmp/boxstudio-v48-fail
+          python3 tests/v48_e2e_server.py >/tmp/boxstudio-v48-http.log 2>&1 & SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do curl -fsS http://127.0.0.1:8778/tests/v48-browser-e2e.html >/dev/null && break; sleep .1; done
+          timeout 110s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --virtual-time-budget=80000 --dump-dom http://127.0.0.1:8778/tests/v48-browser-e2e.html >/tmp/boxstudio-v48-dom.log 2>/tmp/boxstudio-v48-chrome.log || true
+          if test -f /tmp/boxstudio-v48-pass; then cat /tmp/boxstudio-v48-pass; elif test -f /tmp/boxstudio-v48-fail; then cat /tmp/boxstudio-v48-fail; cat /tmp/boxstudio-v48-chrome.log || true; exit 1; else cat /tmp/boxstudio-v48-http.log || true; cat /tmp/boxstudio-v48-dom.log || true; exit 1; fi
