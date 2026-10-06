@@ -18,14 +18,26 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Syntax and advanced constraint regression
+      - name: V0.46 syntax
         run: |
           node --check src/curveConstraintsV46.js
           node --check src/acceptanceV46.js
           node --check src/preflightV46.js
+          node --check src/v46Ui.js
           node --check tests/v46.mjs
-          node tests/v44.mjs
-          node tests/v45.mjs
-          node tests/v46.mjs
+      - name: V0.44 baseline regression
+        run: node tests/v44.mjs
+      - name: V0.45 baseline regression
+        run: node tests/v45.mjs
+      - name: V0.46 advanced regression
+        run: node tests/v46.mjs
+      - name: V0.46 wiring
+        run: |
           grep -q '"version": "0.46.0"' package.json
           grep -q '"test:v46"' package.json
+          grep -q 'v46Ui.js' index.html
+          grep -q 'v46Ui.css' index.html
+          grep -q 'mixedCurveG1:true' src/v46Ui.js
+          grep -q 'batchCorners:true' src/v46Ui.js
+          grep -q 'canvasRadiusDrag:true' src/v46Ui.js
+          grep -q 'cadTopology3dAcceptance:true' src/v46Ui.js
