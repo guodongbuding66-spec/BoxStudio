@@ -14,7 +14,14 @@ const num=(value,fallback=0)=>{const n=Number(value);return Number.isFinite(n)?n
 let host=null,session=null,proofController=null,proofTimer=0,observer=null;
 
 function readState(){try{const parsed=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');return ensureReviewStateV35(parsed?{...clone(defaultState),...parsed,structure:{...defaultState.structure,...(parsed.structure||{})},variables:{...defaultState.variables,...(parsed.variables||{})}}:clone(defaultState))}catch{return ensureReviewStateV35(clone(defaultState))}}
-function persist(){session.savedAt=new Date().toISOString();localStorage.setItem(STORAGE_KEY,JSON.stringify(session))}
+function persist(){
+  session.savedAt=new Date().toISOString();
+  let current={};try{current=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')||{}}catch{}
+  const owned=['structure','elements','variables','reviewV35','foldProgress','savedAt'];
+  const merged={...current};for(const key of owned)if(Object.prototype.hasOwnProperty.call(session,key))merged[key]=clone(session[key]);
+  for(const [key,value] of Object.entries(session))if(!Object.prototype.hasOwnProperty.call(merged,key))merged[key]=clone(value);
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(merged));
+}
 function commit(next,{proof=true}={}){session=ensureReviewStateV35(next);persist();render2D();renderInspector();renderDiagnostics();renderTop();if(proof)scheduleProof()}
 function scheduleProof(){clearTimeout(proofTimer);proofTimer=setTimeout(()=>mountProof(),90)}
 function closeReview(){clearTimeout(proofTimer);proofController?.dispose?.();proofController=null;host?.remove();host=null;injectLauncher()}
@@ -43,7 +50,7 @@ function renderDiagnostics(){if(!host||!session)return;const target=host.querySe
 
 function renderTop(){if(!host||!session)return;const material=resolveMaterialVisualV35(session.structure||{}),catalog=materialCatalogV35(),materialSelect=host.querySelector('#v35Material'),flute=host.querySelector('#v35Flute'),thickness=host.querySelector('#v35Thickness'),fold=host.querySelector('#v35Fold'),label=host.querySelector('#v35FoldLabel'),meta=host.querySelector('#v35MaterialMeta');if(materialSelect){materialSelect.innerHTML=catalog.map(item=>`<option value="${esc(item.id)}" ${item.id===material.materialId?'selected':''}>${esc(item.name)}</option>`).join('')}if(flute){const current=catalog.find(item=>item.id===material.materialId),options=current?.flutes||[];flute.disabled=!options.length;flute.innerHTML=options.length?options.map(item=>`<option value="${item.id}" ${item.id===material.flute?'selected':''}>${esc(item.label)} · ${item.thicknessMm} mm</option>`).join(''):'<option value="">N/A</option>'}if(thickness)thickness.value=material.thicknessMm;if(fold)fold.value=num(session.foldProgress,100);if(label)label.textContent=`${num(session.foldProgress,100)}%`;if(meta)meta.textContent=material.label}
 
-function mountProof(){if(!host||!session)return;proofController?.dispose?.();proofController=null;const target=host.querySelector('#v35Proof');if(!target)return;const model=buildReviewModelV35(session);proofController=mountArtworkProof(target,session,model.geo,model.graph,{selectedPanelId:model.selectedPanelId,materialStyle:model.material,onStatus:status=>{const el=host?.querySelector('#v35ProofStatus');if(el)el.textContent=`${status.mode} · ${status.texturedPanels}/${status.panels} textured panels · ${status.seamWarnings} seam warnings`},onSelectPanel:panelId=>{session=selectReviewPanelV35(session,panelId,{source:'3d'});persist();proofController?.setSelectedPanel?.(panelId);render2D();renderInspector();renderDiagnostics();renderTop()}})}
+function mountProof(){if(!host||!session)return;proofController?.dispose?.();proofController=null;const target=host.querySelector('#v35Proof');if(!target)return;const model=buildReviewModelV35(session);proofController=mountArtworkProof(target,{...session,previewV48:readState().previewV48},model.geo,model.graph,{selectedPanelId:model.selectedPanelId,materialStyle:model.material,onStatus:status=>{const el=host?.querySelector('#v35ProofStatus');if(el)el.textContent=`${status.mode} · ${status.texturedPanels}/${status.panels} textured panels · ${status.seamWarnings} seam warnings`},onSelectPanel:panelId=>{session=selectReviewPanelV35(session,panelId,{source:'3d'});persist();proofController?.setSelectedPanel?.(panelId);render2D();renderInspector();renderDiagnostics();renderTop()}})}
 
 function bindStatic(){
   host.querySelector('#v35Close').onclick=closeReview;
