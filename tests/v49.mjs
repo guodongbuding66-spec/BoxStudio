@@ -18,7 +18,7 @@ const before=state.linkedV49.selectedPanelId;state=cycleLinkedPanelV49(state,1);
 assert.deepEqual(V49_FOLD_PRESETS.map(x=>x.progress),[0,25,50,75,100]);
 model=buildLinkedWorkspaceModelV49(state);const selected=model.records.find(r=>r.panelId===state.linkedV49.selectedPanelId);assert.ok(selected);assert.ok(Number.isFinite(selected.bounds.w)&&Number.isFinite(selected.bounds.h));assert.ok(selected.hinges>=0);assert.ok(selected.artworkCount>=0);
 
-const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('BoxStudio V0.49'));assert.ok(index.includes('v49Ui.css'));assert.ok(index.includes('v49Ui.js'));
+const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('<title>BoxStudio V0.'));assert.ok(index.includes('v49Ui.css'));assert.ok(index.includes('v49Ui.js'));
 const ui=await readFile(new URL('../src/v49Ui.js',import.meta.url),'utf8');assert.ok(ui.includes('点击 2D 或 3D 面板双向联动'));assert.ok(ui.includes('onSelectPanel'));assert.ok(ui.includes('boxstudio:v49-panel-selection'));assert.ok(ui.includes('开合动画'));
-const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.equal(pkg.version,'0.49.0');assert.equal(pkg.scripts['test:v49'],'node tests/v49.mjs');
+const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));const [major,minor]=String(pkg.version).split('.').map(Number);assert.ok(major>0||minor>=49,`Current product version ${pkg.version} must include the V0.49 baseline.`);assert.equal(pkg.scripts['test:v49'],'node tests/v49.mjs');
 console.log(`BoxStudio V0.49 linked workspace passed: templates=${templates.length} panels=${model.stats.panels} hinges=${model.stats.hinges}`);
