@@ -19,8 +19,8 @@ state=stepFoldV51(state,graph,geo,1);model=buildFoldSequenceModelV51(state,graph
 const scan=scanFoldSequenceV51(state,graph,geo);assert.equal(scan.enabled,true);assert.ok(scan.samples>model.stepCount,'collision scan must sample inside each fold step, not keyframes only');assert.ok(Array.isArray(scan.penetrations)&&Array.isArray(scan.overlaps));
 state=setCollisionBlockingV51(state,graph,true);assert.equal(buildFoldSequenceModelV51(state,graph,geo).blockOnPenetration,true);
 
-const I=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],RX90=[1,0,0,0,0,0,-1,0,0,1,0,0,0,0,0,1],syntheticGeo={width:10,height:10,panelMap:{a:{id:'a',x:3,y:3,w:4,h:4},b:{id:'b',x:3,y:3,w:4,h:4}}},syntheticGraph={root:'a',nodes:[{id:'a'},{id:'b'}],edges:[]};
-let hits=detectPanelCollisionsV51(syntheticGraph,syntheticGeo,new Map([['a',I],['b',RX90]]));assert.ok(hits.some(h=>h.type==='penetration'),'crossing non-adjacent panels must report penetration');
+const I=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],RX90_SHIFT=[1,0,0,.5,0,0,-1,0,0,1,0,.35,0,0,0,1],syntheticGeo={width:10,height:10,panelMap:{a:{id:'a',x:3,y:3,w:4,h:4},b:{id:'b',x:3,y:3,w:4,h:4}}},syntheticGraph={root:'a',nodes:[{id:'a'},{id:'b'}],edges:[]};
+let hits=detectPanelCollisionsV51(syntheticGraph,syntheticGeo,new Map([['a',I],['b',RX90_SHIFT]]));assert.ok(hits.some(h=>h.type==='penetration'),'crossing non-adjacent panels must report penetration');
 hits=detectPanelCollisionsV51(syntheticGraph,syntheticGeo,new Map([['a',I],['b',I]]));assert.ok(hits.some(h=>h.type==='overlap'),'coplanar non-adjacent panels must report overlap/contact');
 const adjacentGraph={...syntheticGraph,edges:[{from:'a',to:'b',hinge:{x1:3,y1:3,x2:7,y2:3},angle:90}]};hits=detectPanelCollisionsV51(adjacentGraph,syntheticGeo,new Map([['a',I],['b',I]]));assert.equal(hits.length,0,'direct hinge neighbors must be excluded from self-collision warnings');
 
