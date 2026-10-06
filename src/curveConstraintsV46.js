@@ -81,7 +81,9 @@ function solveTargetFromDriver(next,nodeId,driver,target){
     const which=target.a===nodeId?'c1':'c2',h=target[which],handleLength=Math.max(.001,length(sub(h,node))),d=unit(desired);target[which]=point(node.x+d.x*handleLength,node.y+d.y*handleLength);return{targetEdgeId:target.id,kind,changed:'handle'};
   }
   if(kind==='line'){
-    const outerId=edgeOuterId(target,nodeId),outer=nodeById(next,outerId);if(!outer)throw Object.assign(new Error('Line outer endpoint is missing.'),{code:'V46_ENDPOINT_MISSING'});const lineLength=Math.max(.001,length(sub(outer,node))),d=unit(desired);outer.x=round(node.x+d.x*lineLength);outer.y=round(node.y+d.y*lineLength);return{targetEdgeId:target.id,kind,changed:'outer-node',outerNodeId:outer.id};
+    const outerId=edgeOuterId(target,nodeId),outer=nodeById(next,outerId);if(!outer)throw Object.assign(new Error('Line outer endpoint is missing.'),{code:'V46_ENDPOINT_MISSING'});
+    const degree=incidentEdges(next,outerId).length;if(degree!==1)throw Object.assign(new Error(`Line target ${target.id} cannot move shared outer node ${outerId}; choose the Line as driver or detach the shared node first.`),{code:'V46_LINE_TARGET_OUTER_SHARED',outerNodeId:outerId,degree});
+    const lineLength=Math.max(.001,length(sub(outer,node))),d=unit(desired);outer.x=round(node.x+d.x*lineLength);outer.y=round(node.y+d.y*lineLength);return{targetEdgeId:target.id,kind,changed:'outer-node',outerNodeId:outer.id};
   }
   if(kind==='arc'){
     if(target.v45Corner)throw Object.assign(new Error('Native Fillet arcs are managed by the Corner Feature solver; edit the feature radius instead.'),{code:'V46_CORNER_ARC_MANAGED'});
@@ -128,21 +130,26 @@ export function applyCornerFeatureV46(doc,nodeId,options={}){
   const reserved=reserveCornerSourceIds(doc),result=applyCornerOperationV45(reserved.doc,nodeId,options);return annotateV46Corner(doc,nodeId,result,reserved.added);
 }
 
-export function removeCornerFeatureV46(doc,connectorEdgeId){
+function detachEqualRadiusMemberV46(doc,edgeId){
+  const groups=doc?.constraintsV46?.equalRadiusGroups;if(!Array.isArray(groups))return doc;
+  doc.constraintsV46.equalRadiusGroups=groups.map(g=>({...g,edgeIds:(g.edgeIds||[]).filter(id=>id!==edgeId)})).filter(g=>g.edgeIds.length>=2);return doc;
+}
+export function removeCornerFeatureV46(doc,connectorEdgeId,{preserveEqualRadius=false}={}){
   const connector=edgeById(doc,connectorEdgeId);if(!connector?.v45Corner)throw Object.assign(new Error('Selected edge is not a corner feature.'),{code:'V46_CORNER_FEATURE_MISSING'});
   const provenance=connector.v46Corner;if(!provenance?.sourceNode||!Array.isArray(provenance.endpoints)){
-    const legacy=restoreCornerFeatureV45(doc,connectorEdgeId);return{...legacy,removedEdgeId:connectorEdgeId,legacy:true};
+    const legacy=restoreCornerFeatureV45(doc,connectorEdgeId);if(!preserveEqualRadius)detachEqualRadiusMemberV46(legacy.doc,connectorEdgeId);return{...legacy,removedEdgeId:connectorEdgeId,legacy:true};
   }
   const next=clone(doc),feature=edgeById(next,connectorEdgeId),tangentIds=[feature.a,feature.b];
   for(const record of provenance.endpoints){const edge=edgeById(next,record.edgeId);if(!edge)throw Object.assign(new Error(`Corner source edge ${record.edgeId} no longer exists.`),{code:'V46_CORNER_SOURCE_MISSING'});if(edge[record.endpoint]!==record.tangentNodeId)throw Object.assign(new Error(`Corner source endpoint ${record.edgeId}.${record.endpoint} changed after feature creation.`),{code:'V46_CORNER_ENDPOINT_EDITED'});edge[record.endpoint]=record.originalNodeId}
   next.edges=next.edges.filter(e=>e.id!==connectorEdgeId);for(const tangentId of tangentIds){if(!incidentEdges(next,tangentId).length)next.nodes=next.nodes.filter(n=>n.id!==tangentId)}
   const existing=nodeById(next,provenance.sourceNode.id);if(existing){if(existing.v46IdReservation&&!incidentEdges(next,existing.id).length){existing.x=provenance.sourceNode.x;existing.y=provenance.sourceNode.y;delete existing.v46IdReservation}else if(Math.hypot(finite(existing.x)-finite(provenance.sourceNode.x),finite(existing.y)-finite(provenance.sourceNode.y))>1e-6)throw Object.assign(new Error(`Corner source node id ${provenance.sourceNode.id} is occupied by another topology node.`),{code:'V46_CORNER_SOURCE_ID_COLLISION'})}else next.nodes.push(clone(provenance.sourceNode));
+  if(!preserveEqualRadius)detachEqualRadiusMemberV46(next,connectorEdgeId);
   return{doc:next,nodeId:provenance.sourceNode.id,removedEdgeId:connectorEdgeId,restoredFeature:clone(feature.v45Corner),legacy:false};
 }
 export const restoreCornerFeatureV46=removeCornerFeatureV46;
 
-export function updateCornerFeatureV46(doc,connectorEdgeId,{mode=null,valueMm=null}={}){
-  const connector=edgeById(doc,connectorEdgeId),feature=connector?.v45Corner;if(!feature)throw Object.assign(new Error('Selected edge is not a corner feature.'),{code:'V46_CORNER_FEATURE_MISSING'});const removed=removeCornerFeatureV46(doc,connectorEdgeId),result=applyCornerFeatureV46(removed.doc,removed.nodeId,{mode:mode||feature.mode,valueMm:valueMm==null?feature.valueMm:valueMm});return{...result,previousEdgeId:connectorEdgeId,restoredNodeId:removed.nodeId};
+export function updateCornerFeatureV46(doc,connectorEdgeId,{mode=null,valueMm=null,preserveEqualRadius=false}={}){
+  const connector=edgeById(doc,connectorEdgeId),feature=connector?.v45Corner;if(!feature)throw Object.assign(new Error('Selected edge is not a corner feature.'),{code:'V46_CORNER_FEATURE_MISSING'});const removed=removeCornerFeatureV46(doc,connectorEdgeId,{preserveEqualRadius}),result=applyCornerFeatureV46(removed.doc,removed.nodeId,{mode:mode||feature.mode,valueMm:valueMm==null?feature.valueMm:valueMm});return{...result,previousEdgeId:connectorEdgeId,restoredNodeId:removed.nodeId};
 }
 export function switchCornerFeatureV46(doc,connectorEdgeId,mode){if(!['fillet','chamfer'].includes(mode))throw Object.assign(new Error(`Unsupported corner feature mode: ${mode}`),{code:'V46_CORNER_MODE_INVALID'});return updateCornerFeatureV46(doc,connectorEdgeId,{mode})}
 
@@ -164,7 +171,7 @@ export function createEqualRadiusConstraintV46(doc,edgeIds,{radiusMm=null,groupI
 export function removeEqualRadiusConstraintV46(doc,groupId){const next=clone(doc),root=constraintRoot(next);root.equalRadiusGroups=root.equalRadiusGroups.filter(g=>g.id!==groupId);return next}
 export function updateEqualRadiusGroupV46(doc,groupId,radiusMm){
   const source=doc?.constraintsV46?.equalRadiusGroups?.find(g=>g.id===groupId);if(!source)throw Object.assign(new Error(`Equal-radius group ${groupId} does not exist.`),{code:'V46_EQUAL_RADIUS_GROUP_MISSING'});let next=clone(doc),group=constraintRoot(next).equalRadiusGroups.find(g=>g.id===groupId),radius=Math.max(.001,finite(radiusMm)),newIds=[];
-  for(const edgeId of [...group.edgeIds]){const result=updateCornerFeatureV46(next,edgeId,{mode:'fillet',valueMm:radius});next=result.doc;newIds.push(result.connectorEdgeId);const current=constraintRoot(next).equalRadiusGroups.find(g=>g.id===groupId);if(current)current.edgeIds=current.edgeIds.map(id=>id===edgeId?result.connectorEdgeId:id)}
+  for(const edgeId of [...group.edgeIds]){const result=updateCornerFeatureV46(next,edgeId,{mode:'fillet',valueMm:radius,preserveEqualRadius:true});next=result.doc;newIds.push(result.connectorEdgeId);const current=constraintRoot(next).equalRadiusGroups.find(g=>g.id===groupId);if(current)current.edgeIds=current.edgeIds.map(id=>id===edgeId?result.connectorEdgeId:id)}
   group=constraintRoot(next).equalRadiusGroups.find(g=>g.id===groupId);if(group){group.edgeIds=newIds;group.radiusMm=round(radius)}return{doc:next,groupId,edgeIds:newIds,radiusMm:radius};
 }
 export function setFilletRadiusV46(doc,edgeId,radiusMm,{propagateEqual=true}={}){
@@ -173,9 +180,10 @@ export function setFilletRadiusV46(doc,edgeId,radiusMm,{propagateEqual=true}={})
 }
 
 export function validateV46ConstraintState(doc,{tangentToleranceDeg=.05,equalRadiusTolerance=.001,...v45Options}={}){
-  const base=validateV45ConstraintState(doc,v45Options),issues=[...base.issues];
+  const base=validateV45ConstraintState(doc,v45Options),issues=[...base.issues],membership=new Map();
   for(const node of doc?.nodes||[]){if(node.continuityV46?.mode!=='g1')continue;const d=mixedContinuityDiagnosticsV46(doc,node.id);if(!d.eligible)issues.push({severity:'error',code:'V46_MIXED_TOPOLOGY_INVALID',entityId:node.id,detail:d.detail||'Stored mixed-curve constraint is no longer eligible.'});else if(d.tangentErrorDeg>tangentToleranceDeg)issues.push({severity:'error',code:'V46_MIXED_G1_BROKEN',entityId:node.id,detail:`Mixed-curve tangent error ${d.tangentErrorDeg.toFixed(4)}° exceeds ${tangentToleranceDeg}°.`})}
-  for(const group of doc?.constraintsV46?.equalRadiusGroups||[]){if(!Array.isArray(group.edgeIds)||group.edgeIds.length<2){issues.push({severity:'error',code:'V46_EQUAL_RADIUS_GROUP_INVALID',entityId:group.id,detail:'Equal-radius group must contain at least two Fillet edges.'});continue}const radii=[];for(const id of group.edgeIds){const e=filletEdge(doc,id);if(!e)issues.push({severity:'error',code:'V46_EQUAL_RADIUS_MEMBER_INVALID',entityId:id,detail:`Equal-radius member ${id} is missing or not a Fillet.`});else radii.push(finite(e.v45Corner.valueMm))}if(radii.length>1&&Math.max(...radii)-Math.min(...radii)>equalRadiusTolerance)issues.push({severity:'error',code:'V46_EQUAL_RADIUS_BROKEN',entityId:group.id,detail:`Fillet radii differ by ${(Math.max(...radii)-Math.min(...radii)).toFixed(4)} mm.`})}
+  for(const group of doc?.constraintsV46?.equalRadiusGroups||[]){if(!Array.isArray(group.edgeIds)||group.edgeIds.length<2){issues.push({severity:'error',code:'V46_EQUAL_RADIUS_GROUP_INVALID',entityId:group.id,detail:'Equal-radius group must contain at least two Fillet edges.'});continue}const radii=[];for(const id of group.edgeIds){const owners=membership.get(id)||[];owners.push(group.id);membership.set(id,owners);const e=filletEdge(doc,id);if(!e)issues.push({severity:'error',code:'V46_EQUAL_RADIUS_MEMBER_INVALID',entityId:id,detail:`Equal-radius member ${id} is missing or not a Fillet.`});else radii.push(finite(e.v45Corner.valueMm))}if(radii.length>1&&Math.max(...radii)-Math.min(...radii)>equalRadiusTolerance)issues.push({severity:'error',code:'V46_EQUAL_RADIUS_BROKEN',entityId:group.id,detail:`Fillet radii differ by ${(Math.max(...radii)-Math.min(...radii)).toFixed(4)} mm.`})}
+  for(const [id,groups] of membership)if(groups.length>1)issues.push({severity:'error',code:'V46_EQUAL_RADIUS_MULTI_GROUP',entityId:id,detail:`Fillet ${id} belongs to multiple equal-radius groups: ${groups.join(', ')}.`});
   for(const edge of doc?.edges||[]){if(!edge.v46Corner)continue;const p=edge.v46Corner;if(!p.sourceNode||!Array.isArray(p.endpoints)||p.endpoints.length!==2)issues.push({severity:'error',code:'V46_CORNER_PROVENANCE_INVALID',entityId:edge.id,detail:'V0.46 endpoint-level corner provenance is incomplete.'});const occupied=p.sourceNode?.id?nodeById(doc,p.sourceNode.id):null;if(occupied&&!occupied.v46IdReservation)issues.push({severity:'error',code:'V46_CORNER_SOURCE_ID_COLLISION',entityId:edge.id,detail:`Active corner source node id ${p.sourceNode.id} is occupied by another topology node.`})}
   return{ok:issues.every(x=>x.severity!=='error'),issues};
 }
