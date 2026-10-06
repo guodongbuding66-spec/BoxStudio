@@ -11,13 +11,14 @@ function clickTab(id){document.querySelector(`[data-tab="${CSS.escape(id)}"]`)?.
 function clickTool(id){document.querySelector(`[data-tool="${CSS.escape(id)}"]`)?.click()}
 function el(tag,cls,html=''){const n=document.createElement(tag);if(cls)n.className=cls;n.innerHTML=html;return n}
 function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function setText(node,text){if(node&&node.textContent!==text)node.textContent=text}
 
 function decorateShell(){
-  document.body.dataset.v47FreeStudio='true';document.title='BoxStudio Free · 在线纸盒设计与唛头编辑';
+  document.body.dataset.v47FreeStudio='true';if(document.title!=='BoxStudio Free · 在线纸盒设计与唛头编辑')document.title='BoxStudio Free · 在线纸盒设计与唛头编辑';
   const brand=document.querySelector('.topbar .brand');if(brand&&!brand.dataset.v47){brand.dataset.v47='true';brand.innerHTML='BOXSTUDIO <small>FREE</small>';const pill=el('span','v47-free-pill','永久免费');brand.after(pill)}
   const save=document.querySelector('.topbar .save-state');if(save&&!document.querySelector('.v47-shell-note')){const note=el('span','v47-shell-note','无需登录 · 无水印 · 所有生产导出免费');save.before(note)}
-  const exportBtn=document.querySelector('#quickExport');if(exportBtn){exportBtn.textContent='免费导出';exportBtn.title='SVG / PDF / DXF / PNG / Production PDF — 无付费墙'}
-  const labels={dashboard:'工作台',templates:'盒型库',projects:'项目',editor:'设计器',marks:'唛头库'};for(const [id,label] of Object.entries(labels)){const b=document.querySelector(`[data-nav="${id}"]`);if(b)b.textContent=label}
+  const exportBtn=document.querySelector('#quickExport');if(exportBtn){setText(exportBtn,'免费导出');if(exportBtn.title!=='SVG / PDF / DXF / PNG / Production PDF — 无付费墙')exportBtn.title='SVG / PDF / DXF / PNG / Production PDF — 无付费墙'}
+  const labels={dashboard:'工作台',templates:'盒型库',projects:'项目',editor:'设计器',marks:'唛头库'};for(const [id,label] of Object.entries(labels))setText(document.querySelector(`[data-nav="${id}"]`),label)
 }
 
 function dashboardHero(){
@@ -34,13 +35,13 @@ function decorateTemplateCards(){
   const cards=[...document.querySelectorAll('main.page .cards > .card')];for(const card of cards){if(card.dataset.v47Card)return;card.dataset.v47Card='true';card.dataset.v47Category=categoryFromCard(card);const meta=el('div','v47-card-meta',`<span class="v47-card-category">${esc(card.dataset.v47Category)}</span><span class="v47-card-free">FREE</span>`);card.prepend(meta)}
 }
 function applyTemplateFilter(){
-  const cards=[...document.querySelectorAll('main.page .cards > .card[data-v47-card]')],q=templateQuery.trim().toLowerCase();let visible=0;for(const card of cards){const category=card.dataset.v47Category,okCategory=templateCategory==='all'||category===templateCategory,okQuery=!q||card.textContent.toLowerCase().includes(q);card.style.display=okCategory&&okQuery?'':'none';if(okCategory&&okQuery)visible++}const counter=document.querySelector('[data-v47-template-count]');if(counter)counter.textContent=`${visible} 个可用盒型 / 入口`}
+  const cards=[...document.querySelectorAll('main.page .cards > .card[data-v47-card]')],q=templateQuery.trim().toLowerCase();let visible=0;for(const card of cards){const category=card.dataset.v47Category,okCategory=templateCategory==='all'||category===templateCategory,okQuery=!q||card.textContent.toLowerCase().includes(q);card.style.display=okCategory&&okQuery?'':'none';if(okCategory&&okQuery)visible++}setText(document.querySelector('[data-v47-template-count]'),`${visible} 个可用盒型 / 入口`)}
 function templateLibrary(){
   if(activePage()!=='templates')return;const page=document.querySelector('main.page');if(!page)return;decorateTemplateCards();if(!page.querySelector('.v47-template-shell')){const shell=el('section','v47-template-shell',`<div class="v47-template-head"><strong>盒型资源库</strong><div class="v47-template-search"><input data-v47-template-search placeholder="搜索盒型、标准、编号，例如 0427 / mailer / RSC"></div><span class="v47-template-count" data-v47-template-count></span></div><div class="v47-filter-row">${V47_TEMPLATE_FILTERS.map(x=>`<button data-v47-category="${x.id}" class="${x.id===templateCategory?'active':''}">${x.label}</button>`).join('')}</div>`);const head=page.querySelector('.page-head');head?.after(shell);const input=shell.querySelector('[data-v47-template-search]');input.value=templateQuery;input.oninput=e=>{templateQuery=e.target.value;applyTemplateFilter()};shell.querySelectorAll('[data-v47-category]').forEach(b=>b.onclick=()=>{templateCategory=b.dataset.v47Category;shell.querySelectorAll('[data-v47-category]').forEach(x=>x.classList.toggle('active',x===b));applyTemplateFilter()})}applyTemplateFilter();
 }
 
 function pageIntro(){
-  const pageName=activePage();if(!['projects','marks'].includes(pageName))return;const page=document.querySelector('main.page');if(!page||page.querySelector('.v47-page-intro'))return;const copy=pageName==='marks'?['免费唛头与包装标识','SKU、净重/毛重、箱规、原产国、CRN、箱号、运输图标、真实一维码、QR 与 Excel 批量字段都可以直接编辑。']:['本地项目工作台','默认自动保存到浏览器；不要求账号。项目、刀版、唛头和批量数据都留在同一工作流中。'];const intro=el('div','v47-page-intro',`<div><b>${copy[0]}</b><span>${copy[1]}</span></div><span class="v47-free-pill">${V47_FREE_POLICY.statement}</span>`);page.prepend(intro)}
+  const pageName=activePage();if(!['projects','marks'].includes(pageName))return;const page=document.querySelector('main.page');if(!page||page.querySelector('.v47-page-intro'))return;const copy=pageName==='marks'?['免费唛头与包装标识','SKU、净重/毛重、箱规、原产国、CRN、箱号、运输图标、真实一维码、QR 与 Excel 批量字段都可以直接编辑。']:['本地项目工作台','默认自动保存在浏览器；不要求账号。项目、刀版、唛头和批量数据都留在同一工作流中。'];const intro=el('div','v47-page-intro',`<div><b>${copy[0]}</b><span>${copy[1]}</span></div><span class="v47-free-pill">${V47_FREE_POLICY.statement}</span>`);page.prepend(intro)}
 
 function workflowBar(){
   if(activePage()!=='editor')return;const main=document.querySelector('.workspace .main'),tabs=main?.querySelector('.tabbar');if(!main||!tabs||main.querySelector('.v47-workflow'))return;const current=activeTab();const bar=el('div','v47-workflow',V47_WORKFLOW.map((x,i)=>`${i?'<span class="v47-step-sep">›</span>':''}<button class="v47-step ${x.tab===current?'active':''}" data-v47-step="${x.id}" ${x.id==='templates'?'data-v47-nav-step="templates"':`data-v47-tab-step="${x.tab}"`} title="${esc(x.description)}"><b>${i+1}</b><span>${x.label}</span></button>`).join(''));tabs.before(bar);bar.querySelectorAll('[data-v47-nav-step]').forEach(b=>b.onclick=()=>clickNav(b.dataset.v47NavStep));bar.querySelectorAll('[data-v47-tab-step]').forEach(b=>b.onclick=()=>clickTab(b.dataset.v47TabStep))}
@@ -59,7 +60,7 @@ function lineLegend(){
   if(activePage()!=='editor')return;const status=document.querySelector('.workspace .status');if(!status||status.querySelector('.v47-line-legend'))return;const legend=el('div','v47-line-legend','<span class="cut"><i></i>CUT</span><span class="crease"><i></i>CREASE</span><span class="bleed"><i></i>BLEED</span><span class="safe"><i></i>SAFE</span>');const right=status.querySelector('.right');right?.prepend(legend)}
 
 function freeGateAudit(){
-  if(activePage()!=='editor')return;for(const button of document.querySelectorAll('#exportSvg,#exportPdf,#exportDxf,#exportPng,#batchSvg,#batchPdf,#batchCombinedPdf')){button.dataset.v47Free='true';button.title=(button.title?button.title+' · ':'')+'BoxStudio Free — no login/paywall'}
+  if(activePage()!=='editor')return;for(const button of document.querySelectorAll('#exportSvg,#exportPdf,#exportDxf,#exportPng,#batchSvg,#batchPdf,#batchCombinedPdf')){button.dataset.v47Free='true';const title='BoxStudio Free — no login/paywall';if(button.title!==title)button.title=title}
 }
 
 function decorate(){decorateShell();dashboardHero();templateLibrary();pageIntro();workflowBar();dimensionCard();markQuickActions();exportFreeNotice();previewLaunch();lineLegend();freeGateAudit()}
