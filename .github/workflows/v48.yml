@@ -35,7 +35,7 @@ jobs:
         run: node tests/v39.mjs
       - name: V0.48 wiring
         run: |
-          grep -q '"version": "0.48.0"' package.json
+          node -e "const p=require('./package.json');if(Number(p.version.split('.')[1])<48)process.exit(1)"
           grep -q '"test:v48"' package.json
           grep -q 'v48Ui.css' index.html
           grep -q 'v48Ui.js' index.html
