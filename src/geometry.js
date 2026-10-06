@@ -1,6 +1,7 @@
 export * from './geometryLegacyV31.js';
 import * as legacy from './geometryLegacyV31.js';
 import { generateAdditionalTemplateV32, isV32EngineTemplate } from './parametricTemplatesV32.js';
+import { generateAdditionalTemplateV48, isV48EngineTemplate } from './parametricTemplatesV48.js';
 import { cubicFilletV43 } from './curvedGeometryV43.js';
 
 const ADVANCED_DEFAULTS={cornerRadius:0,flapTaper:0,relief:0,notch:0,shoulder:0};
@@ -18,8 +19,22 @@ const V32_DEFAULTS={
     materialId:'sbs-paperboard',flute:'CUSTOM',layers:1,glue:18,burstPsi:0,tolerance:1,print:'Artwork + Dieline',compensation:true,bleed:3,safe:4,...ADVANCED_DEFAULTS,
   },
 };
+const V48_DEFAULTS={
+  'fefco-0203':{
+    template:'fefco-0203',sizeType:'internal',length:400,width:300,height:250,thickness:3,
+    materialId:'corrugated-kraft',flute:'B',layers:3,glue:35,burstPsi:0,tolerance:2,print:'Artwork + Dieline',compensation:true,bleed:3,safe:5,...ADVANCED_DEFAULTS,
+  },
+  'straight-tuck-end':{
+    template:'straight-tuck-end',sizeType:'internal',length:120,width:45,height:180,thickness:0.45,
+    materialId:'sbs-paperboard',flute:'CUSTOM',layers:1,glue:18,burstPsi:0,tolerance:1,print:'Artwork + Dieline',compensation:true,bleed:3,safe:4,...ADVANCED_DEFAULTS,
+  },
+  'sleeve-carton':{
+    template:'sleeve-carton',sizeType:'internal',length:160,width:60,height:120,thickness:0.5,
+    materialId:'sbs-paperboard',flute:'CUSTOM',layers:1,glue:18,burstPsi:0,tolerance:1,print:'Artwork + Dieline',compensation:true,bleed:3,safe:4,...ADVANCED_DEFAULTS,
+  },
+};
 
-export const TEMPLATE_DEFAULTS=Object.freeze({...legacy.TEMPLATE_DEFAULTS,...V32_DEFAULTS});
+export const TEMPLATE_DEFAULTS=Object.freeze({...legacy.TEMPLATE_DEFAULTS,...V32_DEFAULTS,...V48_DEFAULTS});
 export const defaultStructure={...TEMPLATE_DEFAULTS['side-seal-rsc']};
 
 const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
@@ -27,13 +42,15 @@ const clamp=(v,min,max=Infinity)=>Math.min(max,Math.max(min,v));
 const line=(x1,y1,x2,y2,type='CUT')=>({x1,y1,x2,y2,type});
 const close=(a,b)=>Math.abs(Number(a)-Number(b))<1e-6;
 const sameSegment=(a,b)=>((close(a.x1,b.x1)&&close(a.y1,b.y1)&&close(a.x2,b.x2)&&close(a.y2,b.y2))||(close(a.x1,b.x2)&&close(a.y1,b.y2)&&close(a.x2,b.x1)&&close(a.y2,b.y1)));
+const isParametricEngineTemplate=template=>isV32EngineTemplate(template)||isV48EngineTemplate(template);
+const generateParametricTemplate=s=>isV48EngineTemplate(s.template)?generateAdditionalTemplateV48(s):generateAdditionalTemplateV32(s);
 
 export function defaultsForTemplate(template='side-seal-rsc'){
   return structuredClone(TEMPLATE_DEFAULTS[template]||TEMPLATE_DEFAULTS['side-seal-rsc']);
 }
 
 export function normalizeStructure(input={}){
-  if(!isV32EngineTemplate(input.template))return legacy.normalizeStructure(input);
+  if(!isParametricEngineTemplate(input.template))return legacy.normalizeStructure(input);
   const base=TEMPLATE_DEFAULTS[input.template],s={...base,...input};
   s.template=input.template;
   s.sizeType=['internal','external','manufacturing'].includes(s.sizeType)?s.sizeType:'internal';
@@ -58,8 +75,8 @@ export function normalizeStructure(input={}){
 
 export function manufacturingDimensions(input={}){
   const s=normalizeStructure(input);
-  if(!isV32EngineTemplate(s.template))return legacy.manufacturingDimensions(s);
-  return generateAdditionalTemplateV32(s).manufacturing;
+  if(!isParametricEngineTemplate(s.template))return legacy.manufacturingDimensions(s);
+  return generateParametricTemplate(s).manufacturing;
 }
 
 function withGuidesV32(g){
@@ -126,12 +143,14 @@ export function applyAdvancedStructureV42(geometry,input={}){
     for(const id of ['top-front-tuck','bottom-back-tuck']){const tuck=applyTuckShapeV42(g,s,id);if(tuck&&(tuck.taper||tuck.notch||tuck.shoulder))applied.push(tuck)}
   }else if(s.template==='auto-lock-bottom'){
     const tuck=applyTuckShapeV42(g,s,'top-front-tuck');if(tuck&&(tuck.taper||tuck.notch||tuck.shoulder))applied.push(tuck);
+  }else if(s.template==='straight-tuck-end'){
+    for(const id of ['top-front-tuck','bottom-front-tuck']){const tuck=applyTuckShapeV42(g,s,id);if(tuck&&(tuck.taper||tuck.notch||tuck.shoulder))applied.push(tuck)}
   }
   const cornerMode=s.cornerRadius>0?'metadata-only-line-engine':'off';
   g.advancedV42={cornerRadius:s.cornerRadius,cornerRadiusMode:cornerMode,flapTaper:s.flapTaper,relief:s.relief,notch:s.notch,shoulder:s.shoulder,applied};
   g.engineeringNotes=[...(g.engineeringNotes||[])];
   if(s.cornerRadius>0)g.engineeringNotes.push(`Requested corner radius ${s.cornerRadius} mm is stored for the V0.42 structure model but is not emitted as a production arc by the V0.42 line-segment generator.`);
-  if(applied.length)g.engineeringNotes.push('V0.42 advanced tuck/relief controls modified semantic CUT geometry. Real-sample tooling acceptance is still required.');
+  if(applied.length)g.engineeringNotes.push('Advanced tuck/relief controls modified semantic CUT geometry. Real-sample tooling acceptance is still required.');
   return g;
 }
 
@@ -154,6 +173,7 @@ export function applyProductionCurvesV43(geometry,input={}){
     'fefco-0427':['lid-tuck'],
     'reverse-tuck-end':['top-front-tuck','bottom-back-tuck'],
     'auto-lock-bottom':['top-front-tuck'],
+    'straight-tuck-end':['top-front-tuck','bottom-front-tuck'],
   },panelIds=supported[s.template]||[],applied=[];
   if(requested>0){for(const panelId of panelIds){const p=g.panelMap?.[panelId];if(!p)continue;const records=[];for(const corner of freeCornersForPanelV43(g,p)){const item=roundCutCornerV43(g,corner,requested,panelId);if(item){records.push(item);applied.push(item)}}if(records.length)p.productionCurvesV43=records.map(x=>structuredClone(x.curve))}}
   g.advancedV43={cornerRadius:requested,cornerRadiusMode:applied.length?'production-native-cubic':'off',curvesAdded:applied.length,applied:applied.map(({curve,...rest})=>rest),meshPolicy:applied.length?'sample-native-curves-for-topology':'line-topology'};
@@ -164,7 +184,7 @@ export function applyProductionCurvesV43(geometry,input={}){
 
 export function generateGeometry(input={}){
   const s=normalizeStructure(input);
-  if(!isV32EngineTemplate(s.template))return legacy.generateGeometry(s.template==='imported'?input:s);
-  const base=generateAdditionalTemplateV32(s),v42=applyAdvancedStructureV42(base,s),v43=applyProductionCurvesV43(v42,s);
+  if(!isParametricEngineTemplate(s.template))return legacy.generateGeometry(s.template==='imported'?input:s);
+  const base=generateParametricTemplate(s),v42=applyAdvancedStructureV42(base,s),v43=applyProductionCurvesV43(v42,s);
   return withGuidesV32(v43);
 }
