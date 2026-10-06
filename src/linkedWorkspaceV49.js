@@ -48,21 +48,24 @@ export function buildLinkedWorkspaceModelV49(state={}){
     records.push({nodeId:node.id,panelId,label:node.label||panel.label||panelId,role:panel.role||panel.kind||node.kind||'panel',kind:panel.kind||node.kind||'panel',bounds,selected:panelId===next.linkedV49.selectedPanelId,artworkCount:elements.filter(el=>el.panelId===panelId&&!el.hidden).length,incoming:incoming.map(e=>({from:e.from,angle:num(e.angle),hasHinge:Boolean(e.hinge)})),outgoing:outgoing.map(e=>({to:e.to,angle:num(e.angle),hasHinge:Boolean(e.hinge)})),hinges:incoming.length+outgoing.length});
   }
   const selected=records.find(r=>r.selected)||records[0]||null;
-  return{schema:V49_LINKED_SCHEMA,version:1,state:next,review,records,selected,foldProgress:next.foldProgress,stats:{panels:records.length,hinges:edges.length,artwork:records.reduce((sum,r)=>sum+r.artworkCount,0)}};
+  return{schema:V49_LINKED_SCHEMA,version:1,state:next,review,records,selected,foldProgress:next.foldProgress,stats:{panels:records.length,semanticPanels:(review.geo.panels||[]).length,hinges:edges.length,artwork:records.reduce((sum,r)=>sum+r.artworkCount,0)}};
 }
 
 export function linkedWorkspaceAcceptanceV49(state={}){
-  const model=buildLinkedWorkspaceModelV49(state),issues=[],graphIds=(model.review.graph.nodes||[]).map(panelIdForNode),recordIds=model.records.map(r=>r.panelId),unique=new Set(recordIds);
+  const model=buildLinkedWorkspaceModelV49(state),issues=[],graphIds=(model.review.graph.nodes||[]).map(panelIdForNode),recordIds=model.records.map(r=>r.panelId),semanticIds=(model.review.geo.panels||[]).map(p=>p.id),unique=new Set(recordIds),graphSet=new Set(graphIds),recordSet=new Set(recordIds);
   if(model.records.length!==graphIds.length)issues.push({severity:'error',code:'V49_PANEL_MAPPING_DRIFT',detail:`3D graph has ${graphIds.length} panels but linked workspace mapped ${model.records.length}.`});
   if(unique.size!==recordIds.length)issues.push({severity:'error',code:'V49_DUPLICATE_PANEL_ID',detail:'Linked workspace contains duplicate panel identities.'});
-  for(const id of graphIds)if(!recordIds.includes(id))issues.push({severity:'error',code:'V49_PANEL_UNMAPPED',entityId:id,detail:`3D panel ${id} has no linked 2D panel.`});
+  for(const id of graphIds)if(!recordSet.has(id))issues.push({severity:'error',code:'V49_PANEL_UNMAPPED',entityId:id,detail:`3D panel ${id} has no linked 2D panel.`});
+  for(const id of semanticIds){if(!graphSet.has(id))issues.push({severity:'error',code:'V49_SEMANTIC_PANEL_MISSING_3D',entityId:id,detail:`Semantic 2D panel ${id} is missing from the 3D FoldGraph.`});if(!recordSet.has(id))issues.push({severity:'error',code:'V49_SEMANTIC_PANEL_MISSING_LINK',entityId:id,detail:`Semantic 2D panel ${id} is missing from the linked workspace.`})}
+  for(const id of graphIds)if(semanticIds.length&&!semanticIds.includes(id))issues.push({severity:'error',code:'V49_3D_PANEL_NOT_SEMANTIC',entityId:id,detail:`3D panel ${id} does not correspond to a current semantic 2D panel.`});
   const selected=model.state.linkedV49?.selectedPanelId;
-  if(selected&&!recordIds.includes(selected))issues.push({severity:'error',code:'V49_SELECTION_ORPHAN',entityId:selected,detail:'Selected panel is not present in the linked 2D/3D panel set.'});
+  if(selected&&!recordSet.has(selected))issues.push({severity:'error',code:'V49_SELECTION_ORPHAN',entityId:selected,detail:'Selected panel is not present in the linked 2D/3D panel set.'});
   if(selected!==model.state.reviewV35?.selectedPanelId)issues.push({severity:'error',code:'V49_SELECTION_DESYNC',detail:'V0.49 selection and V0.35 review selection are not synchronized.'});
   if(num(model.foldProgress)<0||num(model.foldProgress)>100)issues.push({severity:'error',code:'V49_FOLD_RANGE',detail:'Fold progress must stay between 0 and 100.'});
   if((model.review.graph.edges||[]).some(e=>!e.hinge))issues.push({severity:'error',code:'V49_HINGE_REQUIRED',detail:'All linked fold edges must have physical hinge geometry.'});
+  if((model.review.graph.unreached||[]).length)issues.push({severity:'error',code:'V49_UNREACHED_3D_PANEL',detail:`Fold traversal cannot reach: ${model.review.graph.unreached.join(', ')}.`});
   const errors=issues.filter(x=>x.severity==='error');
-  return{schema:'boxstudio-v49-linked-acceptance',version:1,ok:errors.length===0,issues,errors,model,summary:{panels:model.stats.panels,hinges:model.stats.hinges,artwork:model.stats.artwork,selected:selected||null,foldProgress:model.foldProgress}};
+  return{schema:'boxstudio-v49-linked-acceptance',version:1,ok:errors.length===0,issues,errors,model,summary:{panels:model.stats.panels,semanticPanels:model.stats.semanticPanels,hinges:model.stats.hinges,artwork:model.stats.artwork,selected:selected||null,foldProgress:model.foldProgress}};
 }
 
 export function cycleLinkedPanelV49(state,direction=1){
