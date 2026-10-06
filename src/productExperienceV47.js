@@ -24,8 +24,10 @@ export function materialOptionsV47(){return MATERIAL_PRESETS_V32.map(x=>({...x})
 export function fluteOptionsV47(){return Object.values(FLUTE_PRESETS_V32).map(x=>({...x}))}
 export function sanitizeQuickSizeV47(input={}){
   const n=(v,d)=>Number.isFinite(Number(v))?Number(v):d,materialId=String(input.materialId||'corrugated-white'),flute=String(input.flute||'E').toUpperCase();
-  const explicitThickness=Number(input.thickness),material=resolveMaterialV32({materialId,flute,...(Number.isFinite(explicitThickness)&&explicitThickness>0?{thickness:explicitThickness}:{})});
-  return {length:Math.max(25,n(input.length,300)),width:Math.max(20,n(input.width,200)),height:Math.max(15,n(input.height,70)),thickness:Math.max(.1,material.thicknessMm),sizeType:['internal','external','manufacturing'].includes(input.sizeType)?input.sizeType:'internal',materialId:material.materialId,flute:material.flute||'CUSTOM'};
+  const hasThickness=input.thickness!==undefined&&input.thickness!==null&&String(input.thickness).trim()!=='';
+  const rawThickness=Number(input.thickness),explicitThickness=hasThickness&&Number.isFinite(rawThickness)?Math.max(.1,rawThickness):null;
+  const material=resolveMaterialV32({materialId,flute,...(explicitThickness!==null?{thickness:explicitThickness}:{})});
+  return {length:Math.max(25,n(input.length,300)),width:Math.max(20,n(input.width,200)),height:Math.max(15,n(input.height,70)),thickness:explicitThickness!==null?explicitThickness:Math.max(.1,material.thicknessMm),sizeType:['internal','external','manufacturing'].includes(input.sizeType)?input.sizeType:'internal',materialId:material.materialId,flute:material.flute||'CUSTOM'};
 }
 export function prepareTemplateStateV47(currentState,templateId,quickSize={}){
   const found=actionableTemplatesV47().find(t=>t.id===templateId);if(!found)throw Object.assign(new Error(`Template ${templateId} is not available for free editing.`),{code:'V47_TEMPLATE_NOT_ACTIONABLE'});
