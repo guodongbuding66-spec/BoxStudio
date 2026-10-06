@@ -1,0 +1,76 @@
+name: V0.56 Factory Profile and Machine Capability Database
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  factory-capability:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: V0.56 syntax
+        run: |
+          node --check src/factoryProfilesV56.js
+          node --check src/preflightV56.js
+          node --check src/v56Ui.js
+          node --check tests/v56.mjs
+          node --check tests/v56-browser-e2e.js
+          python3 -m py_compile tests/v56_e2e_server.py
+      - name: V0.55 manufacturing baseline
+        run: node tests/v55.mjs
+      - name: V0.56 factory database and capability model
+        run: node tests/v56.mjs
+      - name: Production-chain baseline
+        run: node tests/v39.mjs
+      - name: V0.56 wiring
+        run: |
+          grep -q '"version": "0.56.0"' package.json
+          grep -q '"test:v56"' package.json
+          grep -q 'BoxStudio V0.56' index.html
+          grep -q 'v56Ui.css' index.html
+          grep -q 'v56Ui.js' index.html
+          grep -q 'V56_FACTORY_SCHEMA' src/factoryProfilesV56.js
+          grep -q 'boxstudio-preflight-v56' src/preflightV56.js
+          grep -q 'FACTORY PROFILE / MACHINE CAPABILITY DATABASE' src/v56Ui.js
+          grep -q 'Production Gate' src/v56Ui.js
+      - name: Real Chrome V0.56 factory database workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v56-started /tmp/boxstudio-v56-pass /tmp/boxstudio-v56-fail
+          python3 tests/v56_e2e_server.py >/tmp/boxstudio-v56-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8786/tests/v56-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 180s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,900 --virtual-time-budget=120000 --dump-dom http://127.0.0.1:8786/tests/v56-browser-e2e.html >/tmp/boxstudio-v56-dom.log 2>/tmp/boxstudio-v56-chrome.log || true
+          if test -f /tmp/boxstudio-v56-pass; then
+            echo 'Desktop factory capability:'; cat /tmp/boxstudio-v56-pass
+          elif test -f /tmp/boxstudio-v56-fail; then
+            cat /tmp/boxstudio-v56-fail; cat /tmp/boxstudio-v56-chrome.log || true; cat /tmp/boxstudio-v56-dom.log || true; exit 1
+          else
+            echo 'V0.56 desktop browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v56-http.log || true; cat /tmp/boxstudio-v56-chrome.log || true; cat /tmp/boxstudio-v56-dom.log || true; exit 1
+          fi
+          rm -f /tmp/boxstudio-v56-pass /tmp/boxstudio-v56-fail
+          timeout 180s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=390,844 --virtual-time-budget=120000 --dump-dom http://127.0.0.1:8786/tests/v56-browser-e2e.html >/tmp/boxstudio-v56-mobile-dom.log 2>/tmp/boxstudio-v56-mobile-chrome.log || true
+          if test -f /tmp/boxstudio-v56-pass; then
+            echo 'Mobile factory capability:'; cat /tmp/boxstudio-v56-pass
+          elif test -f /tmp/boxstudio-v56-fail; then
+            cat /tmp/boxstudio-v56-fail; cat /tmp/boxstudio-v56-mobile-chrome.log || true; cat /tmp/boxstudio-v56-mobile-dom.log || true; exit 1
+          else
+            echo 'V0.56 mobile browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v56-http.log || true; cat /tmp/boxstudio-v56-mobile-chrome.log || true; cat /tmp/boxstudio-v56-mobile-dom.log || true; exit 1
+          fi
