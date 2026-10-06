@@ -110,12 +110,23 @@ export function applyLiveMixedContinuityV46(doc,changedEdgeId){
   return{doc:next,applied};
 }
 
-function annotateV46Corner(sourceDoc,nodeId,result){
-  const node=nodeById(sourceDoc,nodeId),sourceEdges=incidentEdges(sourceDoc,nodeId),next=result.doc,connector=edgeById(next,result.connectorEdgeId);if(!node||sourceEdges.length!==2||!connector)return result;
-  connector.v46Corner={version:1,sourceNode:clone(node),endpoints:sourceEdges.map((edge,i)=>({edgeId:edge.id,endpoint:edge.a===nodeId?'a':'b',originalNodeId:nodeId,tangentNodeId:result.newNodeIds[i]}))};
+function activeCornerSourceIds(doc){
+  const ids=new Set();for(const edge of doc?.edges||[]){const id=edge.v46Corner?.sourceNode?.id||edge.v45Corner?.sourceNodeId||edge.v45Corner?.source?.node?.id;if(id)ids.add(id)}return ids;
+}
+function reserveCornerSourceIds(doc){
+  const next=clone(doc),added=[];for(const id of activeCornerSourceIds(doc)){if(nodeById(next,id))continue;next.nodes.push({id,x:0,y:0,v46IdReservation:true});added.push(id)}return{doc:next,added};
+}
+function stripCornerReservations(doc,added=[]){
+  if(!added.length)return doc;const ids=new Set(added),next=clone(doc);next.nodes=next.nodes.filter(n=>!(ids.has(n.id)&&n.v46IdReservation&&!incidentEdges(next,n.id).length));return next;
+}
+function annotateV46Corner(sourceDoc,nodeId,result,reservedIds=[]){
+  const node=nodeById(sourceDoc,nodeId),sourceEdges=incidentEdges(sourceDoc,nodeId),next=stripCornerReservations(result.doc,reservedIds),connector=edgeById(next,result.connectorEdgeId);if(!node||sourceEdges.length!==2||!connector)return{...result,doc:next};
+  connector.v46Corner={version:2,sourceNode:clone(node),endpoints:sourceEdges.map((edge,i)=>({edgeId:edge.id,endpoint:edge.a===nodeId?'a':'b',originalNodeId:nodeId,tangentNodeId:result.newNodeIds[i]}))};
   return{...result,doc:next};
 }
-export function applyCornerFeatureV46(doc,nodeId,options={}){return annotateV46Corner(doc,nodeId,applyCornerOperationV45(doc,nodeId,options))}
+export function applyCornerFeatureV46(doc,nodeId,options={}){
+  const reserved=reserveCornerSourceIds(doc),result=applyCornerOperationV45(reserved.doc,nodeId,options);return annotateV46Corner(doc,nodeId,result,reserved.added);
+}
 
 export function removeCornerFeatureV46(doc,connectorEdgeId){
   const connector=edgeById(doc,connectorEdgeId);if(!connector?.v45Corner)throw Object.assign(new Error('Selected edge is not a corner feature.'),{code:'V46_CORNER_FEATURE_MISSING'});
@@ -124,7 +135,8 @@ export function removeCornerFeatureV46(doc,connectorEdgeId){
   }
   const next=clone(doc),feature=edgeById(next,connectorEdgeId),tangentIds=[feature.a,feature.b];
   for(const record of provenance.endpoints){const edge=edgeById(next,record.edgeId);if(!edge)throw Object.assign(new Error(`Corner source edge ${record.edgeId} no longer exists.`),{code:'V46_CORNER_SOURCE_MISSING'});if(edge[record.endpoint]!==record.tangentNodeId)throw Object.assign(new Error(`Corner source endpoint ${record.edgeId}.${record.endpoint} changed after feature creation.`),{code:'V46_CORNER_ENDPOINT_EDITED'});edge[record.endpoint]=record.originalNodeId}
-  next.edges=next.edges.filter(e=>e.id!==connectorEdgeId);for(const tangentId of tangentIds){if(!incidentEdges(next,tangentId).length)next.nodes=next.nodes.filter(n=>n.id!==tangentId)}if(!nodeById(next,provenance.sourceNode.id))next.nodes.push(clone(provenance.sourceNode));
+  next.edges=next.edges.filter(e=>e.id!==connectorEdgeId);for(const tangentId of tangentIds){if(!incidentEdges(next,tangentId).length)next.nodes=next.nodes.filter(n=>n.id!==tangentId)}
+  const existing=nodeById(next,provenance.sourceNode.id);if(existing){if(existing.v46IdReservation&&!incidentEdges(next,existing.id).length){existing.x=provenance.sourceNode.x;existing.y=provenance.sourceNode.y;delete existing.v46IdReservation}else if(Math.hypot(finite(existing.x)-finite(provenance.sourceNode.x),finite(existing.y)-finite(provenance.sourceNode.y))>1e-6)throw Object.assign(new Error(`Corner source node id ${provenance.sourceNode.id} is occupied by another topology node.`),{code:'V46_CORNER_SOURCE_ID_COLLISION'})}else next.nodes.push(clone(provenance.sourceNode));
   return{doc:next,nodeId:provenance.sourceNode.id,removedEdgeId:connectorEdgeId,restoredFeature:clone(feature.v45Corner),legacy:false};
 }
 export const restoreCornerFeatureV46=removeCornerFeatureV46;
@@ -164,7 +176,7 @@ export function validateV46ConstraintState(doc,{tangentToleranceDeg=.05,equalRad
   const base=validateV45ConstraintState(doc,v45Options),issues=[...base.issues];
   for(const node of doc?.nodes||[]){if(node.continuityV46?.mode!=='g1')continue;const d=mixedContinuityDiagnosticsV46(doc,node.id);if(!d.eligible)issues.push({severity:'error',code:'V46_MIXED_TOPOLOGY_INVALID',entityId:node.id,detail:d.detail||'Stored mixed-curve constraint is no longer eligible.'});else if(d.tangentErrorDeg>tangentToleranceDeg)issues.push({severity:'error',code:'V46_MIXED_G1_BROKEN',entityId:node.id,detail:`Mixed-curve tangent error ${d.tangentErrorDeg.toFixed(4)}° exceeds ${tangentToleranceDeg}°.`})}
   for(const group of doc?.constraintsV46?.equalRadiusGroups||[]){if(!Array.isArray(group.edgeIds)||group.edgeIds.length<2){issues.push({severity:'error',code:'V46_EQUAL_RADIUS_GROUP_INVALID',entityId:group.id,detail:'Equal-radius group must contain at least two Fillet edges.'});continue}const radii=[];for(const id of group.edgeIds){const e=filletEdge(doc,id);if(!e)issues.push({severity:'error',code:'V46_EQUAL_RADIUS_MEMBER_INVALID',entityId:id,detail:`Equal-radius member ${id} is missing or not a Fillet.`});else radii.push(finite(e.v45Corner.valueMm))}if(radii.length>1&&Math.max(...radii)-Math.min(...radii)>equalRadiusTolerance)issues.push({severity:'error',code:'V46_EQUAL_RADIUS_BROKEN',entityId:group.id,detail:`Fillet radii differ by ${(Math.max(...radii)-Math.min(...radii)).toFixed(4)} mm.`})}
-  for(const edge of doc?.edges||[]){if(!edge.v46Corner)continue;const p=edge.v46Corner;if(!p.sourceNode||!Array.isArray(p.endpoints)||p.endpoints.length!==2)issues.push({severity:'error',code:'V46_CORNER_PROVENANCE_INVALID',entityId:edge.id,detail:'V0.46 endpoint-level corner provenance is incomplete.'})}
+  for(const edge of doc?.edges||[]){if(!edge.v46Corner)continue;const p=edge.v46Corner;if(!p.sourceNode||!Array.isArray(p.endpoints)||p.endpoints.length!==2)issues.push({severity:'error',code:'V46_CORNER_PROVENANCE_INVALID',entityId:edge.id,detail:'V0.46 endpoint-level corner provenance is incomplete.'});const occupied=p.sourceNode?.id?nodeById(doc,p.sourceNode.id):null;if(occupied&&!occupied.v46IdReservation)issues.push({severity:'error',code:'V46_CORNER_SOURCE_ID_COLLISION',entityId:edge.id,detail:`Active corner source node id ${p.sourceNode.id} is occupied by another topology node.`})}
   return{ok:issues.every(x=>x.severity!=='error'),issues};
 }
 
