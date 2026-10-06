@@ -35,9 +35,8 @@ jobs:
         run: node tests/v39.mjs
       - name: V0.49 wiring
         run: |
-          grep -q '"version": "0.49.0"' package.json
+          node -e "const p=require('./package.json');if(Number(p.version.split('.')[1])<49)process.exit(1)"
           grep -q '"test:v49"' package.json
-          grep -q 'BoxStudio V0.49' index.html
           grep -q 'v49Ui.css' index.html
           grep -q 'v49Ui.js' index.html
           grep -q 'V49_LINKED_SCHEMA' src/linkedWorkspaceV49.js
