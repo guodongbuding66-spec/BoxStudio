@@ -1,0 +1,75 @@
+name: V0.51 Fold Sequence and Collision Validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  sequence-collision:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: V0.51 syntax
+        run: |
+          node --check src/foldSequenceV51.js
+          node --check src/v51Ui.js
+          node --check tests/v51.mjs
+          node --check tests/v51-browser-e2e.js
+          python3 -m py_compile tests/v51_e2e_server.py
+      - name: V0.50 fold authoring baseline
+        run: node tests/v50.mjs
+      - name: V0.51 sequence and collision model
+        run: node tests/v51.mjs
+      - name: Production-chain baseline
+        run: node tests/v39.mjs
+      - name: V0.51 wiring
+        run: |
+          grep -q '"version": "0.51.0"' package.json
+          grep -q '"test:v51"' package.json
+          grep -q 'BoxStudio V0.51' index.html
+          grep -q 'v51Ui.css' index.html
+          grep -q 'v51Ui.js' index.html
+          grep -q 'V51_SEQUENCE_SCHEMA' src/foldSequenceV51.js
+          grep -q 'detectPanelCollisionsV51' src/foldSequenceV51.js
+          grep -q 'Fold Sequence Collision Check' src/v51Ui.js
+          grep -q '检测折叠碰撞' src/v51Ui.js
+      - name: Real Chrome V0.51 sequence and collision workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v51-started /tmp/boxstudio-v51-pass /tmp/boxstudio-v51-fail
+          python3 tests/v51_e2e_server.py >/tmp/boxstudio-v51-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8781/tests/v51-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 100s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,900 --virtual-time-budget=75000 --dump-dom http://127.0.0.1:8781/tests/v51-browser-e2e.html >/tmp/boxstudio-v51-dom.log 2>/tmp/boxstudio-v51-chrome.log || true
+          if test -f /tmp/boxstudio-v51-pass; then
+            echo 'Desktop sequence/collision:'; cat /tmp/boxstudio-v51-pass
+          elif test -f /tmp/boxstudio-v51-fail; then
+            cat /tmp/boxstudio-v51-fail; cat /tmp/boxstudio-v51-chrome.log || true; cat /tmp/boxstudio-v51-dom.log || true; exit 1
+          else
+            echo 'V0.51 desktop browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v51-http.log || true; cat /tmp/boxstudio-v51-chrome.log || true; cat /tmp/boxstudio-v51-dom.log || true; exit 1
+          fi
+          rm -f /tmp/boxstudio-v51-pass /tmp/boxstudio-v51-fail
+          timeout 100s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=390,844 --virtual-time-budget=75000 --dump-dom http://127.0.0.1:8781/tests/v51-browser-e2e.html >/tmp/boxstudio-v51-mobile-dom.log 2>/tmp/boxstudio-v51-mobile-chrome.log || true
+          if test -f /tmp/boxstudio-v51-pass; then
+            echo 'Mobile sequence/collision:'; cat /tmp/boxstudio-v51-pass
+          elif test -f /tmp/boxstudio-v51-fail; then
+            cat /tmp/boxstudio-v51-fail; cat /tmp/boxstudio-v51-mobile-chrome.log || true; cat /tmp/boxstudio-v51-mobile-dom.log || true; exit 1
+          else
+            echo 'V0.51 mobile browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v51-http.log || true; cat /tmp/boxstudio-v51-mobile-chrome.log || true; cat /tmp/boxstudio-v51-mobile-dom.log || true; exit 1
+          fi
