@@ -25,6 +25,8 @@ jobs:
           node --check src/preflightV46.js
           node --check src/v46Ui.js
           node --check tests/v46.mjs
+          node --check tests/v46-browser-e2e.js
+          python3 -m py_compile tests/v46_e2e_server.py
       - name: V0.44 baseline regression
         run: node tests/v44.mjs
       - name: V0.45 baseline regression
@@ -41,3 +43,34 @@ jobs:
           grep -q 'batchCorners:true' src/v46Ui.js
           grep -q 'canvasRadiusDrag:true' src/v46Ui.js
           grep -q 'cadTopology3dAcceptance:true' src/v46Ui.js
+      - name: Real Chrome V0.46 advanced constraints workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v46-started /tmp/boxstudio-v46-pass /tmp/boxstudio-v46-fail
+          python3 tests/v46_e2e_server.py >/tmp/boxstudio-v46-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8776/tests/v46-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 100s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --virtual-time-budget=70000 --dump-dom http://127.0.0.1:8776/tests/v46-browser-e2e.html >/tmp/boxstudio-v46-dom.log 2>/tmp/boxstudio-v46-chrome.log || true
+          if test -f /tmp/boxstudio-v46-pass; then
+            cat /tmp/boxstudio-v46-pass
+          elif test -f /tmp/boxstudio-v46-fail; then
+            cat /tmp/boxstudio-v46-fail
+            cat /tmp/boxstudio-v46-chrome.log || true
+            cat /tmp/boxstudio-v46-dom.log || true
+            exit 1
+          else
+            echo 'V0.46 browser E2E ended without PASS/FAIL signal.'
+            cat /tmp/boxstudio-v46-http.log || true
+            cat /tmp/boxstudio-v46-chrome.log || true
+            cat /tmp/boxstudio-v46-dom.log || true
+            exit 1
+          fi
+          kill "$SERVER_PID" 2>/dev/null || true
+          trap - EXIT
