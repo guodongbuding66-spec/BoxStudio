@@ -10,11 +10,11 @@ function currentPage(){return document.querySelector('.nav button.active')?.data
 function currentTab(){return document.querySelector('.tabbar button.active')?.dataset.tab||''}
 function uiMode(){return normalizeUiModeV59(localStorage.getItem(MODE_KEY))}
 function setUiMode(mode){localStorage.setItem(MODE_KEY,normalizeUiModeV59(mode));applyUiMode()}
-function applyUiMode(){const mode=uiMode();document.body.dataset.v59Mode=mode;document.querySelectorAll('[data-v59-mode]').forEach(b=>b.classList.toggle('active',b.dataset.v59Mode===mode));document.querySelectorAll('[data-v59-mode-label]').forEach(x=>x.textContent=V59_UI_MODES[mode].label)}
+function applyUiMode(){const mode=uiMode(),label=V59_UI_MODES[mode].label;document.body.dataset.v59Mode=mode;document.querySelectorAll('[data-v59-mode]').forEach(b=>b.classList.toggle('active',b.dataset.v59Mode===mode));document.querySelectorAll('[data-v59-mode-label]').forEach(x=>{if(x.textContent!==label)x.textContent=label})}
 function clickTab(tab){document.querySelector(`.tabbar [data-tab="${CSS.escape(tab)}"]`)?.click()}
 
 function enhanceTopbar(){
-  const top=document.querySelector('.topbar');if(!top)return;document.body.dataset.v59Studio='true';const brand=top.querySelector('.brand small');if(brand)brand.textContent=V59_PRODUCT_VERSION;
+  const top=document.querySelector('.topbar');if(!top)return;document.body.dataset.v59Studio='true';const brand=top.querySelector('.brand small');if(brand&&brand.textContent!==V59_PRODUCT_VERSION)brand.textContent=V59_PRODUCT_VERSION;
   if(!top.querySelector('[data-v59-mode-switch]')){const switcher=document.createElement('div');switcher.className='v59-mode-switch';switcher.dataset.v59ModeSwitch='';switcher.innerHTML=`<button data-v59-mode="simple">简洁</button><button data-v59-mode="professional">专业</button>`;const adv=top.querySelector('[data-v58-advanced]');(adv||top.querySelector('#quickExport'))?.insertAdjacentElement('beforebegin',switcher);switcher.querySelectorAll('[data-v59-mode]').forEach(b=>b.onclick=()=>setUiMode(b.dataset.v59Mode))}
   applyUiMode();
 }
@@ -35,7 +35,7 @@ function lineLegend(){return '<div class="v59-line-legend"><span><i class="bleed
 
 function updateTemplateStudio(panel){
   const id=panel.dataset.v47Config;if(!id)return;const select=panel.querySelector('[data-v47-size-type]');panel.querySelectorAll('[data-v59-size]').forEach(b=>b.classList.toggle('active',b.dataset.v59Size===select?.value));
-  try{const s=dimensionSummaryV48(id,readConfig(panel));const metric=panel.querySelector('[data-v59-metric]');if(metric)metric.innerHTML=`<div><span>内尺寸</span><b>${fmt(s.inside)}</b></div><div><span>制造尺寸</span><b>${fmt(s.manufacturing)}</b></div><div><span>外尺寸</span><b>${fmt(s.external)}</b></div><p>${esc(s.material.name)} · ${Number(s.thickness).toFixed(2)} mm${s.material.flute?` · ${esc(s.material.flute)} 楞`:''}</p>`;const title=panel.querySelector('[data-v59-stage-size]');if(title)title.textContent=fmt(s.manufacturing)}catch(error){const metric=panel.querySelector('[data-v59-metric]');if(metric)metric.innerHTML=`<p class="bad">${esc(error?.message||error)}</p>`}
+  try{const s=dimensionSummaryV48(id,readConfig(panel));const metric=panel.querySelector('[data-v59-metric]'),html=`<div><span>内尺寸</span><b>${fmt(s.inside)}</b></div><div><span>制造尺寸</span><b>${fmt(s.manufacturing)}</b></div><div><span>外尺寸</span><b>${fmt(s.external)}</b></div><p>${esc(s.material.name)} · ${Number(s.thickness).toFixed(2)} mm${s.material.flute?` · ${esc(s.material.flute)} 楞`:''}</p>`;if(metric&&metric.innerHTML!==html)metric.innerHTML=html;const title=panel.querySelector('[data-v59-stage-size]'),titleText=fmt(s.manufacturing);if(title&&title.textContent!==titleText)title.textContent=titleText}catch(error){const metric=panel.querySelector('[data-v59-metric]'),html=`<p class="bad">${esc(error?.message||error)}</p>`;if(metric&&metric.innerHTML!==html)metric.innerHTML=html}
 }
 
 function enhanceTemplateStudio(){
