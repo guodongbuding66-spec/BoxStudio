@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { defaultState,stateForTemplate } from '../src/model.js';
+import { buildLinkedWorkspaceModelV49 } from '../src/linkedWorkspaceV49.js';
+import { buildArtworkAtlas } from '../src/panelArtwork.js';
+import { buildProductionPdf,pdfxCandidateIssues } from '../src/export.js';
+import { V60_PRODUCT_VERSION,V60_IMAGE_LIMITS,dataUrlByteSizeV60,imagePreserveAspectRatioV60,normalizeImageElementV60,createImageElementV60,imageEffectiveDpiV60,imagePdfSourceV60,imagePreflightChecksV60,imageAcceptanceV60 } from '../src/artworkImageV60.js';
+
+assert.equal(V60_PRODUCT_VERSION,'V0.60');assert.ok(V60_IMAGE_LIMITS.maxDimension>=1200);assert.equal(imagePreserveAspectRatioV60('contain'),'xMidYMid meet');assert.equal(imagePreserveAspectRatioV60('cover'),'xMidYMid slice');assert.equal(imagePreserveAspectRatioV60('stretch'),'none');
+const jpeg='data:image/jpeg;base64,/9j/2Q==',png='data:image/png;base64,iVBORw0KGgo=',asset={src:jpeg,mime:'image/jpeg',name:'logo.jpg',pixelWidth:1200,pixelHeight:600,assetBytes:dataUrlByteSizeV60(jpeg),pdfSrc:'',pdfBytes:0};
+const preset=stateForTemplate('fefco-0427',defaultState.variables),state=structuredClone(defaultState);state.structure=preset.structure;state.elements=preset.elements;state.variables=preset.variables;state.page='editor';state.editorTab='Design';const linked=buildLinkedWorkspaceModelV49(state),geo=linked.review.geo,panel=geo.panelMap.front||geo.panelMap.base||geo.bodyPanels[0];assert.ok(panel);
+const image=createImageElementV60(asset,panel,{id:'v60-logo',panelId:panel.id});assert.equal(image.type,'image');assert.equal(image.panelId,panel.id);assert.ok(image.w>0&&image.h>0);assert.ok(imageEffectiveDpiV60(image)>=150);assert.equal(imagePdfSourceV60(image),jpeg);state.elements.push(image);state.selectedId=image.id;
+const atlas=buildArtworkAtlas(state,geo);assert.equal(atlas.imageCommands,1);const plan=atlas.plans.find(p=>p.panelId===panel.id);assert.ok(plan?.commands.some(c=>c.type==='image'&&c.source==='v60-logo'));
+const checks=imagePreflightChecksV60(state);assert.ok(checks.some(x=>x.code==='V60_IMAGE_SOURCE_OK'));assert.ok(checks.some(x=>x.code==='V60_IMAGE_PDF_OK'));assert.equal(checks.some(x=>x.severity==='error'),false,JSON.stringify(checks));
+const pdf=buildProductionPdf(state),pdfText=new TextDecoder('latin1').decode(pdf);assert.ok(pdf.length>1000);assert.ok(pdfText.includes('/Subtype /Image'));assert.ok(pdfText.includes('/Im1'));assert.ok(pdfText.includes('/DCTDecode'));
+const transparent=normalizeImageElementV60({...image,id:'png-logo',src:png,mime:'image/png',pdfSrc:jpeg,pdfBytes:dataUrlByteSizeV60(jpeg),pdfTransparencyFlattened:true,pdfMatte:'#ffffff'}),tChecks=imagePreflightChecksV60({elements:[transparent]});assert.ok(tChecks.some(x=>x.code==='V60_IMAGE_PDF_FLATTEN'&&x.severity==='warning'));assert.equal(imagePdfSourceV60(transparent),jpeg);
+const pdfxState=structuredClone(state);pdfxState.exportOptions={...(pdfxState.exportOptions||{}),pdfxMode:'candidate',outlineText:true};assert.ok(pdfxCandidateIssues(pdfxState).some(x=>x.includes('raster artwork')));
+assert.equal(imageAcceptanceV60().ok,true);
+const ui=await readFile(new URL('../src/v60Ui.js',import.meta.url),'utf8');for(const needle of ['上传 Logo / 图片','data-v60-fit','data-v60-opacity','图片 / Logo 印前检查','exportSvgWithImages'])assert.ok(ui.includes(needle),`V0.60 UI missing ${needle}`);
+const css=await readFile(new URL('../src/v60Ui.css',import.meta.url),'utf8');assert.ok(css.includes('v60-image-inspector'));assert.ok(css.includes('@media(max-width:760px)'));
+const panelArtwork=await readFile(new URL('../src/panelArtwork.js',import.meta.url),'utf8');assert.ok(panelArtwork.includes("type:'image'"));assert.ok(panelArtwork.includes('drawRaster'));
+const exporter=await readFile(new URL('../src/export.js',import.meta.url),'utf8');assert.ok(exporter.includes('/Subtype /Image'));assert.ok(exporter.includes('imagePdfSourceV60'));
+const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('BoxStudio V0.60'));assert.ok(index.includes('v60Ui.css'));assert.ok(index.includes('v60Ui.js'));
+const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.equal(pkg.version,'0.60.0');assert.equal(pkg.scripts['test:v60'],'node tests/v60.mjs');
+console.log(`BoxStudio V0.60 artwork image passed: images=${atlas.imageCommands} dpi=${imageEffectiveDpiV60(image)} pdf=${pdf.length} checks=${checks.length}`);
