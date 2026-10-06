@@ -1,0 +1,83 @@
+name: V0.47 Free Packaging Studio
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  free-packaging-studio:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: V0.47 syntax
+        run: |
+          node --check src/freeStudioV47.js
+          node --check src/projectWorkspaceV47.js
+          node --check src/v47FreeStudio.js
+          node --check src/v47TemplateExperience.js
+          node --check src/v47QuickSliders.js
+          node --check tests/v47.mjs
+          node --check tests/v47-sliders-browser-smoke.js
+          node --check tests/v47-browser-e2e.js
+          python3 -m py_compile tests/v47_e2e_server.py
+      - name: V0.46 baseline regression
+        run: node tests/v46.mjs
+      - name: V0.47 product regression
+        run: node tests/v47.mjs
+      - name: V0.47 wiring
+        run: |
+          grep -q '"version": "0.47.0"' package.json
+          grep -q '"test:v47"' package.json
+          grep -q 'v47FreeStudio.css' index.html
+          grep -q 'v47FreeStudio.js' index.html
+          grep -q 'v47TemplateExperience.js' index.html
+          grep -q 'v47QuickSliders.js' index.html
+          grep -q 'allFeaturesFree:true' src/v47FreeStudio.js
+          grep -q 'noLoginRequired:true' src/v47FreeStudio.js
+          grep -q 'noWatermark:true' src/v47FreeStudio.js
+          grep -q 'data-v47-template-search' src/v47FreeStudio.js
+          grep -q 'v47-dimension-card' src/v47FreeStudio.js
+          grep -q 'v47-mark-actions' src/v47FreeStudio.js
+          grep -q 'data-v47-quick-setup' src/v47TemplateExperience.js
+          grep -q 'data-v47-setup-range' src/v47QuickSliders.js
+          grep -q 'V47_PROJECT_LIBRARY_KEY' src/projectWorkspaceV47.js
+      - name: Real Chrome V0.47 free product workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v47-started /tmp/boxstudio-v47-pass /tmp/boxstudio-v47-fail
+          python3 tests/v47_e2e_server.py >/tmp/boxstudio-v47-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8777/tests/v47-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 110s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --virtual-time-budget=80000 --dump-dom http://127.0.0.1:8777/tests/v47-browser-e2e.html >/tmp/boxstudio-v47-dom.log 2>/tmp/boxstudio-v47-chrome.log || true
+          if test -f /tmp/boxstudio-v47-pass; then
+            cat /tmp/boxstudio-v47-pass
+          elif test -f /tmp/boxstudio-v47-fail; then
+            cat /tmp/boxstudio-v47-fail
+            cat /tmp/boxstudio-v47-chrome.log || true
+            cat /tmp/boxstudio-v47-dom.log || true
+            exit 1
+          else
+            echo 'V0.47 browser E2E ended without PASS/FAIL signal.'
+            cat /tmp/boxstudio-v47-http.log || true
+            cat /tmp/boxstudio-v47-chrome.log || true
+            cat /tmp/boxstudio-v47-dom.log || true
+            exit 1
+          fi
+          kill "$SERVER_PID" 2>/dev/null || true
+          trap - EXIT

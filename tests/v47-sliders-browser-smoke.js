@@ -1,0 +1,13 @@
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const waitFor=async(fn,label,timeout=8000)=>{const end=Date.now()+timeout;while(Date.now()<end){const v=fn();if(v)return v;await sleep(30)}throw new Error(`Timeout: ${label}`)};
+await waitFor(()=>window.BoxStudioV47Template,'template experience');
+await waitFor(()=>window.BoxStudioV47Sliders,'quick sliders');
+window.BoxStudioV47Template.openSetup('fefco-0427');
+const modal=await waitFor(()=>document.querySelector('#boxstudio-v47-template-setup'),'setup modal');
+const range=await waitFor(()=>modal.querySelector('[data-v47-setup-range="l"]'),'L slider'),number=modal.querySelector('[data-v47-setup-l]');
+range.value='360';range.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertReplacementText',data:'360'}));await sleep(40);
+if(Number(number.value)!==360)throw new Error(`L slider did not update numeric field: ${number.value}`);
+number.value='420';number.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertReplacementText',data:'420'}));await sleep(40);
+if(Number(range.value)!==420)throw new Error(`L numeric field did not update slider: ${range.value}`);
+if(!modal.querySelector('[data-v47-setup-preview] svg'))throw new Error('Slider update removed live dieline preview.');
+window.BoxStudioV47Template.closeSetup();
