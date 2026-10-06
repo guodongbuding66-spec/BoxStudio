@@ -33,10 +33,10 @@ jobs:
       - name: Production-chain baseline
         run: node tests/v39.mjs
       - name: V0.52 wiring
+        shell: bash
         run: |
-          grep -q '"version": "0.52.0"' package.json
-          grep -q '"test:v52"' package.json
-          grep -q 'BoxStudio V0.52' index.html
+          node -e "const p=require('./package.json'); if(Number(p.version.split('.')[1])<52) process.exit(1); if(p.scripts['test:v52']!=='node tests/v52.mjs') process.exit(1)"
+          node -e "const fs=require('fs'); const s=fs.readFileSync('index.html','utf8'); const m=s.match(/BoxStudio V0\.(\d+)/); if(!m||Number(m[1])<52) process.exit(1)"
           grep -q 'v52Ui.css' index.html
           grep -q 'v52Ui.js' index.html
           grep -q 'V52_OPT_SCHEMA' src/collisionOptimizationV52.js
