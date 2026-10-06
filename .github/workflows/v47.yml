@@ -25,9 +25,12 @@ jobs:
           node --check src/v47Dashboard.js
           node --check tests/v47.mjs
           node --check tests/v47-browser-e2e.js
+          node --check tests/v47-dashboard-e2e.js
           python3 -m py_compile tests/v47_e2e_server.py
       - name: Baseline V0.46
-        run: node tests/v46.mjs
+        run: |
+          node tests/v46.mjs
+          node tests/v46-hardening.mjs
       - name: V0.47 product model
         run: node tests/v47.mjs
       - name: Wiring
@@ -41,7 +44,7 @@ jobs:
           grep -q 'freeForEveryone:true' src/productExperienceV47.js
           grep -q 'loginRequired:false' src/productExperienceV47.js
           grep -q 'paywall:false' src/productExperienceV47.js
-      - name: Real Chrome template-to-editor workflow
+      - name: Real Chrome free-product workflows
         shell: bash
         run: |
           set -euo pipefail
@@ -55,8 +58,10 @@ jobs:
             if curl -fsS http://127.0.0.1:8777/tests/v47-browser-e2e.html >/dev/null; then break; fi
             sleep 0.1
           done
+
           timeout 80s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --virtual-time-budget=50000 --dump-dom http://127.0.0.1:8777/tests/v47-browser-e2e.html >/tmp/boxstudio-v47-dom.log 2>/tmp/boxstudio-v47-chrome.log || true
           if test -f /tmp/boxstudio-v47-pass; then
+            echo 'Template → quick size → real reload → Structure:'
             cat /tmp/boxstudio-v47-pass
           elif test -f /tmp/boxstudio-v47-fail; then
             cat /tmp/boxstudio-v47-fail
@@ -64,9 +69,27 @@ jobs:
             cat /tmp/boxstudio-v47-dom.log || true
             exit 1
           else
-            echo 'V0.47 browser E2E ended without PASS/FAIL signal.'
+            echo 'V0.47 template workflow ended without PASS/FAIL signal.'
             cat /tmp/boxstudio-v47-http.log || true
             cat /tmp/boxstudio-v47-chrome.log || true
             cat /tmp/boxstudio-v47-dom.log || true
+            exit 1
+          fi
+
+          rm -f /tmp/boxstudio-v47-pass /tmp/boxstudio-v47-fail
+          timeout 80s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=390,844 --virtual-time-budget=40000 --dump-dom http://127.0.0.1:8777/tests/v47-dashboard-e2e.html >/tmp/boxstudio-v47-dashboard-dom.log 2>/tmp/boxstudio-v47-dashboard-chrome.log || true
+          if test -f /tmp/boxstudio-v47-pass; then
+            echo 'Dashboard → Templates → Marks + mobile overflow:'
+            cat /tmp/boxstudio-v47-pass
+          elif test -f /tmp/boxstudio-v47-fail; then
+            cat /tmp/boxstudio-v47-fail
+            cat /tmp/boxstudio-v47-dashboard-chrome.log || true
+            cat /tmp/boxstudio-v47-dashboard-dom.log || true
+            exit 1
+          else
+            echo 'V0.47 dashboard workflow ended without PASS/FAIL signal.'
+            cat /tmp/boxstudio-v47-http.log || true
+            cat /tmp/boxstudio-v47-dashboard-chrome.log || true
+            cat /tmp/boxstudio-v47-dashboard-dom.log || true
             exit 1
           fi
