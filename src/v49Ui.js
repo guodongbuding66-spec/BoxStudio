@@ -3,7 +3,7 @@ import { mountArtworkProof } from './threeArtworkProof.js';
 import { disposeThreePreview } from './threePreview.js';
 import { ensureLinkedWorkspaceV49, selectLinkedPanelV49, setLinkedFoldProgressV49, buildLinkedWorkspaceModelV49, cycleLinkedPanelV49, linkedWorkspaceAcceptanceV49, V49_FOLD_PRESETS, V49_PRODUCT_VERSION } from './linkedWorkspaceV49.js';
 
-const esc=(s='')=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const esc=(s='')=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num=(v,d=0)=>{const n=Number(v);return Number.isFinite(n)?n:d};
 const clampFold=v=>Math.max(0,Math.min(100,num(v,100)));
 let proof=null,activeCanvas=null,animation=0,queued=false,retryTimer=0;
@@ -25,8 +25,8 @@ function updateFoldUi(root,value){const v=Math.round(clampFold(value));const mai
 function emitFold(value){window.dispatchEvent(new CustomEvent('boxstudio:v49-fold',{detail:{progress:value}}))}
 function setFold(root,value){currentState=setLinkedFoldProgressV49(currentState,value);persist(currentState);proof?.setProgress?.(currentState.foldProgress);updateFoldUi(root,currentState.foldProgress);emitFold(currentState.foldProgress)}
 function setFoldTransient(root,value){const v=clampFold(value);currentState.foldProgress=v;currentState.linkedV49={...(currentState.linkedV49||{}),lastFoldProgress:v};proof?.setProgress?.(v);updateFoldUi(root,v);emitFold(v)}
-function stopAnimation(){if(animation){cancelAnimationFrame(animation);animation=0}}
-function playFold(root){stopAnimation();const start=clampFold(currentState.foldProgress),end=start>=50?0:100,duration=700,t0=performance.now();const tick=now=>{const t=Math.min(1,(now-t0)/duration),s=t*t*(3-2*t),v=start+(end-start)*s;setFoldTransient(root,v);if(t<1)animation=requestAnimationFrame(tick);else{animation=0;setFold(root,end)}};animation=requestAnimationFrame(tick)}
+function stopAnimation(){if(animation){clearTimeout(animation);animation=0}}
+function playFold(root){stopAnimation();const start=clampFold(currentState.foldProgress),end=start>=50?0:100,steps=8,interval=45;let step=0;const tick=()=>{step++;const t=Math.min(1,step/steps),s=t*t*(3-2*t);setFoldTransient(root,start+(end-start)*s);if(step<steps)animation=setTimeout(tick,interval);else{animation=0;setFold(root,end)}};animation=setTimeout(tick,0)}
 
 function bindControls(root){const main=document.querySelector('#foldRange'),local=root.querySelector('[data-v49-fold]');if(main)main.oninput=e=>setFold(root,e.target.value);if(local)local.oninput=e=>setFold(root,e.target.value);root.querySelectorAll('[data-v49-fold-preset]').forEach(b=>b.onclick=()=>setFold(root,b.dataset.v49FoldPreset));root.querySelector('[data-v49-play]').onclick=()=>playFold(root);root.querySelector('[data-v49-prev]').onclick=()=>{currentState=cycleLinkedPanelV49(currentState,-1);persist(currentState);proof?.setSelectedPanel?.(currentState.linkedV49.selectedPanelId);renderSelection(root)};root.querySelector('[data-v49-next]').onclick=()=>{currentState=cycleLinkedPanelV49(currentState,1);persist(currentState);proof?.setSelectedPanel?.(currentState.linkedV49.selectedPanelId);renderSelection(root)};root.querySelector('[data-v49-reset]').onclick=()=>proof?.setView?.({yaw:.55,pitch:-.34,zoom:1})}
 
