@@ -1,0 +1,77 @@
+name: V0.58 Core Packaging Studio Reframe
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  core-packaging-studio:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: V0.58 syntax
+        run: |
+          node --check src/productExperienceV58.js
+          node --check src/v58Ui.js
+          node --check tests/v58.mjs
+          node --check tests/v58-browser-e2e.js
+          python3 -m py_compile tests/v58_e2e_server.py
+      - name: V0.57 routing baseline
+        run: node tests/v57.mjs
+      - name: V0.58 core studio model
+        run: node tests/v58.mjs
+      - name: Production-chain baseline
+        run: node tests/v39.mjs
+      - name: V0.58 wiring
+        run: |
+          grep -q '"version": "0.58.0"' package.json
+          grep -q '"test:v58"' package.json
+          grep -q 'BoxStudio V0.58' index.html
+          grep -q 'v58Ui.css' index.html
+          grep -q 'v58Ui.js' index.html
+          grep -q 'V58_STUDIO_FLOW' src/productExperienceV58.js
+          grep -q 'SHIPPING MARK STUDIO' src/v58Ui.js
+          grep -q 'LIVE 3D' src/v58Ui.js
+          grep -q 'Advanced Production' docs/V0.58-reference-audit.md
+          grep -q 'Pacdora' docs/V0.58-reference-audit.md
+          grep -q 'Packform' docs/V0.58-reference-audit.md
+      - name: Real Chrome V0.58 core packaging workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v58-started /tmp/boxstudio-v58-pass /tmp/boxstudio-v58-fail
+          python3 tests/v58_e2e_server.py >/tmp/boxstudio-v58-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8788/tests/v58-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 180s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,900 --virtual-time-budget=120000 --dump-dom http://127.0.0.1:8788/tests/v58-browser-e2e.html >/tmp/boxstudio-v58-dom.log 2>/tmp/boxstudio-v58-chrome.log || true
+          if test -f /tmp/boxstudio-v58-pass; then
+            echo 'Desktop core packaging studio:'; cat /tmp/boxstudio-v58-pass
+          elif test -f /tmp/boxstudio-v58-fail; then
+            cat /tmp/boxstudio-v58-fail; cat /tmp/boxstudio-v58-chrome.log || true; cat /tmp/boxstudio-v58-dom.log || true; exit 1
+          else
+            echo 'V0.58 desktop browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v58-http.log || true; cat /tmp/boxstudio-v58-chrome.log || true; cat /tmp/boxstudio-v58-dom.log || true; exit 1
+          fi
+          rm -f /tmp/boxstudio-v58-pass /tmp/boxstudio-v58-fail
+          timeout 180s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=390,844 --virtual-time-budget=120000 --dump-dom http://127.0.0.1:8788/tests/v58-browser-e2e.html >/tmp/boxstudio-v58-mobile-dom.log 2>/tmp/boxstudio-v58-mobile-chrome.log || true
+          if test -f /tmp/boxstudio-v58-pass; then
+            echo 'Mobile core packaging studio:'; cat /tmp/boxstudio-v58-pass
+          elif test -f /tmp/boxstudio-v58-fail; then
+            cat /tmp/boxstudio-v58-fail; cat /tmp/boxstudio-v58-mobile-chrome.log || true; cat /tmp/boxstudio-v58-mobile-dom.log || true; exit 1
+          else
+            echo 'V0.58 mobile browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v58-http.log || true; cat /tmp/boxstudio-v58-mobile-chrome.log || true; cat /tmp/boxstudio-v58-mobile-dom.log || true; exit 1
+          fi
