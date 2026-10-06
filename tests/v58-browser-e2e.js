@@ -34,7 +34,7 @@ async function main(){
       await waitFor(()=>document.querySelector('[data-v58-marks-studio]'),'Marks studio after reload');
       await waitFor(()=>document.querySelector(`[data-element-id="${CSS.escape(id)}"]`),'inserted mark rendered on dieline');
       if(api.getSummary().markCount!==before+1)throw new Error(`Mark count did not persist: ${api.getSummary().markCount} vs ${before+1}`);
-      const adv=document.querySelector('[data-v58-advanced]');adv.click();if(document.body.dataset.v58Advanced!=='true')throw new Error('Advanced-production toggle did not open.');adv.click();if(document.body.dataset.v58Advanced!=='false')throw new Error('Advanced-production toggle did not close.');
+      const adv=document.querySelector('.v58-quicknav [data-v58-advanced]');if(!adv)throw new Error('Advanced-production button missing.');adv.click();if(document.body.dataset.v58Advanced!=='true')throw new Error('Advanced-production toggle did not open.');adv.click();if(document.body.dataset.v58Advanced!=='false')throw new Error('Advanced-production toggle did not close.');
       noOverflow('marks');sessionStorage.setItem('boxstudio-v58-phase','templates');api.go('templates');return;
     }
 
