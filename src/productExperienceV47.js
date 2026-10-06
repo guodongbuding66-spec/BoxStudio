@@ -1,5 +1,5 @@
 import { STANDARD_TEMPLATE_CATALOG } from './templates.js';
-import { MATERIAL_PRESETS_V32, FLUTE_PRESETS_V32 } from './materialsV32.js';
+import { MATERIAL_PRESETS_V32, FLUTE_PRESETS_V32, resolveMaterialV32 } from './materialsV32.js';
 import { stateForTemplate, cloneState } from './model.js';
 
 export const V47_PRODUCT_VERSION='V0.47';
@@ -23,12 +23,13 @@ export function searchTemplatesV47({query='',category='all',standard='all'}={}){
 export function materialOptionsV47(){return MATERIAL_PRESETS_V32.map(x=>({...x}))}
 export function fluteOptionsV47(){return Object.values(FLUTE_PRESETS_V32).map(x=>({...x}))}
 export function sanitizeQuickSizeV47(input={}){
-  const n=(v,d)=>Number.isFinite(Number(v))?Number(v):d;
-  return {length:Math.max(25,n(input.length,300)),width:Math.max(20,n(input.width,200)),height:Math.max(15,n(input.height,70)),thickness:Math.max(.1,n(input.thickness,1.5)),sizeType:['internal','external','manufacturing'].includes(input.sizeType)?input.sizeType:'internal',materialId:String(input.materialId||'corrugated-white'),flute:String(input.flute||'E').toUpperCase()};
+  const n=(v,d)=>Number.isFinite(Number(v))?Number(v):d,materialId=String(input.materialId||'corrugated-white'),flute=String(input.flute||'E').toUpperCase();
+  const explicitThickness=Number(input.thickness),material=resolveMaterialV32({materialId,flute,...(Number.isFinite(explicitThickness)&&explicitThickness>0?{thickness:explicitThickness}:{})});
+  return {length:Math.max(25,n(input.length,300)),width:Math.max(20,n(input.width,200)),height:Math.max(15,n(input.height,70)),thickness:Math.max(.1,material.thicknessMm),sizeType:['internal','external','manufacturing'].includes(input.sizeType)?input.sizeType:'internal',materialId:material.materialId,flute:material.flute||'CUSTOM'};
 }
 export function prepareTemplateStateV47(currentState,templateId,quickSize={}){
   const found=actionableTemplatesV47().find(t=>t.id===templateId);if(!found)throw Object.assign(new Error(`Template ${templateId} is not available for free editing.`),{code:'V47_TEMPLATE_NOT_ACTIONABLE'});
-  const next=cloneState(currentState),preset=stateForTemplate(templateId,next.variables),size=sanitizeQuickSizeV47(quickSize);
+  const next=cloneState(currentState),preset=stateForTemplate(templateId,next.variables),size=sanitizeQuickSizeV47({...preset.structure,...quickSize});
   next.structure={...preset.structure,...size,template:templateId};next.elements=preset.elements;next.variables={...preset.variables};next.selectedId=preset.selectedId;next.projectName=`${found.nameZh||found.name} / Free Project`;next.page='editor';next.editorTab='Structure';next.foldProgress=100;next.savedAt=new Date().toISOString();return next;
 }
 
