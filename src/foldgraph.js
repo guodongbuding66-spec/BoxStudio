@@ -1,4 +1,5 @@
 import { generateGeometry } from './geometry.js';
+import { manufacturingControlsV48 } from './parametricControlsV48.js';
 
 const PI = Math.PI;
 
@@ -44,8 +45,6 @@ function rscGraph(geo) {
 }
 
 function importedGraph(geo){
-  // V0.46: imported semantic topology must reach 3D without silently dropping flap/glue/auxiliary panels.
-  // generateImported() intentionally keeps the full panel set in geo.panels and only classifies bodyPanels/flapPanels for legacy consumers.
   const importedPanels=(geo.panels?.length?geo.panels:geo.bodyPanels)||[];
   const nodes=importedPanels.map(p=>node(p.id,p.label,p.w,p.h,flatPoseFromPanel(p,geo),flatPoseFromPanel(p,geo),{role:p.role||p.kind||'imported',artPanel:p.id,kind:p.kind||'panel',points:p.points?structuredClone(p.points):null}));
   const ids=new Set(nodes.map(n=>n.id)),root=(ids.has(geo.foldRoot)?geo.foldRoot:nodes[0]?.id)||'artboard';
@@ -102,15 +101,15 @@ function sharedHinge(a,b){
     const y=near(ay2,by1)?ay2:ay1, x1=Math.max(ax1,bx1), x2=Math.min(ax2,bx2);
     if(x2-x1>.01)return{x1,y1:y,x2,y2:y,orientation:'horizontal'};
   }
-  // Fallback: use the side of child nearest the parent centre. This keeps tabs/wings on a physical pivot.
   const acx=ax1+a.w/2,acy=ay1+a.h/2,bcx=bx1+b.w/2,bcy=by1+b.h/2;
   if(Math.abs(bcx-acx)>Math.abs(bcy-acy)){
     const x=bcx>acx?bx1:bx2;return{x1:x,y1:by1,x2:x,y2:by2,orientation:'vertical',fallback:true};
   }
-  const y=bcy>acy?by1:by2;return{x1:bx1,y1:y,x2,y2:y,orientation:'horizontal',fallback:true};
+  const y=bcy>acy?by1:by2;return{x1:bx1,y1:y,x2:bx2,y2:y,orientation:'horizontal',fallback:true};
 }
 function attachHinges(graph,geo){
-  return {...graph,edges:graph.edges.map(e=>({...e,hinge:e.hinge||sharedHinge(geo.panelMap[e.from],geo.panelMap[e.to])}))};
+  const controls=manufacturingControlsV48(geo.structure||{}),bend=controls.bend;
+  return {...graph,manufacturingControls:controls,edges:graph.edges.map(e=>({...e,hinge:e.hinge||sharedHinge(geo.panelMap[e.from],geo.panelMap[e.to]),bendRadiusMm:bend.radiusMm,scoreAllowanceMm:bend.scoreAllowanceMm,boardThicknessMm:bend.thicknessMm}))};
 }
 
 export function buildFoldGraph(input) {
@@ -120,5 +119,5 @@ export function buildFoldGraph(input) {
 }
 
 export function graphStats(graph){
-  return {panels:graph.nodes.length, hinges:graph.edges.length, root:graph.root};
+  return {panels:graph.nodes.length, hinges:graph.edges.length, root:graph.root,bendRadiusMm:graph.manufacturingControls?.bend?.radiusMm??null,boardThicknessMm:graph.manufacturingControls?.bend?.thicknessMm??null};
 }
