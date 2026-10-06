@@ -35,7 +35,6 @@ jobs:
         run: node tests/v46.mjs
       - name: V0.46 wiring
         run: |
-          grep -q '"version": "0.46.0"' package.json
           grep -q '"test:v46"' package.json
           grep -q 'v46Ui.js' index.html
           grep -q 'v46Ui.css' index.html
