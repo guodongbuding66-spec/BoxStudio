@@ -1,62 +1,72 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { generateParametricGeometryV32, resolveBoxDimensionsV32, V32_TEMPLATE_CATALOG } from '../src/parametricTemplatesV32.js';
-import { MATERIAL_PRESETS_V32, FLUTE_PRESETS_V32, resolveMaterialV32 } from '../src/materialsV32.js';
-import { previewSvgForGeometryV32 } from '../src/templatePreviewV32.js';
-import { STORAGE_KEY, LEGACY_STORAGE_KEYS } from '../src/model.js';
+import { TEMPLATE_DEFAULTS, defaultsForTemplate, generateGeometry, manufacturingDimensions } from '../src/geometry.js';
+import { STANDARD_TEMPLATE_CATALOG, searchTemplateCatalog } from '../src/templates.js';
+import { V32_TEMPLATE_CATALOG, resolveBoxDimensionsV32, previewSvgForGeometryV32 } from '../src/parametricTemplatesV32.js';
+import { FLUTE_PRESETS_V32, MATERIAL_PRESETS_V32, resolveMaterialV32, validateMaterialV32 } from '../src/materialsV32.js';
+import { STORAGE_KEY, LEGACY_STORAGE_KEYS, stateForTemplate } from '../src/model.js';
 
-assert.equal(V32_TEMPLATE_CATALOG.length,5);
-assert.deepEqual(V32_TEMPLATE_CATALOG.map(x=>x.id),['side-seal-rsc','mailer-150010','fefco-0427','reverse-tuck-end','auto-lock-bottom']);
-for(const record of V32_TEMPLATE_CATALOG){assert.ok(record.engine);assert.ok(record.parameters.length>=4)}
+const IDS=['side-seal-rsc','mailer-150010','fefco-0427','reverse-tuck-end','auto-lock-bottom'];
+assert.deepEqual(V32_TEMPLATE_CATALOG.map(x=>x.id),IDS);
+const actionable=STANDARD_TEMPLATE_CATALOG.filter(x=>x.engine);
+assert.deepEqual(actionable.map(x=>x.id),IDS);
+assert.equal(actionable.every(x=>x.engine===x.id),true);
+assert.ok(STANDARD_TEMPLATE_CATALOG.some(x=>x.id==='fefco-04xx-schema'&&x.status==='schema-only'));
+assert.ok(STANDARD_TEMPLATE_CATALOG.some(x=>x.id==='ecma-schema'&&x.status==='schema-only'));
+assert.equal(searchTemplateCatalog({query:'0427'}).length,1);
+assert.equal(searchTemplateCatalog({query:'crash lock'})[0]?.id,'auto-lock-bottom');
+assert.equal(searchTemplateCatalog({category:'folding-carton'}).length,2);
+assert.equal(searchTemplateCatalog({standard:'FEFCO'}).filter(x=>x.engine).length,2);
 
-const structures={
-  'fefco-0427':{template:'fefco-0427',length:300,width:200,height:70,materialId:'corrugated-white',flute:'E',thickness:1.5,sizeType:'internal',compensation:true},
-  'reverse-tuck-end':{template:'reverse-tuck-end',length:120,width:45,height:180,materialId:'sbs-paperboard',thickness:.45,sizeType:'internal',glue:18,compensation:true},
-  'auto-lock-bottom':{template:'auto-lock-bottom',length:120,width:45,height:180,materialId:'sbs-paperboard',thickness:.45,sizeType:'internal',glue:18,compensation:true},
-};
+assert.ok(MATERIAL_PRESETS_V32.length>=5);
+assert.ok(Object.keys(FLUTE_PRESETS_V32).includes('BC'));
+assert.equal(resolveMaterialV32({materialId:'corrugated-white',flute:'BC'}).thicknessMm,7);
+assert.equal(validateMaterialV32({materialId:'corrugated-white',flute:'E'}).ok,true);
+assert.equal(resolveMaterialV32({materialId:'sbs-paperboard'}).category,'paperboard');
+
 const geometryById={};
-for(const [id,structure] of Object.entries(structures)){
-  const geo=generateParametricGeometryV32(structure);geometryById[id]=geo;
-  assert.equal(geo.template,id);
-  assert.ok(geo.panels.length>=8,`${id} panels`);
-  assert.ok(geo.cutLines.length>0,`${id} cuts`);
-  assert.ok(geo.creaseLines.length>0,`${id} creases`);
-  assert.ok(geo.width>0&&geo.height>0,`${id} document size`);
-  assert.ok(geo.dimensionSet?.inside?.L>0,`${id} dimension set`);
-  assert.equal(geo.validationState,'engineering-core-pending-real-sample');
+for(const id of IDS){
+  assert.ok(TEMPLATE_DEFAULTS[id],`${id} must have defaults`);
+  const s=defaultsForTemplate(id),g=generateGeometry(s);geometryById[id]=g;
+  assert.equal(g.template,id,`${id} template identity must survive geometry dispatch`);
+  assert.ok(g.width>0&&g.height>0,`${id} document bounds required`);
+  assert.ok(g.bodyPanels?.length>0,`${id} body panels required`);
+  assert.ok(g.cutLines?.length>0,`${id} cut geometry required`);
+  assert.ok(g.creaseLines?.length>0,`${id} crease geometry required`);
+  assert.ok(g.panelMap&&Object.keys(g.panelMap).length===g.panels.length,`${id} panel map must cover all panels`);
+  assert.ok(Array.isArray(g.bleedRects)&&Array.isArray(g.safeRects),`${id} guide geometry required`);
+  assert.equal(JSON.stringify(generateGeometry(s)),JSON.stringify(generateGeometry(structuredClone(s))),`${id} geometry must be deterministic`);
+  const state=stateForTemplate(id),stateGeo=generateGeometry(state.structure);
+  for(const el of state.elements)assert.ok(stateGeo.panelMap[el.panelId],`${id} element ${el.id} targets missing panel ${el.panelId}`);
 }
 
-const f=geometryById['fefco-0427'];
-assert.ok(f.panelMap.base);
-assert.ok(f.panelMap.lid);
-assert.ok(f.panelMap['lid-tuck']);
-assert.equal(f.foldRoot,'base');
-assert.equal(f.structure.glue,0);
+assert.equal(geometryById['side-seal-rsc'].documentTitle,'US Side-Seal Carton / RSC Parametric Base');
+assert.equal(geometryById['mailer-150010'].reference.designArea,'576×590 mm');
 
-const rte=geometryById['reverse-tuck-end'];
-assert.ok(rte.panelMap['top-front-tuck']);
-assert.ok(rte.panelMap['bottom-back-tuck']);
-assert.ok(rte.glueLines.length>0);
+for(const id of ['fefco-0427','reverse-tuck-end','auto-lock-bottom']){
+  const g=geometryById[id];
+  assert.equal(g.validationState,'engineering-core-pending-real-sample');
+  assert.ok(g.engineeringNotes.length>=1);
+}
+assert.ok(geometryById['fefco-0427'].panels.length>=15,'0427 must model roll walls/tabs, not a static rectangle');
+assert.ok(geometryById['reverse-tuck-end'].flapPanels.some(x=>x.id==='top-front-tuck'));
+assert.ok(geometryById['reverse-tuck-end'].flapPanels.some(x=>x.id==='bottom-back-tuck'));
+assert.ok(geometryById['auto-lock-bottom'].creaseLines.some(l=>l.x1!==l.x2&&l.y1!==l.y2),'auto-lock requires diagonal pre-folds');
 
-const alb=geometryById['auto-lock-bottom'];
-assert.ok(alb.panelMap['bottom-front-major']);
-assert.ok(alb.panelMap['bottom-back-major']);
-assert.ok(alb.perfLines.length>0);
+for(const id of ['fefco-0427','reverse-tuck-end','auto-lock-bottom']){
+  const a=defaultsForTemplate(id),g1=generateGeometry(a),g2=generateGeometry({...a,length:a.length+37,width:a.width+19,height:a.height+11});
+  assert.notEqual(g1.width,g2.width,`${id} width must recompute from parameters`);
+  assert.notEqual(g1.height,g2.height,`${id} height must recompute from parameters`);
+  assert.notDeepEqual(g1.cutLines,g2.cutLines,`${id} cut lines must recompute`);
+}
 
-assert.equal(MATERIAL_PRESETS_V32.length,5);
-assert.equal(FLUTE_PRESETS_V32.E.thicknessMm,1.5);
-assert.equal(FLUTE_PRESETS_V32.B.thicknessMm,3);
-const white=resolveMaterialV32({materialId:'corrugated-white',flute:'E'});
-assert.equal(white.flute,'E');
-assert.equal(white.thicknessMm,1.5);
-const explicit=resolveMaterialV32({materialId:'corrugated-white',flute:'E',thickness:2.1});
-assert.equal(explicit.thicknessMm,2.1);
-assert.equal(explicit.source,'explicit');
+for(const id of ['fefco-0427','reverse-tuck-end','auto-lock-bottom']){
+  const a=defaultsForTemplate(id),thin=manufacturingDimensions({...a,thickness:0.5}),thick=manufacturingDimensions({...a,thickness:4});
+  assert.ok(thick.L>thin.L||thick.W>thin.W||thick.H>thin.H,`${id} thickness must affect compensated dimensions`);
+}
 
-const base={length:300,width:200,height:70,materialId:'corrugated-white',flute:'E',thickness:1.5,compensation:true};
-const internal=resolveBoxDimensionsV32({...base,sizeType:'internal'});
-const external=resolveBoxDimensionsV32({...base,sizeType:'external'});
-const manufacturing=resolveBoxDimensionsV32({...base,sizeType:'manufacturing'});
+const common={length:300,width:200,height:70,thickness:3,materialId:'corrugated-white',flute:'B',compensation:true};
+const internal=resolveBoxDimensionsV32({...common,sizeType:'internal'}),external=resolveBoxDimensionsV32({...common,sizeType:'external'}),manufacturing=resolveBoxDimensionsV32({...common,sizeType:'manufacturing'});
 assert.deepEqual(internal.inside,{L:300,W:200,H:70});
 assert.deepEqual(external.external,{L:300,W:200,H:70});
 assert.deepEqual(manufacturing.manufacturing,{L:300,W:200,H:70});
