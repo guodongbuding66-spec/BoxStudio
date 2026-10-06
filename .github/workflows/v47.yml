@@ -21,8 +21,12 @@ jobs:
       - name: V0.47 syntax
         run: |
           node --check src/freeStudioV47.js
+          node --check src/projectWorkspaceV47.js
           node --check src/v47FreeStudio.js
+          node --check src/v47TemplateExperience.js
+          node --check src/v47QuickSliders.js
           node --check tests/v47.mjs
+          node --check tests/v47-sliders-browser-smoke.js
           node --check tests/v47-browser-e2e.js
           python3 -m py_compile tests/v47_e2e_server.py
       - name: V0.46 baseline regression
@@ -35,12 +39,17 @@ jobs:
           grep -q '"test:v47"' package.json
           grep -q 'v47FreeStudio.css' index.html
           grep -q 'v47FreeStudio.js' index.html
+          grep -q 'v47TemplateExperience.js' index.html
+          grep -q 'v47QuickSliders.js' index.html
           grep -q 'allFeaturesFree:true' src/v47FreeStudio.js
           grep -q 'noLoginRequired:true' src/v47FreeStudio.js
           grep -q 'noWatermark:true' src/v47FreeStudio.js
           grep -q 'data-v47-template-search' src/v47FreeStudio.js
           grep -q 'v47-dimension-card' src/v47FreeStudio.js
           grep -q 'v47-mark-actions' src/v47FreeStudio.js
+          grep -q 'data-v47-quick-setup' src/v47TemplateExperience.js
+          grep -q 'data-v47-setup-range' src/v47QuickSliders.js
+          grep -q 'V47_PROJECT_LIBRARY_KEY' src/projectWorkspaceV47.js
       - name: Real Chrome V0.47 free product workflow
         shell: bash
         run: |
