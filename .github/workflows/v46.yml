@@ -1,0 +1,31 @@
+name: V0.46 Advanced Corner and Mixed Curve Constraints
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  advanced-corner-mixed-curve:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Syntax and advanced constraint regression
+        run: |
+          node --check src/curveConstraintsV46.js
+          node --check src/acceptanceV46.js
+          node --check src/preflightV46.js
+          node --check tests/v46.mjs
+          node tests/v44.mjs
+          node tests/v45.mjs
+          node tests/v46.mjs
+          grep -q '"version": "0.46.0"' package.json
+          grep -q '"test:v46"' package.json
