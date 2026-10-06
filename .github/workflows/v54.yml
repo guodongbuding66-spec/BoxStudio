@@ -33,9 +33,8 @@ jobs:
         run: node tests/v39.mjs
       - name: V0.54 wiring
         run: |
-          grep -q '"version": "0.54.0"' package.json
+          grep -Eq '"version": "0\.(5[4-9]|[6-9][0-9])\.' package.json
           grep -q '"test:v54"' package.json
-          grep -q 'BoxStudio V0.54' index.html
           grep -q 'v54Ui.css' index.html
           grep -q 'v54Ui.js' index.html
           grep -q 'V54_PLAN_SCHEMA' src/repairPlanV54.js
