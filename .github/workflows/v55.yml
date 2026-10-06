@@ -1,0 +1,75 @@
+name: V0.55 Manufacturing Intelligence and Fold Feasibility
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  manufacturing-intelligence:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: V0.55 syntax
+        run: |
+          node --check src/manufacturingIntelligenceV55.js
+          node --check src/preflightV55.js
+          node --check src/v55Ui.js
+          node --check tests/v55.mjs
+          node --check tests/v55-browser-e2e.js
+          python3 -m py_compile tests/v55_e2e_server.py
+      - name: V0.54 repair-plan baseline
+        run: node tests/v54.mjs
+      - name: V0.55 manufacturing model
+        run: node tests/v55.mjs
+      - name: Production-chain baseline
+        run: node tests/v39.mjs
+      - name: V0.55 wiring
+        run: |
+          grep -q '"version": "0.55.0"' package.json
+          grep -q '"test:v55"' package.json
+          grep -q 'BoxStudio V0.55' index.html
+          grep -q 'v55Ui.css' index.html
+          grep -q 'v55Ui.js' index.html
+          grep -q 'V55_MANUFACTURING_SCHEMA' src/manufacturingIntelligenceV55.js
+          grep -q 'Safe / Machine / Manual' src/v55Ui.js
+          grep -q 'manufacturingBlocking=false' src/preflightV55.js
+      - name: Real Chrome V0.55 manufacturing workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v55-started /tmp/boxstudio-v55-pass /tmp/boxstudio-v55-fail
+          python3 tests/v55_e2e_server.py >/tmp/boxstudio-v55-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8785/tests/v55-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 180s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,900 --virtual-time-budget=120000 --dump-dom http://127.0.0.1:8785/tests/v55-browser-e2e.html >/tmp/boxstudio-v55-dom.log 2>/tmp/boxstudio-v55-chrome.log || true
+          if test -f /tmp/boxstudio-v55-pass; then
+            echo 'Desktop manufacturing intelligence:'; cat /tmp/boxstudio-v55-pass
+          elif test -f /tmp/boxstudio-v55-fail; then
+            cat /tmp/boxstudio-v55-fail; cat /tmp/boxstudio-v55-chrome.log || true; cat /tmp/boxstudio-v55-dom.log || true; exit 1
+          else
+            echo 'V0.55 desktop browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v55-http.log || true; cat /tmp/boxstudio-v55-chrome.log || true; cat /tmp/boxstudio-v55-dom.log || true; exit 1
+          fi
+          rm -f /tmp/boxstudio-v55-pass /tmp/boxstudio-v55-fail
+          timeout 180s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=390,844 --virtual-time-budget=120000 --dump-dom http://127.0.0.1:8785/tests/v55-browser-e2e.html >/tmp/boxstudio-v55-mobile-dom.log 2>/tmp/boxstudio-v55-mobile-chrome.log || true
+          if test -f /tmp/boxstudio-v55-pass; then
+            echo 'Mobile manufacturing intelligence:'; cat /tmp/boxstudio-v55-pass
+          elif test -f /tmp/boxstudio-v55-fail; then
+            cat /tmp/boxstudio-v55-fail; cat /tmp/boxstudio-v55-mobile-chrome.log || true; cat /tmp/boxstudio-v55-mobile-dom.log || true; exit 1
+          else
+            echo 'V0.55 mobile browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v55-http.log || true; cat /tmp/boxstudio-v55-mobile-chrome.log || true; cat /tmp/boxstudio-v55-mobile-dom.log || true; exit 1
+          fi
