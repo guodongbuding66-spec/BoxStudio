@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { defaultState, stateForTemplate } from '../src/model.js';
+import { actionableTemplatesV47 } from '../src/productExperienceV47.js';
+import { buildLinkedWorkspaceModelV49 } from '../src/linkedWorkspaceV49.js';
+import { ensureFoldSequenceV51, buildFoldSequenceModelV51, setEdgeStepV51, splitEdgeStepV51, mergeEdgeWithPreviousV51, setCurrentStepV51, stepFoldV51, rendererAuthoringV51, detectPanelCollisionsV51, scanFoldSequenceV51, setCollisionBlockingV51, foldSequenceAcceptanceV51, V51_SEQUENCE_SCHEMA } from '../src/foldSequenceV51.js';
+
+const projectFor=id=>{const preset=stateForTemplate(id,defaultState.variables),state=structuredClone(defaultState);state.structure=preset.structure;state.elements=preset.elements;state.variables=preset.variables;state.selectedId=preset.selectedId;state.page='editor';state.editorTab='3D';state.foldProgress=100;return state};
+const templates=actionableTemplatesV47();assert.ok(templates.length>=8,'V0.51 must retain the verified template catalog.');
+for(const template of templates){const linked=buildLinkedWorkspaceModelV49(projectFor(template.id)),state=ensureFoldSequenceV51(linked.state,linked.review.graph),model=buildFoldSequenceModelV51(state,linked.review.graph,linked.review.geo),accept=foldSequenceAcceptanceV51(state,linked.review.graph,linked.review.geo,{skipCollision:true});assert.equal(state.foldSequenceV51.schema,V51_SEQUENCE_SCHEMA);assert.equal(accept.ok,true,`${template.id}: ${JSON.stringify(accept.errors)}`);assert.equal(model.edges.length,linked.review.graph.edges.length,`${template.id} sequence lost fold edges`);assert.equal(model.keyframes.length,model.stepCount+1,`${template.id} keyframe count drift`);assert.equal(model.keyframes[0].timeline,0);assert.equal(model.keyframes.at(-1).timeline,100)}
+
+const linked=buildLinkedWorkspaceModelV49(projectFor('fefco-0203')),graph=linked.review.graph,geo=linked.review.geo;let state=ensureFoldSequenceV51(linked.state,graph),model=buildFoldSequenceModelV51(state,graph,geo);assert.ok(model.stepCount>=8);const first=model.edges[0],second=model.edges[1];
+state=setEdgeStepV51(state,graph,second.key,first.step);model=buildFoldSequenceModelV51(state,graph,geo);assert.equal(model.edges.find(e=>e.key===first.key).step,model.edges.find(e=>e.key===second.key).step,'two folds should be groupable into one step');assert.ok(model.steps[0].edgeKeys.length>=2,'grouped step should contain multiple folds');
+state=splitEdgeStepV51(state,graph,second.key);model=buildFoldSequenceModelV51(state,graph,geo);assert.notEqual(model.edges.find(e=>e.key===first.key).step,model.edges.find(e=>e.key===second.key).step,'split must move a fold into a new step');
+state=mergeEdgeWithPreviousV51(state,graph,second.key);model=buildFoldSequenceModelV51(state,graph,geo);assert.equal(model.edges.find(e=>e.key===first.key).step,model.edges.find(e=>e.key===second.key).step,'merge must restore shared step');
+state=setCurrentStepV51(state,graph,geo,1);model=buildFoldSequenceModelV51(state,graph,geo);assert.equal(model.currentStep,1);assert.ok(model.v50.timeline>0&&model.v50.timeline<100);const render=rendererAuthoringV51(model);assert.ok(Object.values(render.edgeProgress).some(v=>v===100));assert.ok(Object.values(render.edgeProgress).some(v=>v===0));
+state=stepFoldV51(state,graph,geo,1);model=buildFoldSequenceModelV51(state,graph,geo);assert.equal(model.currentStep,2);state=stepFoldV51(state,graph,geo,-1);assert.equal(buildFoldSequenceModelV51(state,graph,geo).currentStep,1);
+
+const scan=scanFoldSequenceV51(state,graph,geo);assert.equal(scan.enabled,true);assert.ok(scan.samples>model.stepCount,'collision scan must sample inside each fold step, not keyframes only');assert.ok(Array.isArray(scan.penetrations)&&Array.isArray(scan.overlaps));
+state=setCollisionBlockingV51(state,graph,true);assert.equal(buildFoldSequenceModelV51(state,graph,geo).blockOnPenetration,true);
+
+const I=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],RX90=[1,0,0,0,0,0,-1,0,0,1,0,0,0,0,0,1],syntheticGeo={width:10,height:10,panelMap:{a:{id:'a',x:3,y:3,w:4,h:4},b:{id:'b',x:3,y:3,w:4,h:4}}},syntheticGraph={root:'a',nodes:[{id:'a'},{id:'b'}],edges:[]};
+let hits=detectPanelCollisionsV51(syntheticGraph,syntheticGeo,new Map([['a',I],['b',RX90]]));assert.ok(hits.some(h=>h.type==='penetration'),'crossing non-adjacent panels must report penetration');
+hits=detectPanelCollisionsV51(syntheticGraph,syntheticGeo,new Map([['a',I],['b',I]]));assert.ok(hits.some(h=>h.type==='overlap'),'coplanar non-adjacent panels must report overlap/contact');
+const adjacentGraph={...syntheticGraph,edges:[{from:'a',to:'b',hinge:{x1:3,y1:3,x2:7,y2:3},angle:90}]};hits=detectPanelCollisionsV51(adjacentGraph,syntheticGeo,new Map([['a',I],['b',I]]));assert.equal(hits.length,0,'direct hinge neighbors must be excluded from self-collision warnings');
+
+const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('BoxStudio V0.51'));assert.ok(index.includes('v51Ui.css'));assert.ok(index.includes('v51Ui.js'));
+const ui=await readFile(new URL('../src/v51Ui.js',import.meta.url),'utf8');assert.ok(ui.includes('关键帧 / 单步播放 / Step 分组 / 折叠路径穿插检测'));assert.ok(ui.includes('Fold Sequence Collision Check'));assert.ok(ui.includes('检测折叠碰撞'));
+const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.equal(pkg.version,'0.51.0');assert.equal(pkg.scripts['test:v51'],'node tests/v51.mjs');
+console.log(`BoxStudio V0.51 sequence/collision passed: templates=${templates.length} steps=${model.stepCount} samples=${scan.samples} penetrations=${scan.penetrations.length} overlaps=${scan.overlaps.length}`);
