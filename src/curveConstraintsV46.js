@@ -81,7 +81,7 @@ function solveTargetFromDriver(next,nodeId,driver,target){
     const which=target.a===nodeId?'c1':'c2',h=target[which],handleLength=Math.max(.001,length(sub(h,node))),d=unit(desired);target[which]=point(node.x+d.x*handleLength,node.y+d.y*handleLength);return{targetEdgeId:target.id,kind,changed:'handle'};
   }
   if(kind==='line'){
-    const outerId=edgeOuterId(target,nodeId),outer=nodeById(next,outerId);if(!outer)throw Object.assign(new Error('Line outer endpoint is missing.'),{code:'V46_ENDPOINT_MISSING'});const lineLength=Math.max(.001,length(sub(outer,node))),d=unit(desired);outer.x=round(node.x+d.x*lineLength);outer.y=round(node.y+d.y*lineLength);return{targetEdgeId:target.id,kind,changed:'outer-node',outerNodeId:outer.id};
+    const outerId=edgeOuterId(target,nodeId),outer=nodeById(next,outerId);if(!outer)throw Object.assign(new Error('Line outer endpoint is missing.'),{code:'V46_ENDPOINT_MISSING'});if(incidentEdges(next,outerId).length>1)throw Object.assign(new Error(`Line ${target.id} cannot be re-angled because its far endpoint ${outerId} is shared by other topology.`),{code:'V46_LINE_TARGET_SHARED_ENDPOINT',edgeId:target.id,nodeId:outerId});const lineLength=Math.max(.001,length(sub(outer,node))),d=unit(desired);outer.x=round(node.x+d.x*lineLength);outer.y=round(node.y+d.y*lineLength);return{targetEdgeId:target.id,kind,changed:'outer-node',outerNodeId:outer.id};
   }
   if(kind==='arc'){
     if(target.v45Corner)throw Object.assign(new Error('Native Fillet arcs are managed by the Corner Feature solver; edit the feature radius instead.'),{code:'V46_CORNER_ARC_MANAGED'});
@@ -128,21 +128,23 @@ export function applyCornerFeatureV46(doc,nodeId,options={}){
   const reserved=reserveCornerSourceIds(doc),result=applyCornerOperationV45(reserved.doc,nodeId,options);return annotateV46Corner(doc,nodeId,result,reserved.added);
 }
 
-export function removeCornerFeatureV46(doc,connectorEdgeId){
+function pruneEqualRadiusEdgeV46(doc,edgeId,replacementId=null){const root=doc?.constraintsV46;if(!Array.isArray(root?.equalRadiusGroups))return doc;root.equalRadiusGroups=root.equalRadiusGroups.map(group=>({...group,edgeIds:[...new Set((group.edgeIds||[]).map(id=>id===edgeId?(replacementId||null):id).filter(Boolean))]})).filter(group=>group.edgeIds.length>=2);return doc}
+
+export function removeCornerFeatureV46(doc,connectorEdgeId,{pruneEqual=true}={}){
   const connector=edgeById(doc,connectorEdgeId);if(!connector?.v45Corner)throw Object.assign(new Error('Selected edge is not a corner feature.'),{code:'V46_CORNER_FEATURE_MISSING'});
   const provenance=connector.v46Corner;if(!provenance?.sourceNode||!Array.isArray(provenance.endpoints)){
-    const legacy=restoreCornerFeatureV45(doc,connectorEdgeId);return{...legacy,removedEdgeId:connectorEdgeId,legacy:true};
+    const legacy=restoreCornerFeatureV45(doc,connectorEdgeId);if(pruneEqual)pruneEqualRadiusEdgeV46(legacy.doc,connectorEdgeId);return{...legacy,removedEdgeId:connectorEdgeId,legacy:true};
   }
   const next=clone(doc),feature=edgeById(next,connectorEdgeId),tangentIds=[feature.a,feature.b];
   for(const record of provenance.endpoints){const edge=edgeById(next,record.edgeId);if(!edge)throw Object.assign(new Error(`Corner source edge ${record.edgeId} no longer exists.`),{code:'V46_CORNER_SOURCE_MISSING'});if(edge[record.endpoint]!==record.tangentNodeId)throw Object.assign(new Error(`Corner source endpoint ${record.edgeId}.${record.endpoint} changed after feature creation.`),{code:'V46_CORNER_ENDPOINT_EDITED'});edge[record.endpoint]=record.originalNodeId}
   next.edges=next.edges.filter(e=>e.id!==connectorEdgeId);for(const tangentId of tangentIds){if(!incidentEdges(next,tangentId).length)next.nodes=next.nodes.filter(n=>n.id!==tangentId)}
   const existing=nodeById(next,provenance.sourceNode.id);if(existing){if(existing.v46IdReservation&&!incidentEdges(next,existing.id).length){existing.x=provenance.sourceNode.x;existing.y=provenance.sourceNode.y;delete existing.v46IdReservation}else if(Math.hypot(finite(existing.x)-finite(provenance.sourceNode.x),finite(existing.y)-finite(provenance.sourceNode.y))>1e-6)throw Object.assign(new Error(`Corner source node id ${provenance.sourceNode.id} is occupied by another topology node.`),{code:'V46_CORNER_SOURCE_ID_COLLISION'})}else next.nodes.push(clone(provenance.sourceNode));
-  return{doc:next,nodeId:provenance.sourceNode.id,removedEdgeId:connectorEdgeId,restoredFeature:clone(feature.v45Corner),legacy:false};
+  if(pruneEqual)pruneEqualRadiusEdgeV46(next,connectorEdgeId);return{doc:next,nodeId:provenance.sourceNode.id,removedEdgeId:connectorEdgeId,restoredFeature:clone(feature.v45Corner),legacy:false};
 }
 export const restoreCornerFeatureV46=removeCornerFeatureV46;
 
 export function updateCornerFeatureV46(doc,connectorEdgeId,{mode=null,valueMm=null}={}){
-  const connector=edgeById(doc,connectorEdgeId),feature=connector?.v45Corner;if(!feature)throw Object.assign(new Error('Selected edge is not a corner feature.'),{code:'V46_CORNER_FEATURE_MISSING'});const removed=removeCornerFeatureV46(doc,connectorEdgeId),result=applyCornerFeatureV46(removed.doc,removed.nodeId,{mode:mode||feature.mode,valueMm:valueMm==null?feature.valueMm:valueMm});return{...result,previousEdgeId:connectorEdgeId,restoredNodeId:removed.nodeId};
+  const connector=edgeById(doc,connectorEdgeId),feature=connector?.v45Corner;if(!feature)throw Object.assign(new Error('Selected edge is not a corner feature.'),{code:'V46_CORNER_FEATURE_MISSING'});const memberships=(doc?.constraintsV46?.equalRadiusGroups||[]).filter(g=>g.edgeIds?.includes(connectorEdgeId)).map(g=>g.id),removed=removeCornerFeatureV46(doc,connectorEdgeId,{pruneEqual:false}),nextMode=mode||feature.mode,result=applyCornerFeatureV46(removed.doc,removed.nodeId,{mode:nextMode,valueMm:valueMm==null?feature.valueMm:valueMm});for(const groupId of memberships){const group=result.doc.constraintsV46?.equalRadiusGroups?.find(g=>g.id===groupId);if(!group)continue;if(nextMode==='fillet')group.edgeIds=[...new Set(group.edgeIds.map(id=>id===connectorEdgeId?result.connectorEdgeId:id))];else group.edgeIds=group.edgeIds.filter(id=>id!==connectorEdgeId)}if(result.doc.constraintsV46?.equalRadiusGroups)result.doc.constraintsV46.equalRadiusGroups=result.doc.constraintsV46.equalRadiusGroups.filter(g=>g.edgeIds.length>=2);return{...result,previousEdgeId:connectorEdgeId,restoredNodeId:removed.nodeId};
 }
 export function switchCornerFeatureV46(doc,connectorEdgeId,mode){if(!['fillet','chamfer'].includes(mode))throw Object.assign(new Error(`Unsupported corner feature mode: ${mode}`),{code:'V46_CORNER_MODE_INVALID'});return updateCornerFeatureV46(doc,connectorEdgeId,{mode})}
 
