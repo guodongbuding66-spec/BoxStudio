@@ -22,6 +22,7 @@ jobs:
           node --check src/preflightV48.js
           node --check src/v48ParametricStudio.js
           node --check src/v48AppearanceStudio.js
+          node --check src/v48FontManager.js
           node --check src/threeArtworkProof.js
           node --check tests/v48.mjs
           node --check tests/v48-browser-e2e.js
@@ -39,11 +40,14 @@ jobs:
           grep -q 'v48ParametricStudio.js' index.html
           grep -q 'v48AppearanceStudio.css' index.html
           grep -q 'v48AppearanceStudio.js' index.html
+          grep -q 'v48FontManager.css' index.html
+          grep -q 'v48FontManager.js' index.html
           grep -q 'Shipping Mark Studio' src/v48ParametricStudio.js
           grep -q 'free:true' src/v48ParametricStudio.js
           grep -q 'boxstudio:v48-preview-change' src/threeArtworkProof.js
           grep -q 'data-v48-face-color' src/v48AppearanceStudio.js
           grep -q 'data-v48-scene' src/v48AppearanceStudio.js
+          grep -q 'localOnly:true' src/v48FontManager.js
       - name: Real Chrome V0.48 workflow
         shell: bash
         run: |
