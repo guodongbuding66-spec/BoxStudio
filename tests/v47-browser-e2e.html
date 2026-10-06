@@ -27,6 +27,7 @@
   localStorage.clear();sessionStorage.clear();localStorage.setItem(STORAGE_KEY,JSON.stringify(initial));
   await fetch('/__v47_started__',{method:'POST',body:'V0.47 browser started'}).catch(()=>{});
   await import('../src/app.js');
+  await import('../src/v33Ui.js');
   await import('../src/v35Ui.js');
   await import('../src/v36Ui.js');
   await import('../src/v38Ui.js');
