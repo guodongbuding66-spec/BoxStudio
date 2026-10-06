@@ -22,6 +22,7 @@ jobs:
         run: |
           node --check src/productExperienceV47.js
           node --check src/v47Ui.js
+          node --check src/v47Dashboard.js
           node --check tests/v47.mjs
           node --check tests/v47-browser-e2e.js
           python3 -m py_compile tests/v47_e2e_server.py
@@ -34,7 +35,9 @@ jobs:
           grep -q '"version": "0.47.0"' package.json
           grep -q '"test:v47"' package.json
           grep -q 'v47Ui.css' index.html
+          grep -q 'v47Dashboard.css' index.html
           grep -q 'v47Ui.js' index.html
+          grep -q 'v47Dashboard.js' index.html
           grep -q 'freeForEveryone:true' src/productExperienceV47.js
           grep -q 'loginRequired:false' src/productExperienceV47.js
           grep -q 'paywall:false' src/productExperienceV47.js
