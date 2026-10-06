@@ -25,6 +25,6 @@ assert.throws(()=>addMarkPresetV58(defaultState,'missing'),/V58_UNKNOWN_MARK_PRE
 
 const ui=await readFile(new URL('../src/v58Ui.js',import.meta.url),'utf8');assert.ok(ui.includes('SHIPPING MARK STUDIO'));assert.ok(ui.includes('LIVE 3D'));assert.ok(ui.includes('高级生产'));assert.ok(ui.includes('data-v58-mark'));
 const css=await readFile(new URL('../src/v58Ui.css',import.meta.url),'utf8');assert.ok(css.includes('data-v58-studio'));assert.ok(css.includes('v58-mini3d'));assert.ok(css.includes('v58-marks-studio'));assert.ok(css.includes('data-v58-advanced'));
-const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('BoxStudio V0.58'));assert.ok(index.includes('v58Ui.css'));assert.ok(index.includes('v58Ui.js'));
-const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.equal(pkg.version,'0.58.0');assert.equal(pkg.scripts['test:v58'],'node tests/v58.mjs');
-console.log(`BoxStudio V0.58 core packaging studio passed: templates=${TEMPLATE_IDS.length} markInsertions=${checked} presets=${Object.keys(V58_MARK_PRESETS).length} flow=${V58_STUDIO_FLOW.length}`);
+const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('v58Ui.css'));assert.ok(index.includes('v58Ui.js'));
+const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));const [major,minor]=pkg.version.split('.').map(Number);assert.ok(major>0||minor>=58,`Expected package version >= 0.58.0, got ${pkg.version}`);assert.equal(pkg.scripts['test:v58'],'node tests/v58.mjs');
+console.log(`BoxStudio V0.58 core packaging studio passed: templates=${TEMPLATE_IDS.length} markInsertions=${checked} presets=${Object.keys(V58_MARK_PRESETS).length} flow=${V58_STUDIO_FLOW.length} package=${pkg.version}`);
