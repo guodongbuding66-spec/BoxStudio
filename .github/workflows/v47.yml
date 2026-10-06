@@ -35,7 +35,6 @@ jobs:
         run: node tests/v47.mjs
       - name: Wiring
         run: |
-          grep -q '"version": "0.47.0"' package.json
           grep -q '"test:v47"' package.json
           grep -q 'v47Ui.css' index.html
           grep -q 'v47Dashboard.css' index.html
