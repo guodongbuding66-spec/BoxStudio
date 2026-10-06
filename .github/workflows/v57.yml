@@ -1,0 +1,78 @@
+name: V0.57 Factory Job Routing and Auto Factory Selection
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  factory-routing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: V0.57 syntax
+        run: |
+          node --check src/factoryRoutingV57.js
+          node --check src/preflightV57.js
+          node --check src/v57Ui.js
+          node --check tests/v57.mjs
+          node --check tests/v57-browser-e2e.js
+          python3 -m py_compile tests/v57_e2e_server.py
+      - name: V0.56 factory baseline
+        run: node tests/v56.mjs
+      - name: V0.57 routing model
+        run: node tests/v57.mjs
+      - name: Production-chain baseline
+        run: node tests/v39.mjs
+      - name: V0.57 wiring
+        run: |
+          grep -q '"version": "0.57.0"' package.json
+          grep -q '"test:v57"' package.json
+          grep -q 'BoxStudio V0.57' index.html
+          grep -q 'v57Ui.css' index.html
+          grep -q 'v57Ui.js' index.html
+          grep -q 'V57_ROUTING_SCHEMA' src/factoryRoutingV57.js
+          grep -q 'boxstudio-preflight-v57' src/preflightV57.js
+          grep -q 'FACTORY JOB ROUTING / AUTO FACTORY SELECTION' src/v57Ui.js
+          grep -q 'PRIMARY FACTORY' src/v57Ui.js
+          grep -q 'BACKUP FACTORY' src/v57Ui.js
+          grep -q 'Manufacturing Job Ticket' src/v57Ui.js
+      - name: Real Chrome V0.57 routing workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v57-started /tmp/boxstudio-v57-pass /tmp/boxstudio-v57-fail
+          python3 tests/v57_e2e_server.py >/tmp/boxstudio-v57-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8787/tests/v57-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 180s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,900 --virtual-time-budget=120000 --dump-dom http://127.0.0.1:8787/tests/v57-browser-e2e.html >/tmp/boxstudio-v57-dom.log 2>/tmp/boxstudio-v57-chrome.log || true
+          if test -f /tmp/boxstudio-v57-pass; then
+            echo 'Desktop factory routing:'; cat /tmp/boxstudio-v57-pass
+          elif test -f /tmp/boxstudio-v57-fail; then
+            cat /tmp/boxstudio-v57-fail; cat /tmp/boxstudio-v57-chrome.log || true; cat /tmp/boxstudio-v57-dom.log || true; exit 1
+          else
+            echo 'V0.57 desktop browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v57-http.log || true; cat /tmp/boxstudio-v57-chrome.log || true; cat /tmp/boxstudio-v57-dom.log || true; exit 1
+          fi
+          rm -f /tmp/boxstudio-v57-pass /tmp/boxstudio-v57-fail
+          timeout 180s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=390,844 --virtual-time-budget=120000 --dump-dom http://127.0.0.1:8787/tests/v57-browser-e2e.html >/tmp/boxstudio-v57-mobile-dom.log 2>/tmp/boxstudio-v57-mobile-chrome.log || true
+          if test -f /tmp/boxstudio-v57-pass; then
+            echo 'Mobile factory routing:'; cat /tmp/boxstudio-v57-pass
+          elif test -f /tmp/boxstudio-v57-fail; then
+            cat /tmp/boxstudio-v57-fail; cat /tmp/boxstudio-v57-mobile-chrome.log || true; cat /tmp/boxstudio-v57-mobile-dom.log || true; exit 1
+          else
+            echo 'V0.57 mobile browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v57-http.log || true; cat /tmp/boxstudio-v57-mobile-chrome.log || true; cat /tmp/boxstudio-v57-mobile-dom.log || true; exit 1
+          fi
