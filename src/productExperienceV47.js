@@ -31,7 +31,10 @@ export function sanitizeQuickSizeV47(input={}){
 }
 export function prepareTemplateStateV47(currentState,templateId,quickSize={}){
   const found=actionableTemplatesV47().find(t=>t.id===templateId);if(!found)throw Object.assign(new Error(`Template ${templateId} is not available for free editing.`),{code:'V47_TEMPLATE_NOT_ACTIONABLE'});
-  const next=cloneState(currentState),preset=stateForTemplate(templateId,next.variables),size=sanitizeQuickSizeV47({...preset.structure,...quickSize});
+  const next=cloneState(currentState),preset=stateForTemplate(templateId,next.variables),sizeInput={...preset.structure,...quickSize};
+  const quickOwnsThickness=Object.prototype.hasOwnProperty.call(quickSize,'thickness')&&quickSize.thickness!==undefined&&quickSize.thickness!==null&&String(quickSize.thickness).trim()!=='';
+  if(!quickOwnsThickness&&(Object.prototype.hasOwnProperty.call(quickSize,'flute')||Object.prototype.hasOwnProperty.call(quickSize,'materialId')))delete sizeInput.thickness;
+  const size=sanitizeQuickSizeV47(sizeInput);
   next.structure={...preset.structure,...size,template:templateId};next.elements=preset.elements;next.variables={...preset.variables};next.selectedId=preset.selectedId;next.projectName=`${found.nameZh||found.name} / Free Project`;next.page='editor';next.editorTab='Structure';next.foldProgress=100;next.savedAt=new Date().toISOString();return next;
 }
 
