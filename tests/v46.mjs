@@ -28,6 +28,12 @@ const cubicLine=shell(
   'cubic-line'
 );
 const cl=setMixedContinuityV46(cubicLine,'m','g1',{driverEdgeId:'cubic'});assert.ok(cl.diagnostics.tangentErrorDeg<1e-4,`Cubic↔Line G1 error ${cl.diagnostics.tangentErrorDeg}`);
+const sharedLine=shell(
+  [{id:'m',x:0,y:0},{id:'c',x:12,y:0},{id:'l',x:-10,y:-4},{id:'x',x:-16,y:-8}],
+  [{id:'cubic',a:'m',b:'c',lineType:'CUT',curve:'cubic',c1:{x:3,y:4},c2:{x:9,y:1}},{id:'line',a:'m',b:'l',lineType:'CUT',curve:'line'},{id:'branch',a:'l',b:'x',lineType:'CUT',curve:'line'}],
+  'cubic-line-shared-target'
+);
+assert.throws(()=>setMixedContinuityV46(sharedLine,'m','g1',{driverEdgeId:'cubic'}),error=>error?.code==='V46_LINE_TARGET_SHARED_ENDPOINT','Mixed G1 must fail closed instead of moving a shared far Line endpoint');
 
 const rect=shell(
   [{id:'n1',x:0,y:0},{id:'n2',x:20,y:0},{id:'n3',x:20,y:20},{id:'n4',x:0,y:20}],
@@ -39,10 +45,11 @@ const first=batch.applied[0].connectorEdgeId,removed=removeCornerFeatureV46(batc
 const switchId=removed.doc.edges.find(e=>e.v46Corner)?.id;let switched;try{switched=switchCornerFeatureV46(removed.doc,switchId,'chamfer')}catch(error){const target=removed.doc.edges.find(e=>e.id===switchId),sourceNodeId=target?.v46Corner?.sourceNode?.id;console.error('V46_SWITCH_DIAGNOSTIC',JSON.stringify({switchId,target,sourceNodeId,incidentAtSource:removed.doc.edges.filter(e=>e.a===sourceNodeId||e.b===sourceNodeId),nodes:removed.doc.nodes},null,2));throw error}const switchedEdge=switched.doc.edges.find(e=>e.id===switched.connectorEdgeId);assert.equal(switchedEdge.v45Corner.mode,'chamfer');assert.equal(switchedEdge.curve,'line');
 
 const fillets=batch.doc.edges.filter(e=>e.v45Corner?.mode==='fillet').slice(0,3).map(e=>e.id),eq=createEqualRadiusConstraintV46(batch.doc,fillets,{radiusMm:3});assert.equal(eq.edgeIds.length,3);assert.ok(eq.edgeIds.every(id=>Math.abs(eq.doc.edges.find(e=>e.id===id).v45Corner.valueMm-3)<1e-8));const eq4=updateEqualRadiusGroupV46(eq.doc,eq.groupId,4);assert.ok(eq4.edgeIds.every(id=>Math.abs(eq4.doc.edges.find(e=>e.id===id).v45Corner.valueMm-4)<1e-8),'Equal-radius group edit must propagate to every Fillet');assert.equal(validateV46ConstraintState(eq4.doc).ok,true);
+const eqRemoved=removeCornerFeatureV46(eq4.doc,eq4.edgeIds[0]),remainingGroup=eqRemoved.doc.constraintsV46?.equalRadiusGroups?.find(g=>g.id===eq4.groupId);assert.equal(remainingGroup?.edgeIds.length,2,'Removing an equal-radius member must immediately prune its membership');const eqChamfer=switchCornerFeatureV46(eqRemoved.doc,remainingGroup.edgeIds[0],'chamfer');assert.equal((eqChamfer.doc.constraintsV46?.equalRadiusGroups||[]).some(g=>g.id===eq4.groupId),false,'Switching a member to Chamfer must drop an undersized equal-radius group');assert.equal(validateV46ConstraintState(eqChamfer.doc).ok,true);
 
 let restored=structuredClone(batch.doc);for(const id of batch.applied.map(x=>x.connectorEdgeId)){const current=restored.edges.find(e=>e.id===id);if(current?.v45Corner)restored=removeCornerFeatureV46(restored,id).doc}assert.deepEqual(restored.nodes.slice().sort((a,b)=>a.id.localeCompare(b.id)),rect.nodes.slice().sort((a,b)=>a.id.localeCompare(b.id)),'Removing all batch features must recover original nodes');assert.deepEqual(restored.edges.slice().sort((a,b)=>a.id.localeCompare(b.id)),rect.edges.slice().sort((a,b)=>a.id.localeCompare(b.id)),'Removing all batch features must recover original line topology');
 
 const state=structuredClone(defaultState),defaultDoc=dielineDocumentFromStateV38(state),acceptance=runCadTopology3dAcceptanceV46(state,{doc:defaultDoc});assert.equal(acceptance.schema,'boxstudio-acceptance-v46');assert.ok(acceptance.summary.panels>0,'Acceptance must rebuild semantic topology panels');assert.ok(acceptance.stats?.panels>0,'Acceptance must build the 3D fold graph');assert.equal(acceptance.errors.filter(x=>x.stage==='3d').length,0,'2D→Topology→3D identity must not drift');
 const preflight=runPreflightV46(state,{doc:defaultDoc});assert.equal(preflight.schema,'boxstudio-preflight-v46');assert.ok(preflight.checks.some(x=>x.code==='V46_3D_FOLDGRAPH_CONSISTENT'&&x.severity==='pass'));
 
-console.log(`BoxStudio V0.46 passed: Line↔Arc=${la.diagnostics.tangentErrorDeg.toExponential(2)}° Arc↔Cubic=${ac.diagnostics.tangentErrorDeg.toExponential(2)}° Cubic↔Line=${cl.diagnostics.tangentErrorDeg.toExponential(2)}° batch=${batch.applied.length} equalR=${eq4.radiusMm} 3D=${acceptance.stats.panels}/${acceptance.stats.hinges}`);
+console.log(`BoxStudio V0.46 passed: Line↔Arc=${la.diagnostics.tangentErrorDeg.toExponential(2)}° Arc↔Cubic=${ac.diagnostics.tangentErrorDeg.toExponential(2)}° Cubic↔Line=${cl.diagnostics.tangentErrorDeg.toExponential(2)}° batch=${batch.applied.length} equalR=${eq4.radiusMm} lifecycle=clean 3D=${acceptance.stats.panels}/${acceptance.stats.hinges}`);
