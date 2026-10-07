@@ -43,16 +43,19 @@ jobs:
       - name: V0.64 runtime model
         run: node tests/v64.mjs
       - name: V0.64 wiring
+        shell: bash
         run: |
-          grep -q '"version": "0.64.0"' package.json
-          grep -q '"test:v64"' package.json
-          grep -q 'BoxStudio V0.64' index.html
-          grep -q 'uiRuntimeV64.js' index.html
-          grep -q 'v64Ui.css' index.html
-          grep -q 'v64Ui.js' index.html
-          grep -q 'suppressLegacyNavigation:true' src/runtimeV64.js
-          grep -q "v64Runtime?.register('v58'" src/v58Ui.js
-          grep -q "v64Runtime?.register('v63'" src/v63Ui.js
+          set -euo pipefail
+          check(){ echo "Checking: $1"; grep -Fq -- "$2" "$3"; }
+          check package-version '"version": "0.64.0"' package.json
+          check package-test '"test:v64"' package.json
+          check page-title 'BoxStudio V0.64' index.html
+          check runtime-script 'uiRuntimeV64.js' index.html
+          check runtime-css 'v64Ui.css' index.html
+          check shell-script 'v64Ui.js' index.html
+          check retirement-policy 'suppressLegacyNavigation:true' src/runtimeV64.js
+          check v58-shared-register "v64Runtime?.register('v58'" src/v58Ui.js
+          check v63-shared-register "v64Runtime?.register('v63'" src/v63Ui.js
       - name: Real Chrome V0.64 runtime cleanup
         shell: bash
         run: |
