@@ -54,8 +54,8 @@ jobs:
           check runtime-css 'v64Ui.css' index.html
           check shell-script 'v64Ui.js' index.html
           check retirement-policy 'suppressLegacyNavigation:true' src/runtimeV64.js
-          check v58-shared-register "v64Runtime?.register('v58'" src/v58Ui.js
-          check v63-shared-register "v64Runtime?.register('v63'" src/v63Ui.js
+          check v58-shared-register "v64Runtime.register('v58'" src/v58Ui.js
+          check v63-shared-register "v64Runtime.register('v63'" src/v63Ui.js
       - name: Real Chrome V0.64 runtime cleanup
         shell: bash
         run: |
