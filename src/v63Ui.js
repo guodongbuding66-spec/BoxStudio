@@ -3,6 +3,7 @@ import { V63_PRODUCT_VERSION,V63_ADVANCED_INSPECTOR_KEY,V63_STAGES,stageForTabV6
 
 const esc=(s='')=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let queued=false;
+const v64Runtime=window.BoxStudioUiRuntimeV64;
 function readState(){try{const p=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null'),b=cloneState(defaultState);return p?{...b,...p,structure:{...b.structure,...(p.structure||{})},variables:{...b.variables,...(p.variables||{})},elements:Array.isArray(p.elements)?p.elements:[]}:b}catch{return cloneState(defaultState)}}
 function currentPage(){return document.querySelector('.nav button.active')?.dataset.nav||readState().page}
 function currentTab(){return document.querySelector('.tabbar button.active')?.dataset.tab||readState().editorTab||'Design'}
@@ -21,5 +22,5 @@ function enableImageTool(){if(currentPage()!=='editor')return;const button=docum
 function compactArtwork(){if(currentPage()!=='editor'||currentTab()!=='Design')return;document.querySelector('[data-v61-studio]')?.classList.add('v63-consolidated-artwork')}
 function enhance(){ensureVersionBadge();if(currentPage()==='editor'){ensureStagebar();ensureInspector();enableImageTool();compactArtwork()}document.body.dataset.v63Acceptance=studioShellAcceptanceV63(readState()).ok?'pass':'fail'}
 function schedule(){if(queued)return;queued=true;queueMicrotask(()=>{queued=false;enhance()})}
-new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});enhance();
+if(v64Runtime?.register)v64Runtime.register('v63',enhance);else{new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});enhance()}
 window.BoxStudioV63={version:V63_PRODUCT_VERSION,stages:V63_STAGES,getState:readState,getSummary:()=>workspaceSummaryV63(readState()),getAcceptance:()=>studioShellAcceptanceV63(readState()),go:goTab,setAdvanced:on=>{localStorage.setItem(V63_ADVANCED_INSPECTOR_KEY,on?'1':'0');markSecondaryPanels();return advancedOpen()}};
