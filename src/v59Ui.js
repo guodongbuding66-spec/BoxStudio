@@ -6,6 +6,8 @@ const AFTER_GENERATE_KEY='boxstudio-v59-after-generate';
 const esc=(s='')=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const versionRank=s=>{const m=String(s||'').match(/V?(\d+)\.(\d+)/i);return m?Number(m[1])*1000+Number(m[2]):-1};
 let queued=false;
+const v64Runtime=window.BoxStudioUiRuntimeV64;
+const legacyNavRetired=()=>v64Runtime?.policy?.suppressLegacyNavigation===true;
 
 function currentPage(){return document.querySelector('.nav button.active')?.dataset.nav||'dashboard'}
 function currentTab(){return document.querySelector('.tabbar button.active')?.dataset.tab||''}
@@ -23,7 +25,8 @@ function enhanceTopbar(){
 function guidedRail(){const active=currentTab();return `<div class="v59-guided-rail" data-v59-guided><div class="v59-guided-steps">${V59_GUIDED_FLOW.map((s,i)=>`<button data-v59-tab="${esc(s.tab)}" class="${active===s.tab?'active':''}"><span>${i+1}</span><b>${esc(s.label)}</b><small>${esc(s.short)}</small></button>`).join('')}</div><div class="v59-guided-side"><button data-v59-preflight>检查</button><span data-v59-mode-label>${esc(V59_UI_MODES[uiMode()].label)}</span></div></div>`}
 function enhanceEditor(){
   if(currentPage()!=='editor')return;const main=document.querySelector('.workspace .main'),tabbar=main?.querySelector('.tabbar');if(!main||!tabbar)return;
-  if(!main.querySelector('[data-v59-guided]')){tabbar.insertAdjacentHTML('afterend',guidedRail());const rail=main.querySelector('[data-v59-guided]');rail.querySelectorAll('[data-v59-tab]').forEach(b=>b.onclick=()=>clickTab(b.dataset.v59Tab));rail.querySelector('[data-v59-preflight]').onclick=()=>clickTab('Preflight')}
+  if(legacyNavRetired())main.querySelector('[data-v59-guided]')?.remove();
+  else if(!main.querySelector('[data-v59-guided]')){tabbar.insertAdjacentHTML('afterend',guidedRail());const rail=main.querySelector('[data-v59-guided]');rail.querySelectorAll('[data-v59-tab]').forEach(b=>b.onclick=()=>clickTab(b.dataset.v59Tab));rail.querySelector('[data-v59-preflight]').onclick=()=>clickTab('Preflight')}
   main.querySelectorAll('[data-v59-tab]').forEach(b=>b.classList.toggle('active',b.dataset.v59Tab===currentTab()));applyUiMode();
   if(currentTab()==='Marks'&&!main.querySelector('[data-v59-marks-steps]')){const studio=main.querySelector('[data-v58-marks-studio]');if(studio)studio.insertAdjacentHTML('beforebegin','<div class="v59-marks-steps" data-v59-marks-steps><span><b>1</b>选目标面</span><span><b>2</b>插入唛头</span><span><b>3</b>调整属性</span><span><b>4</b>批量 / 3D 校验</span></div>')}
 }
@@ -54,6 +57,6 @@ function enhanceTemplatePage(){const page=document.querySelector('.v58-template-
 function resumeAfterGenerate(){const target=sessionStorage.getItem(AFTER_GENERATE_KEY);if(!target||currentPage()!=='editor')return;sessionStorage.removeItem(AFTER_GENERATE_KEY);queueMicrotask(()=>clickTab(target))}
 function enhance(){enhanceTopbar();enhanceTemplatePage();enhanceTemplateStudio();enhanceEditor();resumeAfterGenerate();document.body.dataset.v59Acceptance=productAcceptanceV59().ok?'pass':'fail'}
 function schedule(){if(queued)return;queued=true;queueMicrotask(()=>{queued=false;enhance()})}
-new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});enhance();
+if(v64Runtime?.register)v64Runtime.register('v59',enhance);else{new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});enhance()}
 
 window.BoxStudioV59={version:V59_PRODUCT_VERSION,modes:V59_UI_MODES,flow:V59_GUIDED_FLOW,outputs:V59_OUTPUT_FORMATS,getMode:uiMode,setMode:setUiMode,getAcceptance:productAcceptanceV59};
