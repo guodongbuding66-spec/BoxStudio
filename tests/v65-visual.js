@@ -8,20 +8,24 @@ localStorage.clear();const p=stateForTemplate('fefco-0427',defaultState.variable
 for(const m of ['../src/app.js','../src/v47Ui.js','../src/v48Ui.js','../src/v49Ui.js','../src/v50Ui.js','../src/v51Ui.js','../src/v52Ui.js','../src/v53Ui.js','../src/v54Ui.js','../src/uiRuntimeV64.js','../src/v55Ui.js','../src/v56Ui.js','../src/v57Ui.js','../src/v58Ui.js','../src/v59Ui.js','../src/v60Ui.js','../src/v61Ui.js','../src/v62Ui.js','../src/v63Ui.js','../src/v64Ui.js','../src/v65Ui.js'])await import(m);
 const selectors={templates:'.v58-library-head',structure:'.workspace .main',artwork:'[data-v61-studio]',marks:'[data-v58-marks-studio]','3d':'#threeCanvas',preflight:'.workspace .main',export:'#exportPdf',manufacturing:'[data-v55-manufacturing]',factory:'[data-v56-factory]',routing:'[data-v57-routing]',mobile:'[data-v61-studio]'};
 const target=await waitFor(()=>document.querySelector(selectors[shot]||'[data-v63-stagebar]'));
-function focusMountedSnapshot(node){
-  const snapshot=node.cloneNode(true);
+function isolateMountedSnapshot(node){
+  const snapshot=node.cloneNode(true),top=document.querySelector('.topbar')?.cloneNode(true);
   snapshot.classList.remove('v58-advanced-production');
   snapshot.dataset.v65VisualFocus='true';
   snapshot.setAttribute('aria-label',`${shot} visual acceptance snapshot`);
-  Object.assign(snapshot.style,{display:'block',visibility:'visible',opacity:'1',position:'fixed',left:'68px',top:'62px',right:'24px',bottom:'24px',zIndex:'9999',margin:'0',overflow:'auto',maxHeight:'calc(100vh - 86px)',boxShadow:'0 20px 70px rgba(0,0,0,.38)'});
-  document.body.appendChild(snapshot);
-  const help=document.querySelector('.three-help');if(help)help.style.display='none';
+  window.BoxStudioUiRuntimeV64?.disconnect?.();
+  document.body.innerHTML='';
+  Object.assign(document.body.style,{visibility:'visible',overflow:'auto',background:'#f4f5f7',margin:'0',display:'block'});
+  if(top){top.style.position='relative';top.style.zIndex='2';document.body.appendChild(top)}
+  const stage=document.createElement('main');stage.dataset.v65CaptureStage='true';Object.assign(stage.style,{padding:'16px 22px 24px',minHeight:'calc(100vh - 54px)',background:'#f4f5f7'});
+  Object.assign(snapshot.style,{display:'block',visibility:'visible',opacity:'1',position:'relative',inset:'auto',zIndex:'1',margin:'0',width:'100%',maxWidth:'none',maxHeight:'calc(100vh - 92px)',overflow:'auto',boxShadow:'0 14px 42px rgba(20,28,38,.18)'});
+  stage.appendChild(snapshot);document.body.appendChild(stage);
   return snapshot;
 }
 if(advancedShots.includes(shot)){
   await waitFor(()=>document.body.dataset.v58Advanced==='true');
   await waitFor(()=>window.BoxStudioV55&&window.BoxStudioV56&&window.BoxStudioV57);
   document.body.dataset.visualReady='true';
-  focusMountedSnapshot(target);
+  isolateMountedSnapshot(target);
 }else if(shot==='templates')window.scrollTo(0,0);
 await sleep(700);document.body.dataset.visualReady='true';document.body.dataset.visualShot=shot;
