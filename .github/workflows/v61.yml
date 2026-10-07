@@ -1,0 +1,75 @@
+name: V0.61 Artwork Workspace and Panel Styling
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  artwork-workspace:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: V0.61 syntax
+        run: |
+          node --check src/artworkStudioV61.js
+          node --check src/v61Ui.js
+          node --check tests/v61.mjs
+          node --check tests/v61-browser-e2e.js
+          python3 -m py_compile tests/v61_e2e_server.py
+      - name: V0.60 artwork image baseline
+        run: node tests/v60.mjs
+      - name: V0.61 artwork workspace model
+        run: node tests/v61.mjs
+      - name: Production-chain baseline
+        run: node tests/v39.mjs
+      - name: V0.61 wiring
+        run: |
+          grep -q '"version": "0.61.0"' package.json
+          grep -q '"test:v61"' package.json
+          grep -q 'BoxStudio V0.61' index.html
+          grep -q 'v61Ui.css' index.html
+          grep -q 'v61Ui.js' index.html
+          grep -q 'V61_PRODUCT_VERSION' src/artworkStudioV61.js
+          grep -q 'ARTWORK WORKSPACE' src/v61Ui.js
+          grep -q '应用到当前面' src/v61Ui.js
+          grep -q '2D + 3D' src/v61Ui.js
+      - name: Real Chrome V0.61 artwork workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v61-started /tmp/boxstudio-v61-pass /tmp/boxstudio-v61-fail
+          python3 tests/v61_e2e_server.py >/tmp/boxstudio-v61-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8791/tests/v61-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 120s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,900 --virtual-time-budget=70000 --dump-dom http://127.0.0.1:8791/tests/v61-browser-e2e.html >/tmp/boxstudio-v61-dom.log 2>/tmp/boxstudio-v61-chrome.log || true
+          if test -f /tmp/boxstudio-v61-pass; then
+            echo 'Desktop V0.61:'; cat /tmp/boxstudio-v61-pass
+          elif test -f /tmp/boxstudio-v61-fail; then
+            cat /tmp/boxstudio-v61-fail; cat /tmp/boxstudio-v61-chrome.log || true; cat /tmp/boxstudio-v61-dom.log || true; exit 1
+          else
+            echo 'V0.61 desktop browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v61-http.log || true; cat /tmp/boxstudio-v61-chrome.log || true; cat /tmp/boxstudio-v61-dom.log || true; exit 1
+          fi
+          rm -f /tmp/boxstudio-v61-pass /tmp/boxstudio-v61-fail
+          timeout 120s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=390,844 --virtual-time-budget=70000 --dump-dom http://127.0.0.1:8791/tests/v61-browser-e2e.html >/tmp/boxstudio-v61-mobile-dom.log 2>/tmp/boxstudio-v61-mobile-chrome.log || true
+          if test -f /tmp/boxstudio-v61-pass; then
+            echo 'Mobile V0.61:'; cat /tmp/boxstudio-v61-pass
+          elif test -f /tmp/boxstudio-v61-fail; then
+            cat /tmp/boxstudio-v61-fail; cat /tmp/boxstudio-v61-mobile-chrome.log || true; cat /tmp/boxstudio-v61-mobile-dom.log || true; exit 1
+          else
+            echo 'V0.61 mobile browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v61-http.log || true; cat /tmp/boxstudio-v61-mobile-chrome.log || true; cat /tmp/boxstudio-v61-mobile-dom.log || true; exit 1
+          fi
