@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { generateGeometry } from './geometry.js';
 import { mountThreePreview } from './threePreview.js';
@@ -110,7 +111,8 @@ function modePanel(workspace){
 }
 
 function ensure(){
-  document.title='BoxStudio V0.40';topbar();
+  if(document.body.dataset.studioShell==='unified')return;
+  setUiVersion('V0.40');topbar();
   const hosted=document.querySelector('#v36OpenHosted');if(hosted)hosted.style.display='none';
   const workspace=document.querySelector('.workspace');document.body.classList.toggle('v40-editor',Boolean(workspace));
   if(!workspace){stopPreview();return}

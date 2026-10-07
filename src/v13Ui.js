@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { markEditorPanels, panelForMarkEditor, markElementsForPanel, setMarkPosition, nudgeMark, rotateMark, alignMarkToPanel, duplicateMark, deleteMark, moveMarkToPanel } from './markLayout.js';
 import { createProductionJob, submitProductionJob, approveProductionJob, rejectProductionJob, reviseProductionJob, approvalGate, upsertProductionJob, deleteProductionJob, activeProductionJob } from './productionJobs.js';
@@ -90,5 +91,5 @@ function install(){
   if(!scroll||document.getElementById(BLOCK_ID)) return;
   const block=document.createElement('div');block.id=BLOCK_ID;block.className='profile-section v13-tools';block.innerHTML=`<div class="v13-title"><div><h3>V0.13 Production Workspace</h3><p>独立唛头布局画布 + Production Job / Approval / Audit。</p></div><span>V0.13</span></div><div class="v13-subsection"><div class="v13-subhead"><b>Mark Layout Editor</b><span>Panel-local mm canvas</span></div><div id="v13MarkEditor"></div></div><div class="v13-subsection"><div class="v13-subhead"><b>Production Jobs</b><span>Snapshot · Submit · Approve · Audit</span></div><div id="v13Production"></div></div>`;scroll.appendChild(block);renderMarkEditor(block);renderProduction(block);
 }
-function updateVersionLabel(){const version=document.querySelector('.brand small');if(version)version.textContent='V0.13';}
+function updateVersionLabel(){setUiVersion('V0.13')}
 const observer=new MutationObserver(()=>{updateVersionLabel();install();});observer.observe(document.documentElement,{childList:true,subtree:true});updateVersionLabel();install();

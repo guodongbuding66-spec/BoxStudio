@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState, stateForTemplate } from './model.js';
 import { V32_TEMPLATE_CATALOG, resolveBoxDimensionsV32 } from './parametricTemplatesV32.js';
 import { MATERIAL_PRESETS_V32, FLUTE_PRESETS_V32, resolveMaterialV32 } from './materialsV32.js';
@@ -53,7 +54,7 @@ function bindGenerator(host){
 function faceScopeMarkup(){return `<div class="v41-face-scope"><span>Design scope</span>${[['single','Single Face'],['multi','Multi Face'],['full','Full Dieline']].map(([id,l],i)=>`<button data-v41-scope="${id}" class="${i===2?'active':''}">${l}</button>`).join('')}</div>`}
 function bindFaceScope(host){host.querySelectorAll('[data-v41-scope]').forEach(b=>b.onclick=()=>{host.querySelectorAll('[data-v41-scope]').forEach(x=>x.classList.toggle('active',x===b));document.body.dataset.v41Scope=b.dataset.v41Scope;localStorage.setItem('boxstudio-v41-scope',b.dataset.v41Scope)})}
 
-function addFoldStrip(){if(document.querySelector('.v41-fold-strip'))return;const main=document.querySelector('.workspace .main');if(!main)return;const state=readState(),bar=document.createElement('div');bar.className='v41-fold-strip';bar.innerHTML=`<span>Fold</span><input data-v41-fold type="range" min="0" max="100" value="${n(state.foldProgress,100)}"><b data-v41-fold-label>${n(state.foldProgress,100)}%</b><button data-v41-review>Assembly / 2D↔3D</button>`;const tabbar=main.querySelector('.tabbar');tabbar?.after(bar);const range=bar.querySelector('[data-v41-fold]');range.oninput=()=>{const next=readState();next.foldProgress=Number(range.value);writeState(next);bar.querySelector('[data-v41-fold-label]').textContent=`${range.value}%`;const reviewRange=document.querySelector('#v35Fold');if(reviewRange){reviewRange.value=range.value;reviewRange.dispatchEvent(new Event('input',{bubbles:true}))}};bar.querySelector('[data-v41-review]').onclick=()=>openReview()}
+function addFoldStrip(){if(document.body.dataset.studioShell==='unified')return;if(document.querySelector('.v41-fold-strip'))return;const main=document.querySelector('.workspace .main');if(!main)return;const state=readState(),bar=document.createElement('div');bar.className='v41-fold-strip';bar.innerHTML=`<span>Fold</span><input data-v41-fold type="range" min="0" max="100" value="${n(state.foldProgress,100)}"><b data-v41-fold-label>${n(state.foldProgress,100)}%</b><button data-v41-review>Assembly / 2D↔3D</button>`;const tabbar=main.querySelector('.tabbar');tabbar?.after(bar);const range=bar.querySelector('[data-v41-fold]');range.oninput=()=>{const next=readState();next.foldProgress=Number(range.value);writeState(next);bar.querySelector('[data-v41-fold-label]').textContent=`${range.value}%`;const reviewRange=document.querySelector('#v35Fold');if(reviewRange){reviewRange.value=range.value;reviewRange.dispatchEvent(new Event('input',{bubbles:true}))}};bar.querySelector('[data-v41-review]').onclick=()=>openReview()}
 
 function recentProjectChip(){const top=document.querySelector('.v40-project-context');if(!top||top.querySelector('.v41-recents'))return;const state=readState(),b=document.createElement('button');b.className='v41-recents';b.textContent='Recent ▾';b.title=`Current: ${state.projectName||'Untitled'}`;b.onclick=()=>{const page=document.querySelector('[data-nav="projects"]');page?.click()};top.appendChild(b)}
 
@@ -61,7 +62,7 @@ function enhanceModePanel(){const panel=document.querySelector('.v40-mode-panel'
 function addTemplateButton(){const top=document.querySelector('.v40-top-controls');if(!top||top.querySelector('[data-v41-template-top]'))return;const b=document.createElement('button');b.dataset.v41TemplateTop='';b.textContent='Templates';b.onclick=openTemplateCenter;top.prepend(b)}
 function freePolicy(){document.body.dataset.v41Free='true';document.body.dataset.v41ApprovalRequired='false';for(const text of ['Submit for Approval','Approve','Approver'])document.querySelectorAll('button').forEach(b=>{if(b.textContent.trim()===text)b.hidden=true})}
 
-function ensure(){document.title='BoxStudio V0.41';addTemplateButton();recentProjectChip();enhanceModePanel();addFoldStrip();freePolicy()}
+function ensure(){setUiVersion('V0.41');addTemplateButton();recentProjectChip();enhanceModePanel();addFoldStrip();freePolicy()}
 let queued=false;function schedule(){if(queued)return;queued=true;queueMicrotask(()=>{queued=false;ensure()})}
 observer=new MutationObserver(schedule);observer.observe(document.getElementById('app'),{childList:true,subtree:true});ensure();
 

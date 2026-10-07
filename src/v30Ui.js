@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { normalizeVariables } from './variables.js';
 import { rowToVariables, autoMapHeaders } from './batch.js';
@@ -21,5 +22,5 @@ function render(block){const state=readState(),host=block.querySelector('#v30Wor
   host.querySelector('#v30Status')?.addEventListener('change',e=>{view.status=e.target.value;render(block)});host.querySelector('#v30Query')?.addEventListener('input',e=>{view.query=e.target.value;render(block)});host.querySelector('#v30Sort')?.addEventListener('change',e=>{view.sort=e.target.value;render(block)});host.querySelector('#v30FailedXlsx')?.addEventListener('click',async()=>{try{const bytes=await buildFailedRowsXlsxV30(readState());downloadBytes('failed_rows.xlsx',bytes,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')}catch(err){alert(`failed_rows.xlsx export failed: ${err?.message||err}`)}});host.querySelectorAll('[data-v30-open]').forEach(btn=>btn.addEventListener('click',()=>{const next=readState(),index=Number(btn.dataset.v30Open)||0;next.batch.selectedIndex=index;applyVariablesForSelected(next);writeState(next);location.reload()}));
 }
 function install(){if(document.getElementById(BLOCK_ID))return;const section=[...document.querySelectorAll('.panel-section')].find(el=>el.querySelector('h3')?.textContent?.trim()==='Batch Marks');if(!section)return;if(maybeAutoApply()){location.reload();return}const block=document.createElement('div');block.id=BLOCK_ID;block.className='v30-import-workspace';block.innerHTML=`<div class="v30-title"><div><b>Import Review & Mapping</b><small>Profiles · Leading zero · Cell hints · failed_rows.xlsx</small></div><span>V0.30</span></div><div id="v30Workspace"></div>`;section.appendChild(block);render(block);}
-function updateVersion(){const v=document.querySelector('.brand small');if(v)v.textContent='V0.30';document.title='BoxStudio V0.30';}
+function updateVersion(){setUiVersion('V0.30')}
 const observer=new MutationObserver(()=>{updateVersion();install()});observer.observe(document.documentElement,{childList:true,subtree:true});updateVersion();install();

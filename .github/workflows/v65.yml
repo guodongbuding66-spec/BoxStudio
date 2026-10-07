@@ -18,6 +18,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Install Chinese screenshot fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk fonts-noto-color-emoji
+          fc-cache -f
+          fc-match 'Noto Sans CJK SC' | grep -q NotoSansCJK
       - name: V0.65 syntax
         run: |
           node --check src/runtimeV65.js
@@ -78,6 +84,24 @@ jobs:
           timeout 150s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=390,844 --virtual-time-budget=90000 --dump-dom http://127.0.0.1:8795/tests/v65-browser-e2e.html >/tmp/v65-mobile-dom.log 2>/tmp/v65-mobile-chrome.log || true
           test -f /tmp/boxstudio-v65-pass || { cat /tmp/boxstudio-v65-fail /tmp/v65-mobile-chrome.log /tmp/v65-mobile-dom.log 2>/dev/null || true; exit 1; }
           echo 'Mobile V0.65:'; cat /tmp/boxstudio-v65-pass
+      - name: Full production entry artwork E2E
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/ui-version.mjs
+          node tests/full-entry.mjs
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          python3 tests/v65_e2e_server.py >/tmp/boxstudio-studio-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 80); do if curl -fsS http://127.0.0.1:8795/tests/capture-frame.html >/dev/null; then break; fi; sleep 0.1; done
+          mkdir -p artifacts/v65-screenshots
+          for VIEW in desktop mobile; do
+            if [ "$VIEW" = desktop ]; then WIDTH=1280; HEIGHT=900; else WIDTH=390; HEIGHT=844; fi
+            timeout 150s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,950 --virtual-time-budget=90000 --dump-dom "http://127.0.0.1:8795/tests/capture-frame.html?mode=live&shot=artwork&width=${WIDTH}&height=${HEIGHT}" >"artifacts/v65-screenshots/${VIEW}-full-entry.html" 2>/tmp/studio-chrome.log
+            python3 tests/assert-browser-result.py "artifacts/v65-screenshots/${VIEW}-full-entry.html" live
+          done
       - name: Capture feature screenshots
         shell: bash
         run: |
@@ -88,17 +112,19 @@ jobs:
           python3 tests/v65_e2e_server.py >/tmp/boxstudio-v65-visual-http.log 2>&1 &
           SERVER_PID=$!
           trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
-          for i in $(seq 1 80); do if curl -fsS 'http://127.0.0.1:8795/tests/v65-visual.html?shot=artwork' >/dev/null; then break; fi; sleep 0.1; done
+          for i in $(seq 1 80); do if curl -fsS 'http://127.0.0.1:8795/tests/studio-screenshots.html?shot=artwork' >/dev/null; then break; fi; sleep 0.1; done
           for SHOT in templates structure artwork marks 3d preflight export manufacturing factory routing; do
-            timeout 90s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --hide-scrollbars --run-all-compositor-stages-before-draw --window-size=1280,900 --virtual-time-budget=60000 --screenshot="artifacts/v65-screenshots/${SHOT}.png" "http://127.0.0.1:8795/tests/v65-visual.html?shot=${SHOT}" >/tmp/v65-shot-${SHOT}.log 2>&1 || true
+            timeout 90s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --hide-scrollbars --run-all-compositor-stages-before-draw --window-size=1280,900 --virtual-time-budget=60000 --dump-dom --screenshot="artifacts/v65-screenshots/${SHOT}.png" "http://127.0.0.1:8795/tests/studio-screenshots.html?shot=${SHOT}" >/tmp/v65-shot-${SHOT}.html 2>/tmp/v65-shot-${SHOT}.log
             test -s "artifacts/v65-screenshots/${SHOT}.png"
+            python3 tests/assert-browser-result.py /tmp/v65-shot-${SHOT}.html "$SHOT"
           done
-          timeout 90s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --hide-scrollbars --run-all-compositor-stages-before-draw --window-size=390,844 --virtual-time-budget=60000 --screenshot="artifacts/v65-screenshots/mobile-artwork.png" 'http://127.0.0.1:8795/tests/v65-visual.html?shot=mobile' >/tmp/v65-shot-mobile.log 2>&1 || true
+          timeout 90s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --hide-scrollbars --run-all-compositor-stages-before-draw --window-size=390,844 --virtual-time-budget=60000 --dump-dom --screenshot="artifacts/v65-screenshots/mobile-artwork.png" 'http://127.0.0.1:8795/tests/studio-screenshots.html?shot=mobile' >/tmp/v65-shot-mobile.html 2>/tmp/v65-shot-mobile.log
           test -s artifacts/v65-screenshots/mobile-artwork.png
+          python3 tests/assert-browser-result.py /tmp/v65-shot-mobile.html mobile
           ls -lh artifacts/v65-screenshots
       - name: Upload V0.65 screenshots
         uses: actions/upload-artifact@v4
         with:
           name: boxstudio-v0.65-feature-screenshots
-          path: artifacts/v65-screenshots/*.png
+          path: artifacts/v65-screenshots/
           if-no-files-found: error

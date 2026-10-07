@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { generateGeometry } from './geometry.js';
 import { buildFoldGraph } from './foldgraph.js';
@@ -30,5 +31,5 @@ function renderWorkspace(block){
   }catch(error){host.innerHTML=`<div class="v18-warning">${esc(error?.message||error)}</div>`}
 }
 function install(){hideSuperseded();const scroll=document.querySelector('#boxstudio-profile-manager .profile-manager-scroll');if(!scroll||document.getElementById(BLOCK_ID))return;const block=document.createElement('div');block.id=BLOCK_ID;block.className='profile-section v18-tools';block.innerHTML=`<div class="v18-title"><div><h3>V0.18 Appearance & Fold Bleed Proof</h3><p>SVG fills/gradients/clip/mask · fold bleed continuity · color-pipeline visibility.</p></div><span>V0.18</span></div><section><div id="v18Workspace"></div></section>`;scroll.appendChild(block);renderWorkspace(block)}
-function updateVersion(){const v=document.querySelector('.brand small');if(v)v.textContent='V0.18';document.title='BoxStudio V0.18'}
+function updateVersion(){setUiVersion('V0.18')}
 const observer=new MutationObserver(()=>{updateVersion();hideSuperseded();install()});observer.observe(document.documentElement,{childList:true,subtree:true});window.addEventListener('beforeunload',()=>controller?.dispose?.());updateVersion();install();

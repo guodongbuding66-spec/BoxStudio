@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { exportProductionPdfV23, productionPdfV23Diagnostics } from './productionPdfV23.js';
 import { exportNativeGradientPdfV22 } from './nativePdfV22.js';
@@ -26,5 +27,5 @@ function render(block){const host=block.querySelector('#v23Workspace');if(!host)
   if(sel){host.querySelector('#v23CreateClip').onclick=()=>{const s=readState();commit(ensureCrossClip(s,sel.id,{inset:0}))};host.querySelector('#v23InsetClip').onclick=()=>{const s=readState(),next=ensureCrossClip(s,sel.id,{inset:.1}),el=next.elements.find(x=>x.id===sel.id);el.crossClip={type:'polygon',points:[[.1,.1],[.9,.1],[.9,.9],[.1,.9]]};commit(next)};}
 }catch(error){host.innerHTML=`<div class="v23-warning">${esc(error?.message||error)}</div>`}}
 function install(){hideSuperseded();const scroll=document.querySelector('#boxstudio-profile-manager .profile-manager-scroll');if(!scroll||document.getElementById(BLOCK_ID))return;const block=document.createElement('div');block.id=BLOCK_ID;block.className='profile-section v23-tools';block.innerHTML=`<div class="v23-title"><div><h3>V0.23 Integrated Production & Color</h3><p>Native production PDF · LUT8 DeviceLink · draggable clip points · live equal-spacing snap.</p></div><span>V0.23</span></div><div id="v23Workspace"></div>`;scroll.appendChild(block);render(block)}
-function updateVersion(){const v=document.querySelector('.brand small');if(v)v.textContent='V0.23';document.title='BoxStudio V0.23'}
+function updateVersion(){setUiVersion('V0.23')}
 const observer=new MutationObserver(()=>{updateVersion();hideSuperseded();install()});observer.observe(document.documentElement,{childList:true,subtree:true});updateVersion();install();

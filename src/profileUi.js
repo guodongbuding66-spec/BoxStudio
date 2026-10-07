@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { getCustomerProfileCatalog, applyCustomerProfile, saveCustomCustomerProfile, deleteCustomCustomerProfile } from './customerProfiles.js';
 import { getMarkTemplateCatalog, applyMarkTemplate, createMarkTemplateFromState, saveCustomMarkTemplate, deleteCustomMarkTemplate } from './markTemplates.js';
@@ -361,7 +362,7 @@ function renderDrawer(){
 
 function installButton(){
   const visibleVersion = document.querySelector('.brand small');
-  if(visibleVersion) visibleVersion.textContent = 'V0.11';
+  setUiVersion('V0.11');
   if(document.getElementById(BUTTON_ID)) return;
   const topbar = document.querySelector('.topbar');
   if(!topbar) return;

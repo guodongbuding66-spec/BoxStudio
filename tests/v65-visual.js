@@ -26,4 +26,4 @@ if(advancedShots.includes(shot)){
   document.body.dataset.visualReady='true';
   await isolateMountedSnapshot(target);
 }else if(shot==='templates')window.scrollTo(0,0);
-await sleep(700);document.body.dataset.visualReady='true';document.body.dataset.visualShot=shot;
+await document.fonts.load('14px "BoxStudio UI SC"','纸盒设计唛头出血安全区');await document.fonts.ready;await sleep(700);document.body.dataset.visualReady='true';document.body.dataset.visualShot=shot;

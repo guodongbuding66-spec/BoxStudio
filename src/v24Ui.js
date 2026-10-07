@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { buildProductionPdfV24, productionPdfV24Diagnostics, currentDeviceLinkReference, deviceLinkBindingStatus } from './productionPdfV24.js';
 import { loadRgbCmykDeviceLink, clearRgbCmykDeviceLink, getDeviceLinkInfo } from './iccDeviceLinkV23.js';
@@ -49,5 +50,5 @@ async function exportBatchZip(block){const {queue,artifacts}=await batchSnapshot
 
 function render(block){renderOutput(block);renderBatch(block)}
 function install(){hideSuperseded();const scroll=document.querySelector('#boxstudio-profile-manager .profile-manager-scroll');if(!scroll||document.getElementById(BLOCK_ID))return;const block=document.createElement('div');block.id=BLOCK_ID;block.className='profile-section v24-tools';block.innerHTML=`<div class="v24-title"><div><h3>V0.24 Native Production Pipeline</h3><p>V0.23 native PDF in Batch Worker · frozen run context · DeviceLink asset binding · approved-export audit.</p></div><span>V0.24</span></div><section><h4>Production Output & Approval Gate</h4><div id="v24Output"></div></section><section><h4>Native PDF Batch Worker</h4><div id="v24Batch"></div></section>`;scroll.appendChild(block);render(block)}
-function updateVersion(){const v=document.querySelector('.brand small');if(v)v.textContent='V0.24';document.title='BoxStudio V0.24'}
+function updateVersion(){setUiVersion('V0.24')}
 const observer=new MutationObserver(()=>{updateVersion();hideSuperseded();install()});observer.observe(document.documentElement,{childList:true,subtree:true});updateVersion();install();

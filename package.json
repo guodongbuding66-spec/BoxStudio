@@ -31,7 +31,8 @@
     "test:v62": "node tests/v62.mjs",
     "test:v63": "node tests/v63.mjs",
     "test:v64": "node tests/v64.mjs",
-    "test:v65": "node tests/v65.mjs"
+    "test:v65": "node tests/v65.mjs",
+    "dev": "node server/dev.mjs"
   },
   "dependencies": {
     "pg": "^8.13.1"

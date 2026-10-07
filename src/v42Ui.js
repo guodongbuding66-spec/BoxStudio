@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { generateGeometry, defaultsForTemplate } from './geometry.js';
 import { V32_TEMPLATE_CATALOG } from './parametricTemplatesV32.js';
@@ -114,7 +115,7 @@ function decorateFoldStrip(){
 }
 
 function freePolicy(){document.body.dataset.v42Free='true';document.body.dataset.v42ApprovalRequired='false'}
-function ensure(){document.title='BoxStudio V0.42';decorateTemplateCards();decorateGenerator();decorateFoldStrip();injectPanelLabels();enhanceInspector();freePolicy()}
+function ensure(){setUiVersion('V0.42');decorateTemplateCards();decorateGenerator();decorateFoldStrip();injectPanelLabels();enhanceInspector();freePolicy()}
 let queued=false;function schedule(){if(queued)return;queued=true;queueMicrotask(()=>{queued=false;ensure()})}
 observer=new MutationObserver(schedule);observer.observe(document.getElementById('app'),{childList:true,subtree:true});observer.observe(document.body,{childList:true,subtree:true});ensure();
 

@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {setUiVersion,versionNumber} from '../src/uiVersion.js';
+let writes=0,text='V0.8',title='BoxStudio V0.8';
+const node={get textContent(){return text},set textContent(v){text=v;writes++}};
+const doc={querySelector:()=>node,querySelectorAll:()=>[],get title(){return title},set title(v){title=v;writes++}};
+assert(versionNumber('V0.65')>versionNumber('V0.9'));
+assert.equal(setUiVersion('V0.65',doc),true);const first=writes;
+for(let n=11;n<=65;n++)setUiVersion(`V0.${n}`,doc);
+assert.equal(writes,first);assert.equal(title,'BoxStudio V0.65');assert.equal(text,'V0.65');
+console.log('PASS legacy version writers: monotonic version and no identical DOM writes');

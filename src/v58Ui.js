@@ -53,7 +53,7 @@ function marksPalette(){
 }
 function enhanceMarks(){
   const main=document.querySelector('.workspace .main');if(!main||currentTab()!=='Marks'||main.querySelector('[data-v58-marks-studio]'))return;const canvas=main.querySelector('.canvas-shell');if(!canvas)return;canvas.insertAdjacentHTML('beforebegin',marksPalette());const studio=main.querySelector('[data-v58-marks-studio]'),panel=studio.querySelector('[data-v58-mark-panel]');
-  studio.querySelectorAll('[data-v58-mark]').forEach(b=>b.onclick=()=>{try{const result=addMarkPresetV58(readState(),b.dataset.v58Mark,{panelId:panel.value});saveState(result.state);location.reload()}catch(error){studio.dataset.error=error?.message||String(error)}});
+  studio.querySelectorAll('[data-v58-mark]').forEach(b=>b.onclick=()=>{try{const result=addMarkPresetV58(readState(),b.dataset.v58Mark,{panelId:panel.value});saveState(result.state);if(window.BoxStudioEditor?.reloadFromStorage)window.BoxStudioEditor.reloadFromStorage();else location.reload()}catch(error){studio.dataset.error=error?.message||String(error)}});
   studio.querySelector('[data-v58-batch-focus]').onclick=()=>{const file=document.querySelector('#batchFile')?.closest('.panel-section');file?.scrollIntoView({behavior:'smooth',block:'start'});document.querySelector('#batchFile')?.closest('.file-drop')?.classList.add('v58-pulse')};
 }
 

@@ -11,7 +11,7 @@ function readState(){try{const p=JSON.parse(localStorage.getItem(STORAGE_KEY)||'
 function saveState(s){s.savedAt=new Date().toISOString();localStorage.setItem(STORAGE_KEY,JSON.stringify(s))}
 function currentPage(){return document.querySelector('.nav button.active')?.dataset.nav||readState().page}
 function currentTab(){return document.querySelector('.tabbar button.active')?.dataset.tab||readState().editorTab}
-function reload(){location.reload()}
+function reload(){if(window.BoxStudioEditor?.reloadFromStorage)window.BoxStudioEditor.reloadFromStorage();else location.reload()}
 function imageElements(){return(readState().elements||[]).filter(x=>x?.type==='image').map(normalizeImageElementV60)}
 function currentModel(){const state=readState(),model=buildLinkedWorkspaceModelV49(state);return{state,model,geo:model.review.geo}}
 function targetPanel(state,geo){const selected=state.elements?.find(x=>x.id===state.selectedId),ids=[selected?.panelId,state.markEditorPanelId,state.linkedV49?.selectedPanelId,'front','base'];for(const id of ids)if(id&&geo.panelMap?.[id])return geo.panelMap[id];return(geo.bodyPanels||[]).find(p=>p.kind==='panel')||geo.bodyPanels?.[0]||null}

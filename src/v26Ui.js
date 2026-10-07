@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { generateGeometry } from './geometry.js';
 import { getCrossSelection } from './crossPanelTransformV21.js';
@@ -51,5 +52,5 @@ function render(block){const host=block.querySelector('#v26Workspace');if(!host)
 }catch(error){host.innerHTML=`<div class="v26-warning">${esc(error?.message||error)}</div>`}}
 function hideSuperseded(){document.getElementById('boxstudio-v25-tools')?.setAttribute('hidden','');}
 function install(){hideSuperseded();const scroll=document.querySelector('#boxstudio-profile-manager .profile-manager-scroll');if(!scroll||document.getElementById(BLOCK_ID))return;const block=document.createElement('div');block.id=BLOCK_ID;block.className='profile-section v26-tools';block.innerHTML=`<div class="v26-title"><div><h3>V0.26 Precision Guides & Cubic Clip Proof</h3><p>Numeric Bezier nodes · persistent guides · baseline/rotation assist · native cubic PDF clip proof.</p></div><span>V0.26</span></div><div id="v26Workspace"></div>`;scroll.appendChild(block);render(block)}
-function updateVersion(){const v=document.querySelector('.brand small');if(v)v.textContent='V0.26';document.title='BoxStudio V0.26'}
+function updateVersion(){setUiVersion('V0.26')}
 const observer=new MutationObserver(()=>{updateVersion();hideSuperseded();install()});observer.observe(document.documentElement,{childList:true,subtree:true});updateVersion();install();

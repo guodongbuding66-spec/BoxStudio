@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { buildProductionPdfV27, productionPdfV27Diagnostics } from './productionPdfV27.js';
 import { getDeviceLinkInfo } from './iccDeviceLinkV23.js';
@@ -40,5 +41,5 @@ async function exportBatchZip(block){const {queue,artifacts}=await batchSnapshot
 
 function render(block){renderProduction(block);renderBatch(block)}
 function install(){hideSuperseded();const scroll=document.querySelector('#boxstudio-profile-manager .profile-manager-scroll');if(!scroll||document.getElementById(BLOCK_ID))return;const block=document.createElement('div');block.id=BLOCK_ID;block.className='profile-section v27-tools';block.innerHTML=`<div class="v27-title"><div><h3>V0.27 Native Cubic Production & Live Assist</h3><p>Native cubic clip in Production/Approved PDF · Worker Batch · live User Guide/Baseline/Rotation gestures.</p></div><span>V0.27</span></div><section><h4>Production & Live Assist</h4><div id="v27Production"></div></section><section><h4>Recoverable Native Cubic Batch</h4><div id="v27Batch"></div></section>`;scroll.prepend(block);render(block)}
-function updateVersion(){const v=document.querySelector('.brand small');if(v)v.textContent='V0.27';document.title='BoxStudio V0.27'}
+function updateVersion(){setUiVersion('V0.27')}
 const observer=new MutationObserver(()=>{updateVersion();hideSuperseded();install()});observer.observe(document.documentElement,{childList:true,subtree:true});updateVersion();install();

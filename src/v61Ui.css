@@ -1,1 +1,55 @@
 .v61-version-badge{margin-left:6px;font-size:10px;font-weight:700;letter-spacing:.08em;color:#64748b}.v61-artwork-studio{margin:12px 14px 0;border:1px solid #d9dee7;background:#fff;border-radius:12px;box-shadow:0 8px 26px rgba(15,23,42,.06);overflow:hidden}.v61-artwork-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 14px;border-bottom:1px solid #e8ebf0;background:#f8fafc}.v61-artwork-head>div:first-child{display:grid;gap:2px}.v61-artwork-head span,.v61-quick-tools>span,.v61-artwork-summary>span{font-size:10px;letter-spacing:.12em;color:#64748b;font-weight:700}.v61-artwork-head b{font-size:14px;color:#0f172a}.v61-artwork-head small{font-size:11px;color:#64748b}.v61-view-switch{display:flex;padding:3px;background:#e8edf4;border-radius:9px;flex:none}.v61-view-switch button{border:0;background:transparent;padding:7px 10px;border-radius:7px;font-size:11px;color:#475569}.v61-view-switch button.active{background:#fff;color:#111827;box-shadow:0 1px 4px rgba(15,23,42,.12)}.v61-artwork-grid{display:grid;grid-template-columns:minmax(310px,1.35fr) minmax(210px,.9fr) minmax(220px,.8fr);gap:0}.v61-panel-style,.v61-quick-tools,.v61-artwork-summary{padding:12px 14px;border-right:1px solid #edf0f4}.v61-artwork-summary{border-right:0;display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.v61-artwork-summary>span{grid-column:1/-1}.v61-panel-style{display:grid;grid-template-columns:minmax(120px,.8fr) minmax(150px,1fr);gap:8px 12px}.v61-panel-style label{display:grid;gap:5px;font-size:11px;color:#475569}.v61-panel-style select,.v61-panel-style input[type=color]{height:34px;border:1px solid #d6dce5;border-radius:7px;background:#fff}.v61-color-line{display:flex;gap:6px;align-items:center}.v61-color-line input{width:48px;padding:2px}.v61-color-line code{font-size:11px;color:#475569}.v61-swatches{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap}.v61-swatches button{width:23px;height:23px;border:2px solid #fff;outline:1px solid #d5dbe4;border-radius:6px;background:var(--sw)}.v61-swatches button.active{outline:2px solid #2563eb}.v61-panel-actions{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap}.v61-panel-actions button,.v61-quick-tools button{border:1px solid #d8dee7;background:#fff;border-radius:7px;padding:7px 9px;font-size:11px;color:#334155}.v61-panel-actions button.primary{background:#111827;color:#fff;border-color:#111827}.v61-quick-tools{display:grid;align-content:start;gap:9px}.v61-quick-tools>div{display:grid;grid-template-columns:1fr 1fr;gap:6px}.v61-quick-tools button{display:flex;align-items:center;gap:7px}.v61-quick-tools button b{display:grid;place-items:center;width:21px;height:21px;border-radius:5px;background:#f1f5f9}.v61-quick-tools p{margin:0;font-size:10px;line-height:1.5;color:#64748b}.v61-artwork-summary>div{background:#f8fafc;border:1px solid #eef1f5;border-radius:8px;padding:8px}.v61-artwork-summary b{display:block;font-size:17px;color:#111827}.v61-artwork-summary small{font-size:10px;color:#64748b}.v61-panel-fill{pointer-events:none;stroke:none}.v61-artwork-studio+ .v60-artwork-callout{display:none}body[data-v61-artwork-view="2d"] [data-v58-mini3d]{display:none!important}body[data-v61-artwork-view="split"] [data-v58-mini3d]{display:block}body[data-v61-artwork-view="3d"] .v61-artwork-studio{display:none}@media(max-width:1000px){.v61-artwork-grid{grid-template-columns:1fr 1fr}.v61-artwork-summary{grid-column:1/-1;border-top:1px solid #edf0f4}.v61-panel-style{border-right:1px solid #edf0f4}}@media(max-width:760px){.v61-artwork-studio{margin:8px 8px 0;border-radius:10px}.v61-artwork-head{align-items:flex-start;flex-direction:column}.v61-view-switch{width:100%}.v61-view-switch button{flex:1}.v61-artwork-grid{grid-template-columns:1fr}.v61-panel-style,.v61-quick-tools,.v61-artwork-summary{border-right:0;border-bottom:1px solid #edf0f4}.v61-panel-style{grid-template-columns:1fr 1fr}.v61-artwork-summary{grid-column:auto}.v61-panel-actions button{flex:1 1 42%}}@media(max-width:430px){.v61-panel-style{grid-template-columns:1fr}.v61-swatches,.v61-panel-actions{grid-column:auto}.v61-quick-tools>div{grid-template-columns:1fr 1fr}.v61-artwork-head small{display:none}}
+
+/* Expand secondary settings only when needed; keep the canvas available. */
+.v61-artwork-studio[data-controls-open="false"]>.v61-artwork-grid,.v61-artwork-studio[data-controls-open="false"]>.v62-readiness{display:none}
+.v61-edit-actions{display:flex;flex-wrap:wrap;gap:6px;margin-right:auto}
+.v61-edit-actions button{background:#fff;border:1px solid #d8dee7;border-radius:7px;padding:7px 10px;color:#334155;font:inherit;font-size:13px;cursor:pointer}
+.v61-edit-actions button[aria-expanded="true"]{background:#eef4ff;color:#1769ff;border-color:#93b4f0}
+.v61-artwork-studio{flex-shrink:0;max-height:40vh;overflow:auto}
+body[data-v59-studio="true"] .canvas-wrap{padding:24px}
+body[data-v63="true"] .workspace .main>.tabbar{display:flex!important;flex:0 0 34px;justify-content:flex-end}
+body[data-v63="true"] .main>.tabbar #undo,body[data-v63="true"] .main>.tabbar #redo{display:block}
+@media(max-width:760px){.v61-artwork-head{flex-direction:row;flex-wrap:wrap}.v61-edit-actions{width:100%;gap:4px}.v61-edit-actions button{padding:6px;font-size:12px}.v61-artwork-studio{max-height:30vh}.v61-view-switch{width:auto}.v61-panel-style{grid-template-columns:1fr 1fr}.v61-quick-tools,.v61-artwork-summary{display:none}.v63-work-status>span:nth-child(2){display:none}.v63-work-status>span:nth-child(3){grid-column:auto!important}.v63-work-status{grid-template-columns:minmax(0,1fr) 85px!important}.v63-work-status>button{display:none}.v63-stagebar{flex-shrink:0}}
+
+body[data-studio-shell="unified"] #v36OpenHosted,body[data-studio-shell="unified"] #v32MaterialSummary{display:none}
+/* The old topology actions stay available in 3D/CAD and export, not the edit bar. */
+body[data-studio-shell="unified"] .tabbar #v39RebuildTopology,body[data-studio-shell="unified"] .tabbar #v39FullProduction,body[data-studio-shell="unified"] .tabbar [data-v39-status]{display:none}
+body[data-studio-shell="unified"] .workspace .main>.tabbar{background:#f8fafc;border-color:#e1e6eb}
+body[data-studio-shell="unified"] .tabbar #undo,body[data-studio-shell="unified"] .tabbar #redo{color:#334155}
+body[data-studio-shell="unified"] .tabbar button:disabled{opacity:.4;cursor:default}
+@media(max-width:760px){
+ body[data-studio-shell="unified"] .workspace{grid-template-columns:44px minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,25vh)}
+ body[data-studio-shell="unified"] .workspace>.toolbar{display:flex}
+ body[data-studio-shell="unified"] .workspace>.rightpanel{display:block;max-height:25vh}
+ body[data-studio-shell="unified"] .topbar .brand{font-size:14px}
+ body[data-studio-shell="unified"] .profile-manager-trigger{display:none}
+ .v61-view-switch button{white-space:nowrap;flex:none}
+ .v61-view-switch{margin-left:auto}
+ body[data-studio-shell="unified"] .canvas-wrap{padding:16px}
+}
+
+body[data-studio-shell="unified"] .tabbar #v33OpenProfessional{background:transparent;border-color:#d8dee7;color:#334155;font-size:12px}
+body[data-studio-shell="unified"] .tabbar #v38OpenCad{background:transparent;border-color:#d8dee7;color:#334155;font-size:12px}
+/* The current library header already explains the workflow. */
+body[data-studio-shell="unified"] .v58-template-page>.v47-hero{display:none}
+body[data-studio-shell="unified"][data-v59-mode="simple"][data-v58-advanced="false"] .rightpanel #boxstudio-v11-batch-master,
+body[data-studio-shell="unified"][data-v59-mode="simple"][data-v58-advanced="false"] .rightpanel [id^="boxstudio-v"][id$="-tools"]{display:none}
+.v63-stagebar{flex-shrink:0}
+/* Fold authoring and collision tools are available from Professional / Advanced. */
+body[data-studio-shell="unified"][data-v59-mode="simple"][data-v58-advanced="false"] .v50-authoring,
+body[data-studio-shell="unified"][data-v59-mode="simple"][data-v58-advanced="false"] .v51-sequence,
+body[data-studio-shell="unified"][data-v59-mode="simple"][data-v58-advanced="false"] .v52-panel,
+body[data-studio-shell="unified"][data-v59-mode="simple"][data-v58-advanced="false"] .v53-repair,
+body[data-studio-shell="unified"][data-v59-mode="simple"][data-v58-advanced="false"] .v54-assistant,
+body[data-studio-shell="unified"][data-v59-mode="simple"][data-v58-advanced="false"] .v49-linked-page>.three-toolbar{display:none}
+body[data-studio-shell="unified"] .review-page{background:#f5f7f9;color:#18212b}
+body[data-studio-shell="unified"] .review-page .check,body[data-studio-shell="unified"] .review-page .export-card,body[data-studio-shell="unified"] .review-page .outline-option{background:#fff;border-color:#dce2e7;color:#18212b}
+body[data-studio-shell="unified"] .review-page .check strong,body[data-studio-shell="unified"] .review-page h2,body[data-studio-shell="unified"] .review-page .export-card h4,body[data-studio-shell="unified"] .review-page .outline-option label{color:#18212b}
+body[data-studio-shell="unified"] .review-page .check p,body[data-studio-shell="unified"] .review-page .export-card p{color:#66727e}
+body[data-studio-shell="unified"] .review-page .score .pass{color:#166534;background:#ecfdf5;border-color:#d5eadd}
+body[data-studio-shell="unified"] .review-page .score .warning{color:#9a6700;background:#fffbeb;border-color:#f0e2b8}
+body[data-studio-shell="unified"] .review-page .score .error{color:#b91c1c;background:#fef2f2;border-color:#f1d4d4}
+body[data-studio-shell="unified"][data-v58-advanced="true"] .v58-advanced-production{display:block!important}
+/* Advanced machine and manufacturing forms need the full work area. */
+body[data-studio-shell="unified"][data-v58-advanced="true"] .v49-linked-grid{grid-template-columns:minmax(0,1fr)}
+body[data-studio-shell="unified"][data-v58-advanced="true"] .v49-map-pane{display:none}

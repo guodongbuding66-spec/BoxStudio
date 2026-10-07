@@ -42,7 +42,7 @@ function bind(){
 }
 export function openDielineCadV38(){if(host)return;state=readState();doc=state.dielineV38?.schema==='boxstudio-dieline-v38'?clone(state.dielineV38):dielineDocumentFromStateV38(state);selectedNodeId=null;selectedEdgeId=null;report=null;drag=null;host=document.createElement('div');host.id='boxstudio-v38-cad';document.body.appendChild(host);persist();render()}
 export function closeCad(){persist();host?.remove();host=null;drag=null;injectLauncher()}
-function injectLauncher(){const toolbar=document.querySelector('.three-toolbar')||document.querySelector('.tabbar');if(!toolbar||document.querySelector('#v38OpenCad'))return;const button=document.createElement('button');button.id='v38OpenCad';button.className='primary';button.textContent='Dieline CAD';button.onclick=openDielineCadV38;toolbar.appendChild(button)}
+function injectLauncher(){const toolbar=document.querySelector('.three-toolbar')||document.querySelector('.tabbar');if(!toolbar||document.querySelector('#v38OpenCad'))return;const button=document.createElement('button');button.id='v38OpenCad';button.className='primary';button.textContent=document.body.dataset.studioShell==='unified'?'刀版 CAD':'Dieline CAD';button.onclick=openDielineCadV38;toolbar.appendChild(button)}
 const target=document.querySelector('#app')||document.body;observer=new MutationObserver(()=>injectLauncher());observer.observe(target,{childList:true,subtree:true});injectLauncher();
 export function getDielineDocumentV38(){return doc?clone(doc):null}
 export { buildDxfV38,buildDielineSvgV38,buildDielinePdfV38 };
