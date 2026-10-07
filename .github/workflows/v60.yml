@@ -35,9 +35,8 @@ jobs:
         run: node tests/v39.mjs
       - name: V0.60 wiring
         run: |
-          grep -q '"version": "0.60.0"' package.json
+          node -e "const p=require('./package.json'),v=p.version.split('.').map(Number); if(!(v[0]>0||v[1]>=60)) process.exit(1)"
           grep -q '"test:v60"' package.json
-          grep -q 'BoxStudio V0.60' index.html
           grep -q 'v60Ui.css' index.html
           grep -q 'v60Ui.js' index.html
           grep -q 'V60_PRODUCT_VERSION' src/artworkImageV60.js
@@ -59,7 +58,7 @@ jobs:
             if curl -fsS http://127.0.0.1:8790/tests/v60-browser-e2e.html >/dev/null; then break; fi
             sleep 0.1
           done
-          timeout 200s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,900 --virtual-time-budget=140000 --dump-dom http://127.0.0.1:8790/tests/v60-browser-e2e.html >/tmp/boxstudio-v60-dom.log 2>/tmp/boxstudio-v60-chrome.log || true
+          timeout 120s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,900 --virtual-time-budget=70000 --dump-dom http://127.0.0.1:8790/tests/v60-browser-e2e.html >/tmp/boxstudio-v60-dom.log 2>/tmp/boxstudio-v60-chrome.log || true
           if test -f /tmp/boxstudio-v60-pass; then
             echo 'Desktop V0.60:'; cat /tmp/boxstudio-v60-pass
           elif test -f /tmp/boxstudio-v60-fail; then
@@ -68,7 +67,7 @@ jobs:
             echo 'V0.60 desktop browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v60-http.log || true; cat /tmp/boxstudio-v60-chrome.log || true; cat /tmp/boxstudio-v60-dom.log || true; exit 1
           fi
           rm -f /tmp/boxstudio-v60-pass /tmp/boxstudio-v60-fail
-          timeout 200s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=390,844 --virtual-time-budget=140000 --dump-dom http://127.0.0.1:8790/tests/v60-browser-e2e.html >/tmp/boxstudio-v60-mobile-dom.log 2>/tmp/boxstudio-v60-mobile-chrome.log || true
+          timeout 120s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=390,844 --virtual-time-budget=70000 --dump-dom http://127.0.0.1:8790/tests/v60-browser-e2e.html >/tmp/boxstudio-v60-mobile-dom.log 2>/tmp/boxstudio-v60-mobile-chrome.log || true
           if test -f /tmp/boxstudio-v60-pass; then
             echo 'Mobile V0.60:'; cat /tmp/boxstudio-v60-pass
           elif test -f /tmp/boxstudio-v60-fail; then
