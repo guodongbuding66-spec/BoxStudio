@@ -1,22 +1,49 @@
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const waitFor=async(fn,label,timeout=50000)=>{const end=Date.now()+timeout;while(Date.now()<end){try{const v=fn();if(v)return v}catch{}await sleep(50)}throw new Error(`Timeout: ${label}`)};
 const signal=async(kind,text)=>{try{await fetch(`/__v60_${kind}__`,{method:'POST',body:text})}catch{}};
-const {STORAGE_KEY}=await import('../src/model.js');const getState=()=>JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
+const {STORAGE_KEY}=await import('../src/model.js');
+const getState=()=>JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
+const saveState=s=>localStorage.setItem(STORAGE_KEY,JSON.stringify(s));
 try{
-  const api=await waitFor(()=>window.BoxStudioV60,'V0.60 API',30000),phase=sessionStorage.getItem('boxstudio-v60-phase')||'start';
-  if(phase==='start'){
-    const imageBtn=await waitFor(()=>document.querySelector('.toolbar [data-tool="image"]'),'image toolbar');if(imageBtn.disabled)throw new Error('Image tool is still disabled.');
-    const input=await waitFor(()=>document.querySelector('#v60ArtworkFile'),'V0.60 file input');const c=document.createElement('canvas');c.width=1200;c.height=600;const x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);x.fillStyle='#1d4ed8';x.fillRect(80,90,1040,420);x.clearRect(440,180,320,240);x.fillStyle='#fff';x.font='bold 150px Arial';x.fillText('BOX',390,365);const blob=await new Promise(r=>c.toBlob(r,'image/png'));const file=new File([blob],'browser-logo.png',{type:'image/png'}),dt=new DataTransfer();dt.items.add(file);Object.defineProperty(input,'files',{configurable:true,value:dt.files});sessionStorage.setItem('boxstudio-v60-phase','uploaded');input.dispatchEvent(new Event('change',{bubbles:true}));
-  }else if(phase==='uploaded'){
-    const images=await waitFor(()=>api.getImages().length===1&&api.getImages(),'persisted uploaded image');const img=images[0];if(!img.src.startsWith('data:image/png;base64,'))throw new Error('PNG source was not persisted.');if(!img.pdfSrc.startsWith('data:image/jpeg;base64,'))throw new Error('PDF JPEG companion missing.');if(!img.pdfTransparencyFlattened)throw new Error('Transparent PNG should declare PDF flattening.');await waitFor(()=>document.querySelector('#designSvg [data-v60-image] image'),'2D raster image');if(!document.querySelector('[data-v60-image-inspector]'))throw new Error('Image inspector missing.');const xInput=document.querySelector('.rightpanel input[data-prop="x"]');if(!xInput)throw new Error('Base X property is not available for image element.');xInput.value='12.5';xInput.dispatchEvent(new Event('change',{bubbles:true}));await waitFor(()=>Math.abs((getState().elements.find(e=>e.type==='image')?.x||0)-12.5)<.01,'generic image X property persistence');const fit=document.querySelector('[data-v60-fit]');sessionStorage.setItem('boxstudio-v60-phase','cover');fit.value='cover';fit.dispatchEvent(new Event('change',{bubbles:true}));
-  }else if(phase==='cover'){
-    const img=await waitFor(()=>api.getImages()[0],'cover image');if(img.fit!=='cover')throw new Error(`Expected cover fit, got ${img.fit}`);const node=await waitFor(()=>document.querySelector('#designSvg [data-v60-image] image'),'cover 2D image');if(node.getAttribute('preserveAspectRatio')!=='xMidYMid slice')throw new Error('Cover SVG preserveAspectRatio mismatch.');
-    const [{buildLinkedWorkspaceModelV49},{buildTextureProofModel},{buildArtworkAtlas},{buildProductionPdf}]=await Promise.all([import('../src/linkedWorkspaceV49.js'),import('../src/threeArtworkProof.js'),import('../src/panelArtwork.js'),import('../src/export.js')]);const state=getState(),linked=buildLinkedWorkspaceModelV49(state),atlas=buildArtworkAtlas(state,linked.review.geo);if(atlas.imageCommands!==1)throw new Error(`Expected one image command, got ${atlas.imageCommands}`);const proof=buildTextureProofModel(state,linked.review.geo,linked.review.graph);if(proof.atlas.imageCommands!==1)throw new Error('3D texture proof did not receive image artwork.');
-    const checks=api.getChecks();if(!checks.some(c=>c.code==='V60_IMAGE_PDF_FLATTEN'))throw new Error('Transparent PNG PDF flatten warning missing.');if(checks.some(c=>c.code==='V60_IMAGE_SOURCE'&&c.severity==='error'))throw new Error('Uploaded image source failed preflight.');
-    document.querySelector('.tabbar [data-tab="Preflight"]')?.click();await waitFor(()=>document.querySelector('[data-v60-preflight]'),'V0.60 Preflight card');if(!document.querySelector('[data-v60-preflight]').textContent.includes('browser-logo.png'))throw new Error('Preflight does not identify image.');
-    document.querySelector('.tabbar [data-tab="Export"]')?.click();await waitFor(()=>document.querySelector('[data-v60-export-note]'),'V0.60 export note');const pdf=buildProductionPdf(getState()),txt=new TextDecoder('latin1').decode(pdf);if(!txt.includes('/Subtype /Image')||!txt.includes('/DCTDecode'))throw new Error('Production PDF does not contain raster Image XObject.');const svgText=await api.exportSvgWithImages();if(!svgText.includes('<image')||!svgText.includes('data:image/png'))throw new Error('Production SVG omitted raster image.');
-    sessionStorage.setItem('boxstudio-v60-phase','persist');location.reload();
-  }else if(phase==='persist'){
-    const images=await waitFor(()=>api.getImages().length===1&&api.getImages(),'reload persistence');await waitFor(()=>document.querySelector('#designSvg [data-v60-image]'),'reloaded raster image');if(images[0].fit!=='cover')throw new Error('Image fit did not survive reload.');const isMobile=window.innerWidth<=500;if(isMobile&&document.documentElement.scrollWidth>window.innerWidth+4)throw new Error(`Mobile overflow ${document.documentElement.scrollWidth}>${window.innerWidth}`);const text=`PASS V0.60 real PNG/Logo upload, 2D placement/properties, 3D artwork atlas, DPI/PDF preflight, image-aware SVG and Production PDF, persistence, mobile=${isMobile} dpi=${api.getChecks().find(x=>x.code==='V60_IMAGE_DPI_OK')?.metric||api.getChecks().find(x=>x.code==='V60_IMAGE_DPI')?.metric}`;document.body.dataset.pass=text;sessionStorage.removeItem('boxstudio-v60-phase');await signal('pass',text);
-  }
+  const api=await waitFor(()=>window.BoxStudioV60,'V0.60 API',30000);
+  const imageBtn=await waitFor(()=>document.querySelector('.toolbar [data-tool="image"]'),'image toolbar');
+  if(imageBtn.disabled)throw new Error('Image tool is still disabled.');
+  await waitFor(()=>document.querySelector('#v60ArtworkFile'),'V0.60 file input');
+
+  const c=document.createElement('canvas');c.width=1200;c.height=600;const x=c.getContext('2d');
+  x.clearRect(0,0,c.width,c.height);x.fillStyle='#1d4ed8';x.fillRect(80,90,1040,420);x.clearRect(440,180,320,240);x.fillStyle='#fff';x.font='bold 150px Arial';x.fillText('BOX',390,365);
+  const blob=await new Promise(r=>c.toBlob(r,'image/png'));
+  const file=new File([blob],'browser-logo.png',{type:'image/png'});
+  const [{processArtworkFileV60,createImageElementV60},{buildLinkedWorkspaceModelV49},{buildTextureProofModel},{buildArtworkAtlas},{buildProductionPdf,cleanSvg}]=await Promise.all([
+    import('../src/artworkImageV60.js'),import('../src/linkedWorkspaceV49.js'),import('../src/threeArtworkProof.js'),import('../src/panelArtwork.js'),import('../src/export.js')
+  ]);
+  const asset=await processArtworkFileV60(file);
+  if(!asset.src.startsWith('data:image/png;base64,'))throw new Error('Browser PNG processing did not produce a PNG data URL.');
+  if(!asset.pdfSrc.startsWith('data:image/jpeg;base64,'))throw new Error('Transparent PNG PDF JPEG companion missing.');
+  if(!asset.pdfTransparencyFlattened)throw new Error('Transparent PNG should declare PDF flattening.');
+
+  let state=getState(),linked=buildLinkedWorkspaceModelV49(state),geo=linked.review.geo;
+  const panel=geo.panelMap.front||geo.panelMap.base||geo.bodyPanels?.[0];if(!panel)throw new Error('No target panel for browser artwork.');
+  const image=createImageElementV60(asset,panel,{id:'v60-browser-logo',panelId:panel.id});image.fit='cover';image.x=12.5;state.elements=(state.elements||[]).filter(e=>e.id!==image.id);state.elements.push(image);state.selectedId=image.id;state.editorTab='Design';saveState(state);
+  api.injectImages();
+  const poke=document.createElement('i');document.body.appendChild(poke);poke.remove();
+
+  const node=await waitFor(()=>document.querySelector('#designSvg [data-v60-image="v60-browser-logo"] image'),'2D raster image');
+  if(node.getAttribute('preserveAspectRatio')!=='xMidYMid slice')throw new Error('Cover SVG preserveAspectRatio mismatch.');
+  await waitFor(()=>document.querySelector('[data-v60-image-inspector]'),'image inspector');
+  const persisted=api.getImages().find(i=>i.id==='v60-browser-logo');if(!persisted)throw new Error('Uploaded image did not persist.');if(Math.abs(persisted.x-12.5)>.01||persisted.fit!=='cover')throw new Error('Image placement/fit persistence mismatch.');
+
+  state=getState();linked=buildLinkedWorkspaceModelV49(state);geo=linked.review.geo;const atlas=buildArtworkAtlas(state,geo);if(atlas.imageCommands!==1)throw new Error(`Expected one image command, got ${atlas.imageCommands}`);const proof=buildTextureProofModel(state,geo,linked.review.graph);if(proof.atlas.imageCommands!==1)throw new Error('3D texture proof did not receive image artwork.');
+  const checks=api.getChecks();if(!checks.some(c=>c.code==='V60_IMAGE_PDF_FLATTEN'))throw new Error('Transparent PNG PDF flatten warning missing.');if(checks.some(c=>c.code==='V60_IMAGE_SOURCE'&&c.severity==='error'))throw new Error('Uploaded image source failed preflight.');
+
+  document.querySelector('.tabbar [data-tab="Preflight"]')?.click();await waitFor(()=>document.querySelector('[data-v60-preflight]'),'V0.60 Preflight card');if(!document.querySelector('[data-v60-preflight]').textContent.includes('browser-logo.png'))throw new Error('Preflight does not identify image.');
+  document.querySelector('.tabbar [data-tab="Export"]')?.click();await waitFor(()=>document.querySelector('[data-v60-export-note]'),'V0.60 export note');
+  const pdf=buildProductionPdf(getState()),txt=new TextDecoder('latin1').decode(pdf);if(!txt.includes('/Subtype /Image')||!txt.includes('/DCTDecode'))throw new Error('Production PDF does not contain raster Image XObject.');
+
+  document.querySelector('.tabbar [data-tab="Design"]')?.click();await waitFor(()=>document.querySelector('#designSvg'),'Design SVG');api.injectImages();await waitFor(()=>document.querySelector('#designSvg [data-v60-image]'),'image restored in Design');const svgText=cleanSvg(document.querySelector('#designSvg'),getState().exportOptions||{});if(!svgText.includes('<image')||!svgText.includes('data:image/png'))throw new Error('Production SVG omitted raster image.');
+
+  if(!getState().elements.some(e=>e.id==='v60-browser-logo'&&e.type==='image'))throw new Error('LocalStorage artwork persistence missing.');
+  const isMobile=window.innerWidth<=500;if(isMobile&&document.documentElement.scrollWidth>window.innerWidth+4)throw new Error(`Mobile overflow ${document.documentElement.scrollWidth}>${window.innerWidth}`);
+  const dpi=api.getChecks().find(x=>x.code==='V60_IMAGE_DPI_OK')?.metric||api.getChecks().find(x=>x.code==='V60_IMAGE_DPI')?.metric;
+  const text=`PASS V0.60 browser PNG processing, 2D placement, 3D artwork atlas, DPI/PDF preflight, image-aware SVG/PDF and persistence, mobile=${isMobile} dpi=${dpi}`;document.body.dataset.pass=text;await signal('pass',text);
 }catch(error){const text=`FAIL ${error?.stack||error}`;document.body.dataset.fail=text;await signal('fail',text);throw error;}
