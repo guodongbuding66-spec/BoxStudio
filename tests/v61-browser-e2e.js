@@ -1,0 +1,22 @@
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const waitFor=async(fn,label,timeout=45000)=>{const end=Date.now()+timeout;while(Date.now()<end){try{const v=fn();if(v)return v}catch{}await sleep(50)}throw new Error(`Timeout: ${label}`)};
+const signal=async(kind,text)=>{try{await fetch(`/__v61_${kind}__`,{method:'POST',body:text})}catch{}};
+try{
+  const api=await waitFor(()=>window.BoxStudioV61,'V0.61 API',30000);await waitFor(()=>document.querySelector('[data-v61-studio]'),'Artwork Workspace');
+  if(!window.BoxStudioV60)throw new Error('V0.60 image workflow not mounted with V0.61.');
+  const panelSelect=document.querySelector('[data-v61-panel]'),panelId=panelSelect?.value;if(!panelId)throw new Error('No target panel in Artwork Workspace.');
+  api.applyPanelColor(panelId,'#0f766e');
+  await waitFor(()=>api.getState().elements.some(e=>e.v61PanelFill&&e.panelId===panelId&&e.fillColor==='#0f766e'),'panel fill persistence');
+  const poly=await waitFor(()=>document.querySelector(`#designSvg [data-v61-panel-fill="${CSS.escape(panelId)}"]`),'2D panel fill');if(poly.getAttribute('fill')!=='#0f766e')throw new Error('2D panel color mismatch.');
+  const [{buildLinkedWorkspaceModelV49},{buildArtworkAtlas},{buildTextureProofModel},{buildProductionPdf},{printablePanelsV61}]=await Promise.all([import('../src/linkedWorkspaceV49.js'),import('../src/panelArtwork.js'),import('../src/threeArtworkProof.js'),import('../src/export.js'),import('../src/artworkStudioV61.js')]);
+  let state=api.getState(),linked=buildLinkedWorkspaceModelV49(state),atlas=buildArtworkAtlas(state,linked.review.geo);if(!atlas.plans.some(p=>p.panelId===panelId&&p.commands.some(c=>c.type==='polygon'&&c.fillColor==='#0f766e')))throw new Error('Panel color missing from Artwork Atlas.');const proof=buildTextureProofModel(state,linked.review.geo,linked.review.graph);if(!proof.atlas.plans.some(p=>p.panelId===panelId&&p.commands.some(c=>c.type==='polygon')))throw new Error('Panel color missing from 3D proof atlas.');
+  api.applyAllColors('#1d4ed8');state=api.getState();linked=buildLinkedWorkspaceModelV49(state);const expected=printablePanelsV61(linked.review.geo).length,stats=api.getStats();if(stats.styledPanels!==expected)throw new Error(`Apply-all mismatch ${stats.styledPanels}/${expected}`);
+  api.setView('2d');await waitFor(()=>document.body.dataset.v61ArtworkView==='2d','2D view mode');if(document.querySelector('[data-v58-mini3d]')&&!document.querySelector('[data-v58-mini3d]').hidden&&getComputedStyle(document.querySelector('[data-v58-mini3d]')).display!=='none')throw new Error('Mini 3D should be hidden in 2D mode.');
+  api.setView('split');await waitFor(()=>document.body.dataset.v61ArtworkView==='split','split mode');await waitFor(()=>document.querySelector('[data-v58-mini3d]'),'split live 3D');
+  if(!document.querySelector('[data-v61-tool="image"]')||!document.querySelector('#v60ArtworkFile'))throw new Error('Logo/Image handoff to V0.60 missing.');
+  document.querySelector('[data-v61-tool="marks"]')?.click();await waitFor(()=>document.querySelector('[data-v58-marks-studio]'),'Shipping Mark Studio shortcut');document.querySelector('.tabbar [data-tab="Design"]')?.click();await waitFor(()=>document.querySelector('[data-v61-studio]'),'return to Artwork Workspace');
+  api.clearPanel(panelId);await waitFor(()=>!api.getState().elements.some(e=>e.v61PanelFill&&e.panelId===panelId),'clear panel color');
+  const pdf=buildProductionPdf(api.getState());if(pdf.length<1000)throw new Error('Production PDF failed after Artwork Workspace edits.');
+  const isMobile=window.innerWidth<=500;if(isMobile&&document.documentElement.scrollWidth>window.innerWidth+4)throw new Error(`Mobile overflow ${document.documentElement.scrollWidth}>${window.innerWidth}`);
+  const text=`PASS V0.61 panel styling through 2D/3D/production, Artwork Workspace quick tools, 2D+3D view switching and Marks handoff, mobile=${isMobile} panels=${expected}`;document.body.dataset.pass=text;await signal('pass',text);
+}catch(error){const text=`FAIL ${error?.stack||error}`;document.body.dataset.fail=text;await signal('fail',text);throw error;}
