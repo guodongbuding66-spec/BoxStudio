@@ -1,0 +1,74 @@
+name: V0.62 Print Readiness Overlay
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  print-readiness:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: V0.62 syntax
+        run: |
+          node --check src/printGuidesV62.js
+          node --check src/v62Ui.js
+          node --check tests/v62.mjs
+          node --check tests/v62-browser-e2e.js
+          python3 -m py_compile tests/v62_e2e_server.py
+      - name: V0.61 artwork baseline
+        run: node tests/v61.mjs
+      - name: V0.62 print readiness model
+        run: node tests/v62.mjs
+      - name: Production-chain baseline
+        run: node tests/v39.mjs
+      - name: V0.62 wiring
+        run: |
+          grep -q '"version": "0.62.0"' package.json
+          grep -q '"test:v62"' package.json
+          grep -q 'BoxStudio V0.62' index.html
+          grep -q 'v62Ui.css' index.html
+          grep -q 'v62Ui.js' index.html
+          grep -q 'V62_PRODUCT_VERSION' src/printGuidesV62.js
+          grep -q 'PRINT READINESS' src/v62Ui.js
+          grep -q 'Preflight / Production PDF' src/v62Ui.js
+      - name: Real Chrome V0.62 print readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v62-started /tmp/boxstudio-v62-pass /tmp/boxstudio-v62-fail
+          python3 tests/v62_e2e_server.py >/tmp/boxstudio-v62-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 80); do
+            if curl -fsS http://127.0.0.1:8792/tests/v62-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 120s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,900 --virtual-time-budget=70000 --dump-dom http://127.0.0.1:8792/tests/v62-browser-e2e.html >/tmp/boxstudio-v62-dom.log 2>/tmp/boxstudio-v62-chrome.log || true
+          if test -f /tmp/boxstudio-v62-pass; then
+            echo 'Desktop V0.62:'; cat /tmp/boxstudio-v62-pass
+          elif test -f /tmp/boxstudio-v62-fail; then
+            cat /tmp/boxstudio-v62-fail; cat /tmp/boxstudio-v62-chrome.log || true; cat /tmp/boxstudio-v62-dom.log || true; exit 1
+          else
+            echo 'V0.62 desktop browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v62-http.log || true; cat /tmp/boxstudio-v62-chrome.log || true; cat /tmp/boxstudio-v62-dom.log || true; exit 1
+          fi
+          rm -f /tmp/boxstudio-v62-pass /tmp/boxstudio-v62-fail
+          timeout 120s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=390,844 --virtual-time-budget=70000 --dump-dom http://127.0.0.1:8792/tests/v62-browser-e2e.html >/tmp/boxstudio-v62-mobile-dom.log 2>/tmp/boxstudio-v62-mobile-chrome.log || true
+          if test -f /tmp/boxstudio-v62-pass; then
+            echo 'Mobile V0.62:'; cat /tmp/boxstudio-v62-pass
+          elif test -f /tmp/boxstudio-v62-fail; then
+            cat /tmp/boxstudio-v62-fail; cat /tmp/boxstudio-v62-mobile-chrome.log || true; cat /tmp/boxstudio-v62-mobile-dom.log || true; exit 1
+          else
+            echo 'V0.62 mobile browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v62-http.log || true; cat /tmp/boxstudio-v62-mobile-chrome.log || true; cat /tmp/boxstudio-v62-mobile-dom.log || true; exit 1
+          fi
