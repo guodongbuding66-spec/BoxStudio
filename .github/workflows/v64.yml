@@ -1,0 +1,86 @@
+name: V0.64 Legacy UI Retirement and Runtime Cleanup
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  legacy-retirement:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: V0.64 syntax
+        run: |
+          node --check src/runtimeV64.js
+          node --check src/uiRuntimeV64.js
+          node --check src/v58Ui.js
+          node --check src/v59Ui.js
+          node --check src/v60Ui.js
+          node --check src/v61Ui.js
+          node --check src/v62Ui.js
+          node --check src/v63Ui.js
+          node --check src/v64Ui.js
+          node --check tests/v64.mjs
+          node --check tests/v64-browser-e2e.js
+          python3 -m py_compile tests/v64_e2e_server.py
+      - name: Production baseline
+        run: node tests/v39.mjs
+      - name: V0.61 Artwork baseline
+        run: node tests/v61.mjs
+      - name: V0.62 Print Readiness baseline
+        run: node tests/v62.mjs
+      - name: V0.63 unified shell baseline
+        run: node tests/v63.mjs
+      - name: V0.64 runtime model
+        run: node tests/v64.mjs
+      - name: V0.64 wiring
+        run: |
+          grep -q '"version": "0.64.0"' package.json
+          grep -q '"test:v64"' package.json
+          grep -q 'BoxStudio V0.64' index.html
+          grep -q 'uiRuntimeV64.js' index.html
+          grep -q 'v64Ui.css' index.html
+          grep -q 'v64Ui.js' index.html
+          grep -q 'suppressLegacyNavigation:true' src/runtimeV64.js
+          grep -q "v64Runtime?.register('v58'" src/v58Ui.js
+          grep -q "v64Runtime?.register('v63'" src/v63Ui.js
+      - name: Real Chrome V0.64 runtime cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v64-started /tmp/boxstudio-v64-pass /tmp/boxstudio-v64-fail
+          python3 tests/v64_e2e_server.py >/tmp/boxstudio-v64-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 80); do
+            if curl -fsS http://127.0.0.1:8794/tests/v64-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 120s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,900 --virtual-time-budget=70000 --dump-dom http://127.0.0.1:8794/tests/v64-browser-e2e.html >/tmp/boxstudio-v64-dom.log 2>/tmp/boxstudio-v64-chrome.log || true
+          if test -f /tmp/boxstudio-v64-pass; then
+            echo 'Desktop V0.64:'; cat /tmp/boxstudio-v64-pass
+          elif test -f /tmp/boxstudio-v64-fail; then
+            cat /tmp/boxstudio-v64-fail; cat /tmp/boxstudio-v64-chrome.log || true; cat /tmp/boxstudio-v64-dom.log || true; exit 1
+          else
+            echo 'V0.64 desktop browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v64-http.log || true; cat /tmp/boxstudio-v64-chrome.log || true; cat /tmp/boxstudio-v64-dom.log || true; exit 1
+          fi
+          rm -f /tmp/boxstudio-v64-pass /tmp/boxstudio-v64-fail
+          timeout 120s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=390,844 --virtual-time-budget=70000 --dump-dom http://127.0.0.1:8794/tests/v64-browser-e2e.html >/tmp/boxstudio-v64-mobile-dom.log 2>/tmp/boxstudio-v64-mobile-chrome.log || true
+          if test -f /tmp/boxstudio-v64-pass; then
+            echo 'Mobile V0.64:'; cat /tmp/boxstudio-v64-pass
+          elif test -f /tmp/boxstudio-v64-fail; then
+            cat /tmp/boxstudio-v64-fail; cat /tmp/boxstudio-v64-mobile-chrome.log || true; cat /tmp/boxstudio-v64-mobile-dom.log || true; exit 1
+          else
+            echo 'V0.64 mobile browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v64-http.log || true; cat /tmp/boxstudio-v64-mobile-chrome.log || true; cat /tmp/boxstudio-v64-mobile-dom.log || true; exit 1
+          fi
