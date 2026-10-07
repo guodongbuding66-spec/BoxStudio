@@ -20,6 +20,6 @@ const ui=await readFile(new URL('../src/v60Ui.js',import.meta.url),'utf8');for(c
 const css=await readFile(new URL('../src/v60Ui.css',import.meta.url),'utf8');assert.ok(css.includes('v60-image-inspector'));assert.ok(css.includes('@media(max-width:760px)'));
 const panelArtwork=await readFile(new URL('../src/panelArtwork.js',import.meta.url),'utf8');assert.ok(panelArtwork.includes("type:'image'"));assert.ok(panelArtwork.includes('drawRaster'));
 const exporter=await readFile(new URL('../src/export.js',import.meta.url),'utf8');assert.ok(exporter.includes('/Subtype /Image'));assert.ok(exporter.includes('imagePdfSourceV60'));
-const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('BoxStudio V0.60'));assert.ok(index.includes('v60Ui.css'));assert.ok(index.includes('v60Ui.js'));
-const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.equal(pkg.version,'0.60.0');assert.equal(pkg.scripts['test:v60'],'node tests/v60.mjs');
-console.log(`BoxStudio V0.60 artwork image passed: images=${atlas.imageCommands} dpi=${imageEffectiveDpiV60(image)} pdf=${pdf.length} checks=${checks.length}`);
+const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('v60Ui.css'));assert.ok(index.includes('v60Ui.js'));
+const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8')),parts=String(pkg.version).split('.').map(Number);assert.ok(parts[0]>0||parts[1]>=60,`Expected package version >=0.60, got ${pkg.version}`);assert.equal(pkg.scripts['test:v60'],'node tests/v60.mjs');
+console.log(`BoxStudio V0.60 artwork image passed: images=${atlas.imageCommands} dpi=${imageEffectiveDpiV60(image)} pdf=${pdf.length} checks=${checks.length} package=${pkg.version}`);
