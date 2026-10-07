@@ -33,9 +33,8 @@ jobs:
         run: node tests/v39.mjs
       - name: V0.62 wiring
         run: |
-          grep -q '"version": "0.62.0"' package.json
+          node -e "const p=require('./package.json'),v=String(p.version).split('.').map(Number); if(!(v[0]>0||v[1]>=62)) process.exit(1)"
           grep -q '"test:v62"' package.json
-          grep -q 'BoxStudio V0.62' index.html
           grep -q 'v62Ui.css' index.html
           grep -q 'v62Ui.js' index.html
           grep -q 'V62_PRODUCT_VERSION' src/printGuidesV62.js

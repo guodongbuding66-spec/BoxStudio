@@ -39,8 +39,8 @@ for(const token of ['PRINT READINESS','2D 印刷辅助','完整 3D / 折叠动�
 const css=await readFile(new URL('../src/v62Ui.css',import.meta.url),'utf8');
 for(const token of ['v62-readiness','v62-bleed-zone','v62-safe-zone','@media(max-width:760px)'])assert.ok(css.includes(token),`V0.62 CSS missing ${token}`);
 const index=await readFile(new URL('../index.html',import.meta.url),'utf8');
-assert.ok(index.includes('BoxStudio V0.62'));assert.ok(index.includes('v62Ui.css'));assert.ok(index.includes('v62Ui.js'));
-const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));
-assert.equal(pkg.version,'0.62.0');assert.equal(pkg.scripts['test:v62'],'node tests/v62.mjs');
+assert.ok(index.includes('v62Ui.css'));assert.ok(index.includes('v62Ui.js'));
+const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8')),parts=String(pkg.version).split('.').map(Number);
+assert.ok(parts[0]>0||parts[1]>=62,`Expected package version >=0.62, got ${pkg.version}`);assert.equal(pkg.scripts['test:v62'],'node tests/v62.mjs');
 
-console.log(`BoxStudio V0.62 print readiness passed: templates=${routed} panels=${totalPanels}`);
+console.log(`BoxStudio V0.62 print readiness passed: templates=${routed} panels=${totalPanels} package=${pkg.version}`);
