@@ -7,6 +7,7 @@ const NS='http://www.w3.org/2000/svg';
 const esc=(s='')=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num=(v,d=0)=>{const n=Number(v);return Number.isFinite(n)?n:d};
 let queued=false;
+const v64Runtime=window.BoxStudioUiRuntimeV64;
 
 function readState(){
   try{const p=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null'),b=cloneState(defaultState);return p?{...b,...p,structure:{...b.structure,...(p.structure||{})},variables:{...b.variables,...(p.variables||{})},elements:Array.isArray(p.elements)?p.elements:[]}:b}catch{return cloneState(defaultState)}
@@ -108,9 +109,8 @@ function enhance(){
 }
 function schedule(){if(queued)return;queued=true;queueMicrotask(()=>{queued=false;enhance()})}
 
-window.addEventListener('boxstudio:v49-panel-selection',schedule);
-new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});
-enhance();
+window.addEventListener('boxstudio:v49-panel-selection',()=>v64Runtime?.schedule?v64Runtime.schedule():schedule());
+if(v64Runtime?.register)v64Runtime.register('v62',enhance);else{new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});enhance()}
 
 window.BoxStudioV62={
   version:V62_PRODUCT_VERSION,
