@@ -5,6 +5,7 @@ import { V61_PRODUCT_VERSION,V61_SWATCHES,normalizeColorV61,printablePanelsV61,p
 const VIEW_KEY='boxstudio-v61-artwork-view';
 const esc=(s='')=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let queued=false;
+const v64Runtime=window.BoxStudioUiRuntimeV64;
 function readState(){try{const p=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null'),b=cloneState(defaultState);return p?{...b,...p,structure:{...b.structure,...(p.structure||{})},variables:{...b.variables,...(p.variables||{})},elements:Array.isArray(p.elements)?p.elements:[]}:b}catch{return cloneState(defaultState)}}
 function saveState(s){s.savedAt=new Date().toISOString();localStorage.setItem(STORAGE_KEY,JSON.stringify(s))}
 function currentPage(){return document.querySelector('.nav button.active')?.dataset.nav||readState().page}
@@ -36,5 +37,5 @@ function updateStudio(){const old=document.querySelector('[data-v61-studio]');if
 function syncExistingFills(){if(currentPage()!=='editor')return;const {state,geo}=model(),synced=syncPanelFillsV61(state,geo);if(fillSignature(synced)!==fillSignature(state))saveState(synced)}
 function enhance(){ensureVersionBadge();syncExistingFills();ensureStudio();if(currentPage()==='editor'&&['Design','Marks'].includes(currentTab()))injectPanelFills();applyView();document.body.dataset.v61Acceptance=artworkAcceptanceV61().ok?'pass':'fail'}
 function schedule(){if(queued)return;queued=true;queueMicrotask(()=>{queued=false;enhance()})}
-new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});enhance();
+if(v64Runtime?.register)v64Runtime.register('v61',enhance);else{new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});enhance()}
 window.BoxStudioV61={version:V61_PRODUCT_VERSION,swatches:V61_SWATCHES,getState:readState,getStats:()=>{const {state,geo}=model();return artworkStatsV61(state,geo)},applyPanelColor:(panelId,color)=>{const {state,geo}=model(),next=upsertPanelFillV61(state,geo,panelId,color);persist(next);return next},applyAllColors:color=>{const {state,geo}=model(),next=applyAllPanelFillsV61(state,geo,color);persist(next);return next},clearPanel:panelId=>persist(removePanelFillV61(readState(),panelId)),clearAll:()=>persist(clearPanelFillsV61(readState())),setView,getView:viewMode,getAcceptance:artworkAcceptanceV61};
