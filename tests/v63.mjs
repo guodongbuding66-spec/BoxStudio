@@ -17,6 +17,6 @@ for(const id of TEMPLATES){const state=makeState(id),summary=workspaceSummaryV63
 
 const ui=await readFile(new URL('../src/v63Ui.js',import.meta.url),'utf8');for(const token of ['v63-stagebar','CONTEXT','data-v63-advanced','v60ArtworkFile','workspaceSummaryV63'])assert.ok(ui.includes(token),`V0.63 UI missing ${token}`);
 const css=await readFile(new URL('../src/v63Ui.css',import.meta.url),'utf8');for(const token of ['v58-quicknav','v58-contextbar','v63-secondary-panel','data-v63-image','@media(max-width:760px)'])assert.ok(css.includes(token),`V0.63 CSS missing ${token}`);
-const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(index.includes('BoxStudio V0.63'));assert.ok(index.includes('v63Ui.css'));assert.ok(index.includes('v63Ui.js'));
-const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.equal(pkg.version,'0.63.0');assert.equal(pkg.scripts['test:v63'],'node tests/v63.mjs');
-console.log(`BoxStudio V0.63 studio consolidation passed: templates=${routed} panels=${totalPanels} preflightChecks=${totalChecks}`);
+const index=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.ok(/BoxStudio V0\.(?:6[3-9]|[7-9]\d|\d{3,})/.test(index),`Expected product title >= V0.63`);assert.ok(index.includes('v63Ui.css'));assert.ok(index.includes('v63Ui.js'));
+const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));const [major,minor]=pkg.version.split('.').map(Number);assert.ok(major>0||minor>=63,`Expected package version >= 0.63.0, got ${pkg.version}`);assert.equal(pkg.scripts['test:v63'],'node tests/v63.mjs');
+console.log(`BoxStudio V0.63 studio consolidation passed: templates=${routed} panels=${totalPanels} preflightChecks=${totalChecks} package=${pkg.version}`);
