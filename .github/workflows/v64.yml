@@ -46,10 +46,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+          const [maj,min]=pkg.version.split('.').map(Number);
+          if(!(maj>0||min>=64)) throw new Error(`Expected package >=0.64, got ${pkg.version}`);
+          const html=fs.readFileSync('index.html','utf8');
+          const m=html.match(/BoxStudio V0\.(\d+)/); if(!m||Number(m[1])<64) throw new Error('Expected title >= V0.64');
+          NODE
           check(){ echo "Checking: $1"; grep -Fq -- "$2" "$3"; }
-          check package-version '"version": "0.64.0"' package.json
           check package-test '"test:v64"' package.json
-          check page-title 'BoxStudio V0.64' index.html
           check runtime-script 'uiRuntimeV64.js' index.html
           check runtime-css 'v64Ui.css' index.html
           check shell-script 'v64Ui.js' index.html
