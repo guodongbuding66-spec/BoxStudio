@@ -11,13 +11,12 @@ function currentPage(){return document.querySelector('.nav button.active')?.data
 function currentTab(){return document.querySelector('.tabbar button.active')?.dataset.tab||readState().editorTab}
 function model(){const state=readState(),linked=buildLinkedWorkspaceModelV49(state);return{state,linked,geo:linked.review.geo}}
 function currentPanel(state,geo){const ids=[state.linkedV49?.selectedPanelId,state.markEditorPanelId,state.elements?.find(x=>x.id===state.selectedId)?.panelId,'front','base'];for(const id of ids)if(id&&geo.panelMap?.[id])return geo.panelMap[id];return printablePanelsV61(geo)[0]||null}
-function persist(next,{refresh=false}={}){saveState(next);if(refresh){location.reload();return}injectPanelFills();updateStudio();refreshMini3d()}
+function persist(next,{refresh=true}={}){saveState(next);if(refresh){location.reload();return}injectPanelFills();updateStudio()}
 function fillSignature(state){return JSON.stringify((state.elements||[]).filter(e=>e?.v61PanelFill===true).map(e=>[e.panelId,e.fillColor,e.points]))}
 function injectPanelFills(){
   if(currentPage()!=='editor'||!['Design','Marks'].includes(currentTab()))return;const svg=document.querySelector('#designSvg'),layer=svg?.querySelector('#artwork-layer');if(!svg||!layer)return;const {state,geo}=model(),sig=fillSignature(state);if(svg.dataset.v61FillSig===sig)return;layer.querySelectorAll('[data-v61-panel-fill]').forEach(n=>n.remove());
   for(const raw of(state.elements||[]).filter(e=>e?.v61PanelFill===true)){const p=geo.panelMap?.[raw.panelId];if(!p)continue;const ns='http://www.w3.org/2000/svg',poly=document.createElementNS(ns,'polygon'),pts=(raw.points||[]).map(q=>`${p.x+Number(q[0]||0)},${p.y+Number(q[1]||0)}`).join(' ');poly.setAttribute('points',pts);poly.setAttribute('fill',normalizeColorV61(raw.fillColor));poly.setAttribute('class','v61-panel-fill');poly.dataset.v61PanelFill=raw.panelId;layer.insertBefore(poly,layer.firstChild)}svg.dataset.v61FillSig=sig;
 }
-function refreshMini3d(){const old=document.querySelector('[data-v58-mini3d]');if(old){old.remove();const poke=document.createElement('i');poke.hidden=true;document.body.appendChild(poke);queueMicrotask(()=>poke.remove())}}
 function viewMode(){const mobile=window.innerWidth<=760;return localStorage.getItem(VIEW_KEY)|| (mobile?'2d':'split')}
 function setView(mode){if(!['2d','split','3d'].includes(mode))mode='split';localStorage.setItem(VIEW_KEY,mode);document.body.dataset.v61ArtworkView=mode;if(mode==='3d'){document.querySelector('.tabbar [data-tab="3D"]')?.click();return}if(currentTab()!=='Design')document.querySelector('.tabbar [data-tab="Design"]')?.click();queueMicrotask(()=>applyView())}
 function applyView(){const mode=viewMode();document.body.dataset.v61ArtworkView=mode;document.querySelectorAll('[data-v61-view]').forEach(b=>b.classList.toggle('active',b.dataset.v61View===mode));const mini=document.querySelector('[data-v58-mini3d]');if(mini)mini.hidden=mode==='2d'}
