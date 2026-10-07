@@ -5,6 +5,8 @@ import { V58_PRODUCT_VERSION, V58_FREE_POLICY, V58_STUDIO_FLOW, V58_MARK_GROUPS,
 
 const esc=(s='')=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let queued=false,miniProof=null,miniHost=null;
+const v64Runtime=window.BoxStudioUiRuntimeV64;
+const legacyNavRetired=()=>v64Runtime?.policy?.suppressLegacyNavigation===true;
 
 function readState(){
   try{const p=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null'),b=cloneState(defaultState);return p?{...b,...p,structure:{...b.structure,...(p.structure||{})},variables:{...b.variables,...(p.variables||{})},batch:{...b.batch,...(p.batch||{})}}:b}catch{return cloneState(defaultState)}
@@ -14,13 +16,14 @@ function go(page,editorTab=null){const s=readState();s.page=page;if(editorTab)s.
 function currentPage(){return document.querySelector('.nav button.active')?.dataset.nav||readState().page}
 function currentTab(){return document.querySelector('.tabbar button.active')?.dataset.tab||readState().editorTab}
 
+function syncAdvancedState(){const on=localStorage.getItem('boxstudio-v58-advanced')==='1';document.body.dataset.v58Advanced=on?'true':'false';return on}
 function enhanceTopbar(){
-  const top=document.querySelector('.topbar');if(!top||top.dataset.v58==='true')return;top.dataset.v58='true';document.body.dataset.v58Studio='true';
-  const brand=top.querySelector('.brand');if(brand){brand.innerHTML=`BOXSTUDIO <small>${V58_PRODUCT_VERSION}</small>`;brand.title='Free packaging design studio'}
-  const quick=document.createElement('div');quick.className='v58-quicknav';quick.innerHTML=`<button data-v58-go="templates">盒型库</button><button data-v58-go="Design">2D设计</button><button data-v58-go="3D">3D预览</button><button data-v58-go="Marks">唛头</button><button data-v58-go="Export">导出</button><button class="advanced" data-v58-advanced>高级生产</button>`;
-  const nav=top.querySelector('.nav');nav?.insertAdjacentElement('afterend',quick);
-  quick.querySelectorAll('[data-v58-go]').forEach(b=>b.onclick=()=>b.dataset.v58Go==='templates'?go('templates'):go('editor',b.dataset.v58Go));
-  const adv=quick.querySelector('[data-v58-advanced]'),key='boxstudio-v58-advanced';const sync=()=>{const on=localStorage.getItem(key)==='1';document.body.dataset.v58Advanced=on?'true':'false';adv.classList.toggle('active',on);adv.textContent=on?'收起高级生产':'高级生产'};adv.onclick=()=>{localStorage.setItem(key,localStorage.getItem(key)==='1'?'0':'1');sync()};sync();
+  const top=document.querySelector('.topbar');if(!top)return;document.body.dataset.v58Studio='true';
+  if(top.dataset.v58!=='true'){top.dataset.v58='true';const brand=top.querySelector('.brand');if(brand){brand.innerHTML=`BOXSTUDIO <small>${V58_PRODUCT_VERSION}</small>`;brand.title='Free packaging design studio'}}
+  if(legacyNavRetired()){
+    top.querySelector('.v58-quicknav')?.remove();syncAdvancedState();document.body.dataset.v58LegacyNav='retired';const ex=top.querySelector('#quickExport');if(ex)ex.textContent='导出文件';return;
+  }
+  if(!top.querySelector('.v58-quicknav')){const quick=document.createElement('div');quick.className='v58-quicknav';quick.innerHTML=`<button data-v58-go="templates">盒型库</button><button data-v58-go="Design">2D设计</button><button data-v58-go="3D">3D预览</button><button data-v58-go="Marks">唛头</button><button data-v58-go="Export">导出</button><button class="advanced" data-v58-advanced>高级生产</button>`;const nav=top.querySelector('.nav');nav?.insertAdjacentElement('afterend',quick);quick.querySelectorAll('[data-v58-go]').forEach(b=>b.onclick=()=>b.dataset.v58Go==='templates'?go('templates'):go('editor',b.dataset.v58Go));const adv=quick.querySelector('[data-v58-advanced]'),sync=()=>{const on=syncAdvancedState();adv.classList.toggle('active',on);adv.textContent=on?'收起高级生产':'高级生产'};adv.onclick=()=>{localStorage.setItem('boxstudio-v58-advanced',localStorage.getItem('boxstudio-v58-advanced')==='1'?'0':'1');sync()};sync()}
   const ex=top.querySelector('#quickExport');if(ex)ex.textContent='导出文件';
 }
 
@@ -31,7 +34,9 @@ function contextBar(){
   const s=readState(),m=studioSummaryV58(s);return `<div class="v58-contextbar" data-v58-context><div class="v58-context-main"><span>当前结构</span><b>${esc(m.templateId)}</b><small>${m.length} × ${m.width} × ${m.height} mm · ${esc(m.materialId||'material')} · ${m.thickness} mm${m.flute?` · ${esc(m.flute)}`:''}</small></div><div class="v58-context-actions"><button data-v58-context-go="Structure">修改尺寸 / 材料</button><button data-v58-context-go="3D">查看 3D</button><button data-v58-context-go="Marks">编辑唛头</button></div></div>`
 }
 function enhanceEditorHeader(){
-  const main=document.querySelector('.workspace .main'),tabbar=main?.querySelector('.tabbar');if(!main||!tabbar)return;if(!main.querySelector('[data-v58-context]'))tabbar.insertAdjacentHTML('afterend',contextBar());main.querySelectorAll('[data-v58-context-go]').forEach(b=>b.onclick=()=>go('editor',b.dataset.v58ContextGo));
+  const main=document.querySelector('.workspace .main'),tabbar=main?.querySelector('.tabbar');if(!main||!tabbar)return;
+  if(legacyNavRetired()){main.querySelector('[data-v58-context]')?.remove();return}
+  if(!main.querySelector('[data-v58-context]'))tabbar.insertAdjacentHTML('afterend',contextBar());main.querySelectorAll('[data-v58-context-go]').forEach(b=>b.onclick=()=>go('editor',b.dataset.v58ContextGo));
 }
 
 function disposeMini(){if(miniProof){try{miniProof.dispose?.()}catch{}miniProof=null}miniHost=null}
@@ -58,7 +63,7 @@ function enhanceTemplates(){
 }
 
 function collapseAdvancedProduction(){
-  const nodes=[...document.querySelectorAll('[data-v55-manufacturing],[data-v56-factory],[data-v57-routing]')];nodes.forEach(n=>{n.classList.add('v58-advanced-production')});
+  const nodes=[...document.querySelectorAll('[data-v55-manufacturing],[data-v56-factory],[data-v57-routing]')];nodes.forEach(n=>{n.classList.add('v58-advanced-production')});syncAdvancedState();
 }
 
 function markActiveQuickNav(){const p=currentPage(),t=currentTab();document.querySelectorAll('.v58-quicknav [data-v58-go]').forEach(b=>{const v=b.dataset.v58Go;b.classList.toggle('active',(v==='templates'&&p==='templates')||(p==='editor'&&v===t))})}
@@ -66,6 +71,6 @@ function enhance(){
   enhanceTopbar();enhanceToolbar();markActiveQuickNav();enhanceTemplates();if(currentPage()==='editor'){enhanceEditorHeader();enhanceMarks();mountMiniPreview();collapseAdvancedProduction()}else disposeMini();document.body.dataset.v58Acceptance=productAcceptanceV58().ok?'pass':'fail';
 }
 function schedule(){if(queued)return;queued=true;queueMicrotask(()=>{queued=false;enhance()})}
-new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});enhance();
+if(v64Runtime?.register)v64Runtime.register('v58',enhance);else{new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});enhance()}
 
 window.BoxStudioV58={version:V58_PRODUCT_VERSION,freePolicy:V58_FREE_POLICY,flow:V58_STUDIO_FLOW,markGroups:V58_MARK_GROUPS,markPresets:V58_MARK_PRESETS,getState:readState,getSummary:()=>studioSummaryV58(readState()),getAcceptance:productAcceptanceV58,addMark:(id,panelId)=>{const r=addMarkPresetV58(readState(),id,{panelId});saveState(r.state);return r},go};
