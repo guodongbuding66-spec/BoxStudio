@@ -4,6 +4,7 @@ import { V59_PRODUCT_VERSION,V59_UI_MODES,V59_GUIDED_FLOW,V59_SIZE_MODES,V59_OUT
 const MODE_KEY='boxstudio-v59-ui-mode';
 const AFTER_GENERATE_KEY='boxstudio-v59-after-generate';
 const esc=(s='')=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const versionRank=s=>{const m=String(s||'').match(/V?(\d+)\.(\d+)/i);return m?Number(m[1])*1000+Number(m[2]):-1};
 let queued=false;
 
 function currentPage(){return document.querySelector('.nav button.active')?.dataset.nav||'dashboard'}
@@ -14,7 +15,7 @@ function applyUiMode(){const mode=uiMode(),label=V59_UI_MODES[mode].label;docume
 function clickTab(tab){document.querySelector(`.tabbar [data-tab="${CSS.escape(tab)}"]`)?.click()}
 
 function enhanceTopbar(){
-  const top=document.querySelector('.topbar');if(!top)return;document.body.dataset.v59Studio='true';const brand=top.querySelector('.brand small');if(brand&&brand.textContent!==V59_PRODUCT_VERSION)brand.textContent=V59_PRODUCT_VERSION;
+  const top=document.querySelector('.topbar');if(!top)return;document.body.dataset.v59Studio='true';const brand=top.querySelector('.brand small');if(brand&&versionRank(brand.textContent)<versionRank(V59_PRODUCT_VERSION))brand.textContent=V59_PRODUCT_VERSION;
   if(!top.querySelector('[data-v59-mode-switch]')){const switcher=document.createElement('div');switcher.className='v59-mode-switch';switcher.dataset.v59ModeSwitch='';switcher.innerHTML=`<button data-v59-mode="simple">简洁</button><button data-v59-mode="professional">专业</button>`;const adv=top.querySelector('[data-v58-advanced]');(adv||top.querySelector('#quickExport'))?.insertAdjacentElement('beforebegin',switcher);switcher.querySelectorAll('[data-v59-mode]').forEach(b=>b.onclick=()=>setUiMode(b.dataset.v59Mode))}
   applyUiMode();
 }
