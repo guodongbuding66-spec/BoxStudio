@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { runProductionAcceptanceV31 } from './preflightV31.js';
 import { activeProductionJob, recordProductionExport, upsertProductionJob } from './productionJobs.js';
@@ -21,5 +22,5 @@ function render(block){const host=block.querySelector('#v31Workspace');if(!host)
   host.querySelector('#v31Approved')?.addEventListener('click',()=>{try{const n=readState(),x=acceptanceFor(n),active=activeProductionJob(n),g=productionOutputGateV24(n,active),r=role(n);if(!x.ok)throw new Error('V0.31 required checks failed.');if(!g.ok||!canProductionAction(r,'export-approved'))throw new Error(g.ok?'Current role cannot export approved production files.':g.reason);const fileName=`${safe(n.variables?.sku||'production')}-approved-r${active.revision}-v31-checked.pdf`;downloadBytes(fileName,x.pdf,'application/pdf');const updated=recordProductionExport(active,{actor:actor(n),role:r,format:'pdf',fileName,serializer:'v0.27-native-cubic-production',note:'V0.31 digital decode + geometry acceptance passed'});writeState(upsertProductionJob(n,updated));render(block)}catch(err){alert(err?.message||err)}});
 }
 function install(){if(document.getElementById(BLOCK_ID))return;const scroll=document.querySelector('#boxstudio-profile-manager .profile-manager-scroll');if(!scroll)return;const block=document.createElement('div');block.id=BLOCK_ID;block.className='profile-section v31-tools';block.innerHTML=`<div class="v31-title"><div><h3>V0.31 Production Acceptance</h3><p>PDF artifact digital decode · Preview/PDF geometry acceptance.</p></div><span>V0.31</span></div><div id="v31Workspace"></div>`;scroll.prepend(block);render(block);}
-function updateVersion(){const v=document.querySelector('.brand small');if(v)v.textContent='V0.31';document.title='BoxStudio V0.31';}
+function updateVersion(){setUiVersion('V0.31')}
 const observer=new MutationObserver(()=>{updateVersion();install()});observer.observe(document.documentElement,{childList:true,subtree:true});updateVersion();install();

@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { generateGeometry } from './geometry.js';
 import { buildArtworkAtlas } from './panelArtwork.js';
@@ -19,5 +20,5 @@ function render(block){const host=block.querySelector('#v20Workspace');if(!host)
 <section><h4>V0.20 Production Boundary</h4><p>Native SVG gradients, direct cross-panel 2D placement, panel clipping, folded-atlas integration and object ordering are implemented. Native PDF shading, true ICC device-link conversion, alpha/luminance mask fidelity and board-stretch simulation remain separate work.</p></section>`;
   host.querySelector('#v20Svg').onclick=()=>{try{exportProductionSvgV20(document.querySelector('#designSvg'),readState())}catch(e){alert(e?.message||e)}};host.querySelector('#v20Pdf').onclick=()=>{try{exportProductionPdfV19(readState())}catch(e){alert(e?.message||e)}};host.querySelectorAll('[data-z]').forEach(btn=>btn.onclick=()=>{const s=readState();if(!s.selectedId)return;const next=moveElementZ(s,s.selectedId,btn.dataset.z);writeState(next);location.reload()});}catch(error){host.innerHTML=`<div class="v20-warning">${esc(error?.message||error)}</div>`}}
 function install(){hideSuperseded();const scroll=document.querySelector('#boxstudio-profile-manager .profile-manager-scroll');if(!scroll||document.getElementById(BLOCK_ID))return;const block=document.createElement('div');block.id=BLOCK_ID;block.className='profile-section v20-tools';block.innerHTML=`<div class="v20-title"><div><h3>V0.20 Native SVG & Cross-panel Editing</h3><p>Native SVG gradients · direct canvas editing · folded atlas integration · z-order.</p></div><span>V0.20</span></div><div id="v20Workspace"></div>`;scroll.appendChild(block);render(block)}
-function updateVersion(){const v=document.querySelector('.brand small');if(v)v.textContent='V0.20';document.title='BoxStudio V0.20'}
+function updateVersion(){setUiVersion('V0.20')}
 const observer=new MutationObserver(()=>{updateVersion();hideSuperseded();install()});observer.observe(document.documentElement,{childList:true,subtree:true});updateVersion();install();

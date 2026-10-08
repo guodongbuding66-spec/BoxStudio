@@ -1,0 +1,76 @@
+name: V0.52 Collision Visualization and Sequence Optimization
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  collision-optimization:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: V0.52 syntax
+        run: |
+          node --check src/collisionOptimizationV52.js
+          node --check src/threeCollisionProofV52.js
+          node --check src/v52Ui.js
+          node --check tests/v52.mjs
+          node --check tests/v52-browser-e2e.js
+          python3 -m py_compile tests/v52_e2e_server.py
+      - name: V0.51 sequence/collision baseline
+        run: node tests/v51.mjs
+      - name: V0.52 visualization and optimizer model
+        run: node tests/v52.mjs
+      - name: Production-chain baseline
+        run: node tests/v39.mjs
+      - name: V0.52 wiring
+        shell: bash
+        run: |
+          node -e "const p=require('./package.json'); if(Number(p.version.split('.')[1])<52) process.exit(1); if(p.scripts['test:v52']!=='node tests/v52.mjs') process.exit(1)"
+          node -e "const fs=require('fs'); const s=fs.readFileSync('index.html','utf8'); const m=s.match(/BoxStudio V0\.(\d+)/); if(!m||Number(m[1])<52) process.exit(1)"
+          grep -q 'v52Ui.css' index.html
+          grep -q 'v52Ui.js' index.html
+          grep -q 'V52_OPT_SCHEMA' src/collisionOptimizationV52.js
+          grep -q 'mountCollisionProofV52' src/threeCollisionProofV52.js
+          grep -q '分析避碰顺序' src/v52Ui.js
+          grep -q '应用方案' src/v52Ui.js
+      - name: Real Chrome V0.52 collision visualization workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v52-started /tmp/boxstudio-v52-pass /tmp/boxstudio-v52-fail
+          python3 tests/v52_e2e_server.py >/tmp/boxstudio-v52-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8782/tests/v52-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 120s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,900 --virtual-time-budget=90000 --dump-dom http://127.0.0.1:8782/tests/v52-browser-e2e.html >/tmp/boxstudio-v52-dom.log 2>/tmp/boxstudio-v52-chrome.log || true
+          if test -f /tmp/boxstudio-v52-pass; then
+            echo 'Desktop collision visualization:'; cat /tmp/boxstudio-v52-pass
+          elif test -f /tmp/boxstudio-v52-fail; then
+            cat /tmp/boxstudio-v52-fail; cat /tmp/boxstudio-v52-chrome.log || true; cat /tmp/boxstudio-v52-dom.log || true; exit 1
+          else
+            echo 'V0.52 desktop browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v52-http.log || true; cat /tmp/boxstudio-v52-chrome.log || true; cat /tmp/boxstudio-v52-dom.log || true; exit 1
+          fi
+          rm -f /tmp/boxstudio-v52-pass /tmp/boxstudio-v52-fail
+          timeout 120s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=390,844 --virtual-time-budget=90000 --dump-dom http://127.0.0.1:8782/tests/v52-browser-e2e.html >/tmp/boxstudio-v52-mobile-dom.log 2>/tmp/boxstudio-v52-mobile-chrome.log || true
+          if test -f /tmp/boxstudio-v52-pass; then
+            echo 'Mobile collision visualization:'; cat /tmp/boxstudio-v52-pass
+          elif test -f /tmp/boxstudio-v52-fail; then
+            cat /tmp/boxstudio-v52-fail; cat /tmp/boxstudio-v52-mobile-chrome.log || true; cat /tmp/boxstudio-v52-mobile-dom.log || true; exit 1
+          else
+            echo 'V0.52 mobile browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v52-http.log || true; cat /tmp/boxstudio-v52-mobile-chrome.log || true; cat /tmp/boxstudio-v52-mobile-dom.log || true; exit 1
+          fi

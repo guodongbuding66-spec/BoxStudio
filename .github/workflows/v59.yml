@@ -1,0 +1,76 @@
+name: V0.59 Reference UX Convergence
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  reference-ux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: V0.59 syntax
+        run: |
+          node --check src/productExperienceV59.js
+          node --check src/v59Ui.js
+          node --check tests/v59.mjs
+          node --check tests/v59-browser-e2e.js
+          python3 -m py_compile tests/v59_e2e_server.py
+      - name: V0.58 core studio baseline
+        run: node tests/v58.mjs
+      - name: V0.59 product model
+        run: node tests/v59.mjs
+      - name: Production-chain baseline
+        run: node tests/v39.mjs
+      - name: V0.59 wiring
+        run: |
+          node -e "const p=require('./package.json'); const [M,m]=p.version.split('.').map(Number); if(!(M>0||m>=59)) process.exit(1)"
+          grep -q '"test:v59"' package.json
+          grep -q 'v59Ui.css' index.html
+          grep -q 'v59Ui.js' index.html
+          grep -q 'V59_GUIDED_FLOW' src/productExperienceV59.js
+          grep -q 'DIELINE PREVIEW' src/v59Ui.js
+          grep -q '生成并查看 3D' src/v59Ui.js
+          grep -q 'Pacdora' docs/V0.59-reference-deep-dive.md
+          grep -q 'Packform' docs/V0.59-reference-deep-dive.md
+          grep -q 'Real artwork image upload' docs/V0.59-reference-deep-dive.md
+      - name: Real Chrome V0.59 template-detail and guided workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v59-started /tmp/boxstudio-v59-pass /tmp/boxstudio-v59-fail
+          python3 tests/v59_e2e_server.py >/tmp/boxstudio-v59-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8789/tests/v59-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 180s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,900 --virtual-time-budget=120000 --dump-dom http://127.0.0.1:8789/tests/v59-browser-e2e.html >/tmp/boxstudio-v59-dom.log 2>/tmp/boxstudio-v59-chrome.log || true
+          if test -f /tmp/boxstudio-v59-pass; then
+            echo 'Desktop V0.59:'; cat /tmp/boxstudio-v59-pass
+          elif test -f /tmp/boxstudio-v59-fail; then
+            cat /tmp/boxstudio-v59-fail; cat /tmp/boxstudio-v59-chrome.log || true; cat /tmp/boxstudio-v59-dom.log || true; exit 1
+          else
+            echo 'V0.59 desktop browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v59-http.log || true; cat /tmp/boxstudio-v59-chrome.log || true; cat /tmp/boxstudio-v59-dom.log || true; exit 1
+          fi
+          rm -f /tmp/boxstudio-v59-pass /tmp/boxstudio-v59-fail
+          timeout 180s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=390,844 --virtual-time-budget=120000 --dump-dom http://127.0.0.1:8789/tests/v59-browser-e2e.html >/tmp/boxstudio-v59-mobile-dom.log 2>/tmp/boxstudio-v59-mobile-chrome.log || true
+          if test -f /tmp/boxstudio-v59-pass; then
+            echo 'Mobile V0.59:'; cat /tmp/boxstudio-v59-pass
+          elif test -f /tmp/boxstudio-v59-fail; then
+            cat /tmp/boxstudio-v59-fail; cat /tmp/boxstudio-v59-mobile-chrome.log || true; cat /tmp/boxstudio-v59-mobile-dom.log || true; exit 1
+          else
+            echo 'V0.59 mobile browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v59-http.log || true; cat /tmp/boxstudio-v59-mobile-chrome.log || true; cat /tmp/boxstudio-v59-mobile-dom.log || true; exit 1
+          fi

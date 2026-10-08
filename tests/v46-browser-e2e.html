@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><title>BoxStudio V0.46 Advanced Constraints E2E</title>
+  <link rel="stylesheet" href="../src/styles.css">
+  <link rel="stylesheet" href="../src/profileUi.css">
+  <link rel="stylesheet" href="../src/v33Ui.css">
+  <link rel="stylesheet" href="../src/v34Ui.css">
+  <link rel="stylesheet" href="../src/v35Ui.css">
+  <link rel="stylesheet" href="../src/v36Ui.css">
+  <link rel="stylesheet" href="../src/v38Ui.css">
+  <link rel="stylesheet" href="../src/v39Ui.css">
+  <link rel="stylesheet" href="../src/v40Ui.css">
+  <link rel="stylesheet" href="../src/v41Ui.css">
+  <link rel="stylesheet" href="../src/v42Ui.css">
+  <link rel="stylesheet" href="../src/v43Ui.css">
+  <link rel="stylesheet" href="../src/v44Ui.css">
+  <link rel="stylesheet" href="../src/v45Ui.css">
+  <link rel="stylesheet" href="../src/v46Ui.css">
+</head>
+<body data-v46-e2e="running">
+<div id="app"></div><pre id="log"></pre>
+<script src="../vendor/jszip.min.js"></script>
+<script type="module">
+  import { STORAGE_KEY, defaultState } from '../src/model.js';
+  const initial=structuredClone(defaultState);initial.page='editor';initial.editorTab='Structure';initial.savedAt=new Date().toISOString();
+  localStorage.clear();sessionStorage.clear();localStorage.setItem(STORAGE_KEY,JSON.stringify(initial));
+  await fetch('/__v46_started__',{method:'POST',body:'V0.46 browser started'}).catch(()=>{});
+  await import('../src/app.js');
+  await import('../src/v35Ui.js');
+  await import('../src/v36Ui.js');
+  await import('../src/v38Ui.js');
+  await import('../src/v39Ui.js');
+  await import('../src/v40Ui.js');
+  await import('../src/v41Ui.js');
+  await import('../src/v42Ui.js');
+  await import('../src/v43Ui.js');
+  await import('../src/v44Ui.js');
+  await import('../src/v45Ui.js');
+  await import('../src/v46Ui.js');
+  await import('./v46-browser-e2e.js');
+</script>
+</body>
+</html>

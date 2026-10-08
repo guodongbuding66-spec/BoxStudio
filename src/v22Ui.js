@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { buildNativePdfV22Plan, exportNativeGradientPdfV22 } from './nativePdfV22.js';
 import { exportProductionSvgV20 } from './nativeSvgV20.js';
@@ -22,5 +23,5 @@ function render(block){const host=block.querySelector('#v22Workspace');if(!host)
   if(selected){host.querySelector('#v22ApplyClip').onclick=()=>{try{const s=readState(),id=getCrossSelection(s).at(-1),pts=parseNormalizedClipPolygon(host.querySelector('#v22Clip').value);commit(setCrossSelection(setCrossClipPolygon(s,id,pts),getCrossSelection(s)))}catch(e){alert(e?.message||e)}};host.querySelector('#v22InsetClip').onclick=()=>{const s=readState(),ids=getCrossSelection(s),id=ids.at(-1);commit(setCrossSelection(setCrossClipRect(s,id,{x:.1,y:.1,w:.8,h:.8}),ids))};host.querySelector('#v22ClearClip').onclick=()=>{const s=readState(),ids=getCrossSelection(s),id=ids.at(-1);commit(setCrossSelection(clearCrossClip(s,id),ids))}}
 }catch(error){host.innerHTML=`<div class="v22-warning">${esc(error?.message||error)}</div>`}}
 function install(){hideSuperseded();const scroll=document.querySelector('#boxstudio-profile-manager .profile-manager-scroll');if(!scroll||document.getElementById(BLOCK_ID))return;const block=document.createElement('div');block.id=BLOCK_ID;block.className='profile-section v22-tools';block.innerHTML=`<div class="v22-title"><div><h3>V0.22 Soft Mask & Shared Transform</h3><p>Gradient soft-mask proof · group transform · align/distribute · editable clip polygon.</p></div><span>V0.22</span></div><div id="v22Workspace"></div>`;scroll.appendChild(block);render(block)}
-function updateVersion(){const v=document.querySelector('.brand small');if(v)v.textContent='V0.22';document.title='BoxStudio V0.22'}
+function updateVersion(){setUiVersion('V0.22')}
 const observer=new MutationObserver(()=>{updateVersion();hideSuperseded();install()});observer.observe(document.documentElement,{childList:true,subtree:true});updateVersion();install();

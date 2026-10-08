@@ -1,0 +1,73 @@
+name: V0.54 Repair Plan and Auto Search
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  repair-plan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: V0.54 syntax
+        run: |
+          node --check src/repairPlanV54.js
+          node --check src/v54Ui.js
+          node --check tests/v54.mjs
+          node --check tests/v54-browser-e2e.js
+          python3 -m py_compile tests/v54_e2e_server.py
+      - name: V0.53 collision repair baseline
+        run: node tests/v53.mjs
+      - name: V0.54 global repair plan model
+        run: node tests/v54.mjs
+      - name: Production-chain baseline
+        run: node tests/v39.mjs
+      - name: V0.54 wiring
+        run: |
+          grep -Eq '"version": "0\.(5[4-9]|[6-9][0-9])\.' package.json
+          grep -q '"test:v54"' package.json
+          grep -q 'v54Ui.css' index.html
+          grep -q 'v54Ui.js' index.html
+          grep -q 'V54_PLAN_SCHEMA' src/repairPlanV54.js
+          grep -q 'Safe / Balanced / Aggressive' src/v54Ui.js
+          grep -q '撤销上次 Repair Plan' src/v54Ui.js
+      - name: Real Chrome V0.54 global repair plan workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v54-started /tmp/boxstudio-v54-pass /tmp/boxstudio-v54-fail
+          python3 tests/v54_e2e_server.py >/tmp/boxstudio-v54-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8784/tests/v54-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 180s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,900 --virtual-time-budget=120000 --dump-dom http://127.0.0.1:8784/tests/v54-browser-e2e.html >/tmp/boxstudio-v54-dom.log 2>/tmp/boxstudio-v54-chrome.log || true
+          if test -f /tmp/boxstudio-v54-pass; then
+            echo 'Desktop global repair plan:'; cat /tmp/boxstudio-v54-pass
+          elif test -f /tmp/boxstudio-v54-fail; then
+            cat /tmp/boxstudio-v54-fail; cat /tmp/boxstudio-v54-chrome.log || true; cat /tmp/boxstudio-v54-dom.log || true; exit 1
+          else
+            echo 'V0.54 desktop browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v54-http.log || true; cat /tmp/boxstudio-v54-chrome.log || true; cat /tmp/boxstudio-v54-dom.log || true; exit 1
+          fi
+          rm -f /tmp/boxstudio-v54-pass /tmp/boxstudio-v54-fail
+          timeout 180s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=390,844 --virtual-time-budget=120000 --dump-dom http://127.0.0.1:8784/tests/v54-browser-e2e.html >/tmp/boxstudio-v54-mobile-dom.log 2>/tmp/boxstudio-v54-mobile-chrome.log || true
+          if test -f /tmp/boxstudio-v54-pass; then
+            echo 'Mobile global repair plan:'; cat /tmp/boxstudio-v54-pass
+          elif test -f /tmp/boxstudio-v54-fail; then
+            cat /tmp/boxstudio-v54-fail; cat /tmp/boxstudio-v54-mobile-chrome.log || true; cat /tmp/boxstudio-v54-mobile-dom.log || true; exit 1
+          else
+            echo 'V0.54 mobile browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v54-http.log || true; cat /tmp/boxstudio-v54-mobile-chrome.log || true; cat /tmp/boxstudio-v54-mobile-dom.log || true; exit 1
+          fi

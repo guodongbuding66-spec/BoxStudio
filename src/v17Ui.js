@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { generateGeometry } from './geometry.js';
 import { buildFoldGraph } from './foldgraph.js';
@@ -28,5 +29,5 @@ function renderProof(block){
 }
 
 function install(){hideSuperseded();const scroll=document.querySelector('#boxstudio-profile-manager .profile-manager-scroll');if(!scroll||document.getElementById(BLOCK_ID))return;const block=document.createElement('div');block.id=BLOCK_ID;block.className='profile-section v17-tools';block.innerHTML=`<div class="v17-title"><div><h3>V0.17 Folded Artwork Proof</h3><p>Panel texture projection · polygon UV triangulation · fold seam diagnostics.</p></div><span>V0.17</span></div><section><h4>Folded 3D Artwork Texture Proof</h4><div id="v17Proof"></div></section>`;scroll.appendChild(block);renderProof(block)}
-function updateVersion(){const v=document.querySelector('.brand small');if(v)v.textContent='V0.17';document.title='BoxStudio V0.17'}
+function updateVersion(){setUiVersion('V0.17')}
 const observer=new MutationObserver(()=>{updateVersion();hideSuperseded();install()});observer.observe(document.documentElement,{childList:true,subtree:true});window.addEventListener('beforeunload',()=>controller?.dispose?.());updateVersion();install();

@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { getCrossSelection } from './crossPanelTransformV21.js';
 import { crossClipNodes, ensureBezierClipState, removeClipNodeV25, resetClipNodeHandlesV25, setClipNodeHandlePresetV25, toggleClipNodeSmoothV25, clipPathDiagnosticsV25 } from './clipPathV25.js';
@@ -38,5 +39,5 @@ function render(block){const host=block.querySelector('#v25Workspace');if(!host)
   host.querySelector('#v25Approved').onclick=()=>{const n=readState(),active=activeProductionJob(n),g=productionOutputGateV24(n,active),rr=role(n);if(!g.ok||!canProductionAction(rr,'export-approved')){alert(g.ok?'Current role cannot export approved production files.':g.reason);return}try{const fileName=`${safe(n.variables?.sku||'production')}-approved-r${active.revision}-v25.pdf`,bytes=buildProductionPdfV25(n);downloadBytes(fileName,bytes,'application/pdf');const updated=recordProductionExport(active,{actor:actor(n),role:rr,format:'pdf',fileName,serializer:'v0.25-native-production'});writeState(upsertProductionJob(n,updated));render(block)}catch(err){alert(err?.message||err)}};
 }catch(error){host.innerHTML=`<div class="v25-warning">${esc(error?.message||error)}</div>`}}
 function install(){const scroll=document.querySelector('#boxstudio-profile-manager .profile-manager-scroll');if(!scroll||document.getElementById(BLOCK_ID))return;const block=document.createElement('div');block.id=BLOCK_ID;block.className='profile-section v25-tools';block.innerHTML=`<div class="v25-title"><div><h3>V0.25 Direct Selection & Color Precision</h3><p>Bezier clip nodes · segment insertion/deletion · object Smart Guides · ICC LUT16 DeviceLink.</p></div><span>V0.25</span></div><div id="v25Workspace"></div>`;scroll.appendChild(block);render(block)}
-function updateVersion(){const v=document.querySelector('.brand small');if(v)v.textContent='V0.25';document.title='BoxStudio V0.25'}
+function updateVersion(){setUiVersion('V0.25')}
 const observer=new MutationObserver(()=>{updateVersion();install()});observer.observe(document.documentElement,{childList:true,subtree:true});updateVersion();install();

@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { buildBatchState } from './batchTemplates.js';
 import { runPreflight } from './preflight.js';
@@ -141,7 +142,7 @@ function installBatchQueue(){
   block.querySelector('#v12CancelQueue').onclick=()=>{const current=readState();if(!current.batch?.queue)return;current.batch.queue=requestQueueCancel(current.batch.queue);writeState(current);renderQueueStatus(block,current.batch.queue);};
 }
 
-function updateVersionLabel(){const version=document.querySelector('.brand small');if(version)version.textContent='V0.13';}
+function updateVersionLabel(){setUiVersion('V0.13')}
 const observer=new MutationObserver(()=>{updateVersionLabel();installProfileTools();installBatchQueue();});
 observer.observe(document.documentElement,{childList:true,subtree:true});
 updateVersionLabel();installProfileTools();installBatchQueue();

@@ -1,0 +1,239 @@
+name: V0.69 Design Workspaces and Shipping Marks Acceptance
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-and-visual:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Chinese screenshot fonts
+        timeout-minutes: 3
+        run: |
+          sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 update
+          sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 install -y fonts-noto-cjk fonts-noto-color-emoji poppler-utils
+          fc-cache -f
+          fc-match 'Noto Sans CJK SC' | grep -q NotoSansCJK
+      - name: V0.65 syntax
+        run: |
+          node --check src/runtimeV65.js
+          node --check src/v65Ui.js
+          node --check src/v55Ui.js
+          node --check src/v56Ui.js
+          node --check src/v57Ui.js
+          node --check tests/v65.mjs
+          node --check tests/v65-browser-e2e.js
+          node --check tests/v65-visual.js
+          python3 -m py_compile tests/v65_e2e_server.py
+      - name: Core production baseline
+        run: node tests/v39.mjs
+      - name: Manufacturing baselines
+        run: |
+          node tests/v55.mjs
+          node tests/v56.mjs
+          node tests/v57.mjs
+      - name: Artwork and runtime baselines
+        run: |
+          node tests/v61.mjs
+          node tests/v62.mjs
+          node tests/v63.mjs
+          node tests/v64.mjs
+      - name: V0.65 model acceptance
+        run: node tests/v65.mjs
+      - name: V0.65 wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e "if(Number(require('./package.json').version.split('.')[1])<65)process.exit(1)"
+          grep -Fq '"test:v65"' package.json
+          grep -Eq 'BoxStudio V0\.[0-9]+' index.html
+          grep -Fq 'runtimeV65.js' src/v65Ui.js
+          grep -Fq "v64Runtime.register('v55'" src/v55Ui.js
+          grep -Fq "v64Runtime.register('v56'" src/v56Ui.js
+          grep -Fq "v64Runtime.register('v57'" src/v57Ui.js
+          node - <<'NODE'
+          const html=require('fs').readFileSync('index.html','utf8');
+          const r=html.indexOf('uiRuntimeV64.js'),v55=html.indexOf('v55Ui.js');
+          if(!(r>0&&r<v55)) throw new Error('shared runtime must load before V55');
+          NODE
+      - name: Real Chrome V0.65 comprehensive E2E
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v65-started /tmp/boxstudio-v65-pass /tmp/boxstudio-v65-fail
+          python3 tests/v65_e2e_server.py >/tmp/boxstudio-v65-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 80); do if curl -fsS http://127.0.0.1:8795/tests/v65-browser-e2e.html >/dev/null; then break; fi; sleep 0.1; done
+          timeout 150s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,900 --virtual-time-budget=90000 --dump-dom http://127.0.0.1:8795/tests/v65-browser-e2e.html >/tmp/v65-desktop-dom.log 2>/tmp/v65-desktop-chrome.log || true
+          test -f /tmp/boxstudio-v65-pass || { cat /tmp/boxstudio-v65-fail /tmp/v65-desktop-chrome.log /tmp/v65-desktop-dom.log 2>/dev/null || true; exit 1; }
+          echo 'Desktop V0.65:'; cat /tmp/boxstudio-v65-pass
+          rm -f /tmp/boxstudio-v65-pass /tmp/boxstudio-v65-fail
+          timeout 150s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=390,844 --virtual-time-budget=90000 --dump-dom http://127.0.0.1:8795/tests/v65-browser-e2e.html >/tmp/v65-mobile-dom.log 2>/tmp/v65-mobile-chrome.log || true
+          test -f /tmp/boxstudio-v65-pass || { cat /tmp/boxstudio-v65-fail /tmp/v65-mobile-chrome.log /tmp/v65-mobile-dom.log 2>/dev/null || true; exit 1; }
+          echo 'Mobile V0.65:'; cat /tmp/boxstudio-v65-pass
+      - name: Full production entry artwork E2E
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/ui-version.mjs
+          node tests/full-entry.mjs
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          python3 tests/v65_e2e_server.py >/tmp/boxstudio-studio-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 80); do if curl -fsS http://127.0.0.1:8795/tests/capture-frame.html >/dev/null; then break; fi; sleep 0.1; done
+          mkdir -p artifacts/v65-screenshots
+          for VIEW in desktop mobile; do
+            if [ "$VIEW" = desktop ]; then WIDTH=1280; HEIGHT=900; else WIDTH=390; HEIGHT=844; fi
+            timeout 150s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,950 --virtual-time-budget=90000 --dump-dom "http://127.0.0.1:8795/tests/capture-frame.html?mode=live&shot=artwork&width=${WIDTH}&height=${HEIGHT}" >"artifacts/v65-screenshots/${VIEW}-full-entry.html" 2>/tmp/studio-chrome.log
+            python3 tests/assert-browser-result.py "artifacts/v65-screenshots/${VIEW}-full-entry.html" live
+          done
+      - name: V0.66 editor and marks acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/v66.mjs
+          node --check src/v66Ui.js
+          node --check tests/v66-browser-e2e.js
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          python3 tests/v65_e2e_server.py >/tmp/boxstudio-v66-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 80); do if curl -fsS http://127.0.0.1:8795/tests/v66-browser-e2e.html >/dev/null; then break; fi; sleep 0.1; done
+          mkdir -p artifacts/v66
+          for VIEW in desktop mobile; do
+            if [ "$VIEW" = desktop ]; then WIDTH=1280; HEIGHT=900; else WIDTH=390; HEIGHT=844; fi
+            timeout 150s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,950 --virtual-time-budget=90000 --dump-dom "http://127.0.0.1:8795/tests/capture-frame.html?mode=v66&width=${WIDTH}&height=${HEIGHT}" >"artifacts/v66/${VIEW}.html" 2>/tmp/v66-chrome.log
+            python3 tests/assert-browser-result.py "artifacts/v66/${VIEW}.html" v66
+          done
+      - name: V0.67 independent marks and redesigned workspaces
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/v67.mjs
+          python3 -m pip install --quiet Pillow zxing-cpp
+          pdftoppm -scale-to 1400 -singlefile -png artifacts/v67/standalone.pdf artifacts/v67/standalone-print
+          python3 tests/v67-print-decode.py artifacts/v67/standalone-print.png
+          node --check src/v67Ui.js
+          node --check src/standaloneMarkUiV67.js
+          node --check tests/v67-browser-e2e.js
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          python3 tests/v65_e2e_server.py >/tmp/boxstudio-v67-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 80); do if curl -fsS http://127.0.0.1:8795/tests/v67-browser-e2e.html >/dev/null; then break; fi; sleep 0.1; done
+          mkdir -p artifacts/v67
+          for VIEW in desktop mobile; do
+            if [ "$VIEW" = desktop ]; then WIDTH=1280; HEIGHT=900; else WIDTH=390; HEIGHT=844; fi
+            timeout 150s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,950 --virtual-time-budget=90000 --dump-dom "http://127.0.0.1:8795/tests/capture-frame.html?mode=v67&width=${WIDTH}&height=${HEIGHT}" >"artifacts/v67/${VIEW}.html" 2>/tmp/v67-chrome.log
+            python3 tests/assert-browser-result.py "artifacts/v67/${VIEW}.html" v67
+          done
+      - name: V0.68 layout interaction acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/v68.mjs
+          node --check src/standaloneLayoutV68.js
+          node --check tests/v68-browser-e2e.js
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          python3 tests/v65_e2e_server.py >/tmp/boxstudio-v68-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 80); do if curl -fsS http://127.0.0.1:8795/tests/v68-browser-e2e.html >/dev/null; then break; fi; sleep 0.1; done
+          mkdir -p artifacts/v68
+          for VIEW in desktop mobile; do
+            if [ "$VIEW" = desktop ]; then WIDTH=1280; HEIGHT=900; else WIDTH=390; HEIGHT=844; fi
+            timeout 150s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,950 --virtual-time-budget=90000 --dump-dom --screenshot="artifacts/v68/${VIEW}.png" "http://127.0.0.1:8795/tests/capture-frame.html?mode=v68&width=${WIDTH}&height=${HEIGHT}" >"artifacts/v68/${VIEW}.html" 2>/tmp/v68-chrome.log
+            python3 tests/assert-browser-result.py "artifacts/v68/${VIEW}.html" v68
+          done
+      - name: V0.69 resize, focus and deploy build acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts
+          node tests/v69.mjs
+          node --check tests/v69-browser-e2e.js
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          python3 tests/v65_e2e_server.py >/tmp/boxstudio-v69-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 80); do if curl -fsS http://127.0.0.1:8795/tests/v69-browser-e2e.html >/dev/null; then break; fi; sleep 0.1; done
+          mkdir -p artifacts/v69
+          for VIEW in desktop mobile; do
+            if [ "$VIEW" = desktop ]; then WIDTH=1280; HEIGHT=900; else WIDTH=390; HEIGHT=844; fi
+            timeout 150s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,950 --virtual-time-budget=90000 --dump-dom --screenshot="artifacts/v69/${VIEW}.png" "http://127.0.0.1:8795/tests/capture-frame.html?mode=v69&width=${WIDTH}&height=${HEIGHT}" >"artifacts/v69/${VIEW}.html" 2>/tmp/v69-chrome.log
+            python3 tests/assert-browser-result.py "artifacts/v69/${VIEW}.html" v69
+          done
+      - name: Upload V0.69 results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boxstudio-v0.69-resize-focus-results
+          path: artifacts/v69/
+          if-no-files-found: ignore
+      - name: Upload V0.68 results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boxstudio-v0.68-layout-results
+          path: artifacts/v68/
+          if-no-files-found: ignore
+      - name: Upload V0.67 results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boxstudio-v0.67-independent-marks-results
+          path: artifacts/v67/
+          if-no-files-found: ignore
+      - name: Upload V0.66 results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boxstudio-v0.66-editor-results
+          path: artifacts/v66/
+          if-no-files-found: ignore
+      - name: Capture feature screenshots
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          mkdir -p artifacts/v65-screenshots
+          python3 tests/v65_e2e_server.py >/tmp/boxstudio-v65-visual-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 80); do if curl -fsS 'http://127.0.0.1:8795/tests/studio-screenshots.html?shot=artwork' >/dev/null; then break; fi; sleep 0.1; done
+          for SHOT in templates structure artwork marks 3d preflight export manufacturing factory routing; do
+            timeout 90s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --hide-scrollbars --run-all-compositor-stages-before-draw --window-size=1280,900 --virtual-time-budget=60000 --dump-dom --screenshot="artifacts/v65-screenshots/${SHOT}.png" "http://127.0.0.1:8795/tests/studio-screenshots.html?shot=${SHOT}" >/tmp/v65-shot-${SHOT}.html 2>/tmp/v65-shot-${SHOT}.log
+            test -s "artifacts/v65-screenshots/${SHOT}.png"
+            python3 tests/assert-browser-result.py /tmp/v65-shot-${SHOT}.html "$SHOT"
+          done
+          timeout 90s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --hide-scrollbars --run-all-compositor-stages-before-draw --window-size=390,844 --virtual-time-budget=60000 --dump-dom --screenshot="artifacts/v65-screenshots/mobile-artwork.png" 'http://127.0.0.1:8795/tests/studio-screenshots.html?shot=mobile' >/tmp/v65-shot-mobile.html 2>/tmp/v65-shot-mobile.log
+          test -s artifacts/v65-screenshots/mobile-artwork.png
+          python3 tests/assert-browser-result.py /tmp/v65-shot-mobile.html mobile
+          ls -lh artifacts/v65-screenshots
+      - name: Upload V0.65 screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: boxstudio-v0.65-feature-screenshots
+          path: artifacts/v65-screenshots/
+          if-no-files-found: error

@@ -1,0 +1,75 @@
+name: V0.50 Advanced Fold Authoring
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  fold-authoring:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: V0.50 syntax
+        run: |
+          node --check src/foldAuthoringV50.js
+          node --check src/threeArtworkProofV50.js
+          node --check src/v50Ui.js
+          node --check tests/v50.mjs
+          node --check tests/v50-browser-e2e.js
+          python3 -m py_compile tests/v50_e2e_server.py
+      - name: V0.49 linked workspace baseline
+        run: node tests/v49.mjs
+      - name: V0.50 fold authoring model
+        run: node tests/v50.mjs
+      - name: Production-chain baseline
+        run: node tests/v39.mjs
+      - name: V0.50 wiring
+        run: |
+          node -e "const p=require('./package.json');if(Number(p.version.split('.')[1])<50)process.exit(1)"
+          grep -q '"test:v50"' package.json
+          grep -q 'v50Ui.css' index.html
+          grep -q 'v50Ui.js' index.html
+          grep -q 'V50_FOLD_SCHEMA' src/foldAuthoringV50.js
+          grep -q 'mountArtworkProofV50' src/threeArtworkProofV50.js
+          grep -q '播放顺序' src/v50Ui.js
+          grep -q '3D 尺寸标注' src/v50Ui.js
+      - name: Real Chrome advanced fold authoring
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v50-started /tmp/boxstudio-v50-pass /tmp/boxstudio-v50-fail
+          python3 tests/v50_e2e_server.py >/tmp/boxstudio-v50-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8780/tests/v50-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 90s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,900 --virtual-time-budget=65000 --dump-dom http://127.0.0.1:8780/tests/v50-browser-e2e.html >/tmp/boxstudio-v50-dom.log 2>/tmp/boxstudio-v50-chrome.log || true
+          if test -f /tmp/boxstudio-v50-pass; then
+            echo 'Desktop fold authoring:'; cat /tmp/boxstudio-v50-pass
+          elif test -f /tmp/boxstudio-v50-fail; then
+            cat /tmp/boxstudio-v50-fail; cat /tmp/boxstudio-v50-chrome.log || true; cat /tmp/boxstudio-v50-dom.log || true; exit 1
+          else
+            echo 'V0.50 desktop browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v50-http.log || true; cat /tmp/boxstudio-v50-chrome.log || true; cat /tmp/boxstudio-v50-dom.log || true; exit 1
+          fi
+          rm -f /tmp/boxstudio-v50-pass /tmp/boxstudio-v50-fail
+          timeout 90s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=390,844 --virtual-time-budget=65000 --dump-dom http://127.0.0.1:8780/tests/v50-browser-e2e.html >/tmp/boxstudio-v50-mobile-dom.log 2>/tmp/boxstudio-v50-mobile-chrome.log || true
+          if test -f /tmp/boxstudio-v50-pass; then
+            echo 'Mobile fold authoring:'; cat /tmp/boxstudio-v50-pass
+          elif test -f /tmp/boxstudio-v50-fail; then
+            cat /tmp/boxstudio-v50-fail; cat /tmp/boxstudio-v50-mobile-chrome.log || true; cat /tmp/boxstudio-v50-mobile-dom.log || true; exit 1
+          else
+            echo 'V0.50 mobile browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v50-http.log || true; cat /tmp/boxstudio-v50-mobile-chrome.log || true; cat /tmp/boxstudio-v50-mobile-dom.log || true; exit 1
+          fi

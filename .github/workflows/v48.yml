@@ -1,0 +1,74 @@
+name: V0.48 Template Library and Packaging Workflow
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  template-library-workflow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: V0.48 syntax
+        run: |
+          node --check src/parametricTemplatesV48.js
+          node --check src/productExperienceV48.js
+          node --check src/v48Ui.js
+          node --check src/geometry.js
+          node --check tests/v48.mjs
+          node --check tests/v48-browser-e2e.js
+          python3 -m py_compile tests/v48_e2e_server.py
+      - name: V0.47 compatibility
+        run: node tests/v47.mjs
+      - name: V0.48 parametric and topology regression
+        run: node tests/v48.mjs
+      - name: Production-chain baseline
+        run: node tests/v39.mjs
+      - name: V0.48 wiring
+        run: |
+          node -e "const p=require('./package.json');if(Number(p.version.split('.')[1])<48)process.exit(1)"
+          grep -q '"test:v48"' package.json
+          grep -q 'v48Ui.css' index.html
+          grep -q 'v48Ui.js' index.html
+          grep -q "fefco-0203" src/parametricTemplatesV48.js
+          grep -q "straight-tuck-end" src/parametricTemplatesV48.js
+          grep -q "sleeve-carton" src/parametricTemplatesV48.js
+          grep -q 'dimensionSummaryV48' src/productExperienceV48.js
+      - name: Real Chrome V0.48 template workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v48-started /tmp/boxstudio-v48-pass /tmp/boxstudio-v48-fail
+          python3 tests/v48_e2e_server.py >/tmp/boxstudio-v48-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8778/tests/v48-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 90s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,900 --virtual-time-budget=60000 --dump-dom http://127.0.0.1:8778/tests/v48-browser-e2e.html >/tmp/boxstudio-v48-dom.log 2>/tmp/boxstudio-v48-chrome.log || true
+          if test -f /tmp/boxstudio-v48-pass; then
+            cat /tmp/boxstudio-v48-pass
+          elif test -f /tmp/boxstudio-v48-fail; then
+            cat /tmp/boxstudio-v48-fail
+            cat /tmp/boxstudio-v48-chrome.log || true
+            cat /tmp/boxstudio-v48-dom.log || true
+            exit 1
+          else
+            echo 'V0.48 browser E2E ended without PASS/FAIL signal.'
+            cat /tmp/boxstudio-v48-http.log || true
+            cat /tmp/boxstudio-v48-chrome.log || true
+            cat /tmp/boxstudio-v48-dom.log || true
+            exit 1
+          fi

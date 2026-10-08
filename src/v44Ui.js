@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { closeCad, openDielineCadV38, getDielineDocumentV38 } from './v38Ui.js';
 import { splitEdgeV44, mergeSplitNodeV44, canMergeSplitNodeV44, setNodeContinuityV44, continuityDiagnosticsV44, curveLengthV44 } from './curveEditingV44.js';
@@ -41,7 +42,7 @@ function decorateNode(cad){
   const mergeButton=box.querySelector('[data-v44-merge]');if(mergeButton&&!mergeButton.disabled)mergeButton.onclick=()=>{try{const result=mergeSplitNodeV44(getDielineDocumentV38(),id);reopen(result.doc,{edgeId:result.edgeId})}catch(error){alert(error.message)}};
 }
 
-function decorate(){document.title='BoxStudio V0.44';document.body.dataset.v44CurveTopology='true';const cad=document.querySelector('#boxstudio-v38-cad');if(!cad)return;decorateTop(cad);decorateLegacyTopologyControls(cad);decorateEdge(cad);decorateNode(cad)}
+function decorate(){setUiVersion('V0.44');document.body.dataset.v44CurveTopology='true';const cad=document.querySelector('#boxstudio-v38-cad');if(!cad)return;decorateTop(cad);decorateLegacyTopologyControls(cad);decorateEdge(cad);decorateNode(cad)}
 function schedule(){if(queued)return;queued=true;queueMicrotask(()=>{queued=false;decorate()})}
 observer=new MutationObserver(schedule);observer.observe(document.body,{subtree:true,childList:true});decorate();
 

@@ -1,0 +1,77 @@
+name: V0.60 Artwork Image and Logo Workflow
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  artwork-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: V0.60 syntax
+        run: |
+          node --check src/artworkImageV60.js
+          node --check src/panelArtwork.js
+          node --check src/export.js
+          node --check src/v60Ui.js
+          node --check tests/v60.mjs
+          node --check tests/v60-browser-e2e.js
+          python3 -m py_compile tests/v60_e2e_server.py
+      - name: V0.59 reference UX baseline
+        run: node tests/v59.mjs
+      - name: V0.60 artwork image model
+        run: node tests/v60.mjs
+      - name: Production-chain baseline
+        run: node tests/v39.mjs
+      - name: V0.60 wiring
+        run: |
+          node -e "const p=require('./package.json'),v=p.version.split('.').map(Number); if(!(v[0]>0||v[1]>=60)) process.exit(1)"
+          grep -q '"test:v60"' package.json
+          grep -q 'v60Ui.css' index.html
+          grep -q 'v60Ui.js' index.html
+          grep -q 'V60_PRODUCT_VERSION' src/artworkImageV60.js
+          grep -q "type:'image'" src/panelArtwork.js
+          grep -q '/Subtype /Image' src/export.js
+          grep -q '上传 Logo / 图片' src/v60Ui.js
+          grep -q 'Production PDF' src/v60Ui.js
+      - name: Real Chrome V0.60 artwork image workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v60-started /tmp/boxstudio-v60-pass /tmp/boxstudio-v60-fail
+          python3 tests/v60_e2e_server.py >/tmp/boxstudio-v60-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8790/tests/v60-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 120s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,900 --virtual-time-budget=70000 --dump-dom http://127.0.0.1:8790/tests/v60-browser-e2e.html >/tmp/boxstudio-v60-dom.log 2>/tmp/boxstudio-v60-chrome.log || true
+          if test -f /tmp/boxstudio-v60-pass; then
+            echo 'Desktop V0.60:'; cat /tmp/boxstudio-v60-pass
+          elif test -f /tmp/boxstudio-v60-fail; then
+            cat /tmp/boxstudio-v60-fail; cat /tmp/boxstudio-v60-chrome.log || true; cat /tmp/boxstudio-v60-dom.log || true; exit 1
+          else
+            echo 'V0.60 desktop browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v60-http.log || true; cat /tmp/boxstudio-v60-chrome.log || true; cat /tmp/boxstudio-v60-dom.log || true; exit 1
+          fi
+          rm -f /tmp/boxstudio-v60-pass /tmp/boxstudio-v60-fail
+          timeout 120s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=390,844 --virtual-time-budget=70000 --dump-dom http://127.0.0.1:8790/tests/v60-browser-e2e.html >/tmp/boxstudio-v60-mobile-dom.log 2>/tmp/boxstudio-v60-mobile-chrome.log || true
+          if test -f /tmp/boxstudio-v60-pass; then
+            echo 'Mobile V0.60:'; cat /tmp/boxstudio-v60-pass
+          elif test -f /tmp/boxstudio-v60-fail; then
+            cat /tmp/boxstudio-v60-fail; cat /tmp/boxstudio-v60-mobile-chrome.log || true; cat /tmp/boxstudio-v60-mobile-dom.log || true; exit 1
+          else
+            echo 'V0.60 mobile browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v60-http.log || true; cat /tmp/boxstudio-v60-mobile-chrome.log || true; cat /tmp/boxstudio-v60-mobile-dom.log || true; exit 1
+          fi

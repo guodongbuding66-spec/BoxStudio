@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { generateGeometry } from './geometry.js';
 import { setEdgeCurveV38, edgeByIdV38 } from './dielineCadV38.js';
@@ -34,7 +35,7 @@ function decorateCad(){
   cad.querySelectorAll('[data-v38-export]').forEach(button=>{if(button.dataset.v43)return;button.dataset.v43='true';if(button.dataset.v38Export==='dxf')button.title='Native DXF: LINE / ARC / SPLINE';if(button.dataset.v38Export==='pdf')button.title='Native vector PDF: line + cubic curve operators';if(button.dataset.v38Export==='svg')button.title='Native SVG: L / A / C path commands'});
   const id=selectedArcId();if(!id||cad.querySelector('.v43-arc-advanced'))return;const state=readState(),edge=edgeByIdV38(state.dielineV38,id);if(!edge||edge.curve!=='arc')return;const section=[...cad.querySelectorAll('.v38-right section')].find(s=>s.querySelector('.v38-section-head h3')?.textContent==='Edge');if(!section)return;const box=document.createElement('div');box.className='v43-arc-advanced';box.innerHTML=`<div class="v43-curve-head"><b>Native Arc</b><span>DXF ARC when circular · cubic PDF serialization</span></div><div class="v38-grid2"><label>Rotation °<input data-v43-arc="rotation" type="number" step="1" value="${Number(edge.arc?.rotation||0)}"></label><label class="v43-check">Sweep<input data-v43-arc="sweep" type="checkbox" ${edge.arc?.sweep?'checked':''}></label><label class="v43-check">Large arc<input data-v43-arc="largeArc" type="checkbox" ${edge.arc?.largeArc?'checked':''}></label></div>`;section.appendChild(box);box.querySelectorAll('[data-v43-arc]').forEach(input=>input.onchange=()=>{const key=input.dataset.v43Arc,value=input.type==='checkbox'?input.checked:Number(input.value||0);applyArcPatch(id,{[key]:value})});
 }
-function decorate(){document.title='BoxStudio V0.43';document.body.dataset.v43NativeCurves='true';decorateAdvanced();decorateTemplateDetail();decorateCad()}
+function decorate(){setUiVersion('V0.43');document.body.dataset.v43NativeCurves='true';decorateAdvanced();decorateTemplateDetail();decorateCad()}
 function schedule(){if(queued)return;queued=true;queueMicrotask(()=>{queued=false;decorate()})}
 observer=new MutationObserver(schedule);observer.observe(document.body,{subtree:true,childList:true});decorate();
 

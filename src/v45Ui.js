@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { closeCad, openDielineCadV38, getDielineDocumentV38 } from './v38Ui.js';
 import { applyLiveContinuityV45, setCubicHandleLengthV45, setCircularArcRadiusV45, curveDimensionDiagnosticsV45, cornerOperationEligibilityV45, applyCornerOperationV45 } from './curveConstraintsV45.js';
@@ -33,7 +34,7 @@ function decorateEdge(){const id=selectedEdgeId(),section=findInspector('Edge');
 function decorateNode(){const id=selectedNodeId(),section=findInspector('Node');if(!id||!section||section.querySelector('.v45-corner-tools'))return;const eligibility=cornerOperationEligibilityV45(getDielineDocumentV38(),id);if(!eligibility.ok)return;const box=document.createElement('div');box.className='v45-corner-tools';box.innerHTML=`<div class="v45-head"><b>Corner Tool</b><span>${eligibility.angleDeg.toFixed(2)}° · native topology</span></div><div class="v45-corner-row"><select data-v45-corner-mode><option value="fillet">Fillet / 圆角</option><option value="chamfer">Chamfer / 倒角</option></select><label><input data-v45-corner-value type="number" min="0.1" step="0.1" value="5"><em>mm</em></label><button data-v45-corner-apply>Apply</button></div><small>Fillet inserts a real CUT Arc; Chamfer inserts a real CUT Line. Both trim the two source edges.</small>`;section.appendChild(box);box.querySelector('[data-v45-corner-apply]').onclick=()=>{const mode=box.querySelector('[data-v45-corner-mode]').value,valueMm=Number(box.querySelector('[data-v45-corner-value]').value);try{const result=applyCornerOperationV45(getDielineDocumentV38(),id,{mode,valueMm});reopen(result.doc,{edgeId:result.connectorEdgeId})}catch(error){alert(error.message)}}
 }
 
-function decorate(){document.title='BoxStudio V0.45';document.body.dataset.v45LiveConstraints='true';const cad=document.querySelector('#boxstudio-v38-cad');if(!cad)return;decorateTop(cad);decorateEdge();decorateNode();const edgeId=selectedEdgeId();if(edgeId)scheduleLive(edgeId)}
+function decorate(){setUiVersion('V0.45');document.body.dataset.v45LiveConstraints='true';const cad=document.querySelector('#boxstudio-v38-cad');if(!cad)return;decorateTop(cad);decorateEdge();decorateNode();const edgeId=selectedEdgeId();if(edgeId)scheduleLive(edgeId)}
 function schedule(){if(queued)return;queued=true;queueMicrotask(()=>{queued=false;decorate()})}
 observer=new MutationObserver(schedule);observer.observe(document.body,{subtree:true,childList:true});decorate();
 

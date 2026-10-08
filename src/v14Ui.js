@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState } from './model.js';
 import { buildBatchState } from './batchTemplates.js';
 import { runPreflight } from './preflight.js';
@@ -104,5 +105,5 @@ function install(){
   hideLegacyPanels();const scroll=document.querySelector('#boxstudio-profile-manager .profile-manager-scroll');if(!scroll||document.getElementById(BLOCK_ID))return;
   const block=document.createElement('div');block.id=BLOCK_ID;block.className='profile-section v14-tools';block.innerHTML=`<div class="v14-title"><div><h3>V0.14 Persistent Production</h3><p>Recoverable batch artifacts · role-gated approval · local/REST project persistence.</p></div><span>V0.14</span></div><section><h4>Persistent Batch Artifacts</h4><div id="v14Batch"></div></section><section><h4>Production Roles & Approval</h4><div id="v14Production"></div></section><section><h4>Project Persistence</h4><div id="v14Projects"></div></section>`;scroll.appendChild(block);renderPersistentBatch(block);renderRoleProduction(block);renderProjectStore(block);
 }
-function updateVersionLabel(){const version=document.querySelector('.brand small');if(version)version.textContent='V0.14';}
+function updateVersionLabel(){setUiVersion('V0.14')}
 const observer=new MutationObserver(()=>{updateVersionLabel();hideLegacyPanels();install();});observer.observe(document.documentElement,{childList:true,subtree:true});updateVersionLabel();install();

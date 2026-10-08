@@ -1,3 +1,4 @@
+import {setUiVersion} from './uiVersion.js';
 import { STORAGE_KEY, defaultState, stateForTemplate } from './model.js';
 import { defaultsForTemplate, generateGeometry } from './geometry.js';
 import { V32_TEMPLATE_CATALOG, searchTemplateCatalogV32, previewSvgForGeometryV32 } from './parametricTemplatesV32.js';
@@ -65,20 +66,23 @@ function bindCenter(host){
 function renderTemplatePage(preserveFocus=false){
   const page=[...document.querySelectorAll('main.page')].find(x=>x.querySelector('h1')?.textContent.trim()==='Templates');
   if(!page)return;
+  const html=templateCenterHtml();
   let host=page.querySelector('#v32TemplateCenter');
+  if(host?.dataset.renderKey===html)return;
   if(!host){
     page.querySelector('.cards')?.classList.add('v32-legacy-cards-hidden');
-    host=document.createElement('div');host.innerHTML=templateCenterHtml();page.querySelector('.page-head')?.after(host.firstElementChild);host=page.querySelector('#v32TemplateCenter');
-  }else host.outerHTML=templateCenterHtml(),host=page.querySelector('#v32TemplateCenter');
+    host=document.createElement('div');host.innerHTML=html;page.querySelector('.page-head')?.after(host.firstElementChild);host=page.querySelector('#v32TemplateCenter');
+  }else host.outerHTML=html,host=page.querySelector('#v32TemplateCenter');
+  host.dataset.renderKey=html;
   bindCenter(host);
   if(preserveFocus){const i=host.querySelector('#v32TemplateSearch');i?.focus();i?.setSelectionRange(i.value.length,i.value.length);}
 }
 
 function updateVersionAndLabels(){
-  const brand=document.querySelector('.brand small');if(brand)brand.textContent=VERSION;document.title=`BoxStudio ${VERSION}`;
+  setUiVersion(VERSION);
   const s=readState(),id=s.structure?.template,label=titleFor(id);
-  document.querySelectorAll('.status span').forEach(el=>{if(/Side-Seal \/ RSC:|Mailer 150010:|FEFCO 0427:|Reverse Tuck End:|Auto-lock Bottom:/.test(el.textContent))el.textContent=`${label}: ${s.structure.length} × ${s.structure.width} × ${s.structure.height}`;});
-  if(id&&id!=='side-seal-rsc')document.querySelectorAll('.card .eyebrow').forEach(el=>{if(/SIDE-SEAL|RSC/.test(el.textContent))el.textContent=label.toUpperCase();});
+  document.querySelectorAll('.status span').forEach(el=>{if(/Side-Seal \/ RSC:|Mailer 150010:|FEFCO 0427:|Reverse Tuck End:|Auto-lock Bottom:/.test(el.textContent))if(el.textContent!==`${label}: ${s.structure.length} × ${s.structure.width} × ${s.structure.height}`)el.textContent=`${label}: ${s.structure.length} × ${s.structure.width} × ${s.structure.height}`;});
+  if(id&&id!=='side-seal-rsc')document.querySelectorAll('.card .eyebrow').forEach(el=>{if(/SIDE-SEAL|RSC/.test(el.textContent)&&el.textContent!==label.toUpperCase())el.textContent=label.toUpperCase();});
 }
 
 function installMaterialSummary(){

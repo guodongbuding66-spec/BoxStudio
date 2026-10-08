@@ -1,0 +1,74 @@
+name: V0.53 Collision Repair Assistant
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  collision-repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: V0.53 syntax
+        run: |
+          node --check src/collisionRepairV53.js
+          node --check src/v53Ui.js
+          node --check tests/v53.mjs
+          node --check tests/v53-browser-e2e.js
+          python3 -m py_compile tests/v53_e2e_server.py
+      - name: V0.52 collision optimizer baseline
+        run: node tests/v52.mjs
+      - name: V0.53 repair model
+        run: node tests/v53.mjs
+      - name: Production-chain baseline
+        run: node tests/v39.mjs
+      - name: V0.53 wiring
+        run: |
+          node -e "const p=require('./package.json');const [a,b]=p.version.split('.').map(Number);if(a!==0||b<53)process.exit(1)"
+          grep -q '"test:v53"' package.json
+          grep -q 'v53Ui.css' index.html
+          grep -q 'v53Ui.js' index.html
+          grep -q 'V53_REPAIR_SCHEMA' src/collisionRepairV53.js
+          grep -q '试算预览' src/v53Ui.js
+          grep -q '确认应用' src/v53Ui.js
+          grep -q 'Before-After' src/v53Ui.js
+      - name: Real Chrome V0.53 collision repair workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          rm -f /tmp/boxstudio-v53-started /tmp/boxstudio-v53-pass /tmp/boxstudio-v53-fail
+          python3 tests/v53_e2e_server.py >/tmp/boxstudio-v53-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8783/tests/v53-browser-e2e.html >/dev/null; then break; fi
+            sleep 0.1
+          done
+          timeout 140s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,900 --virtual-time-budget=100000 --dump-dom http://127.0.0.1:8783/tests/v53-browser-e2e.html >/tmp/boxstudio-v53-dom.log 2>/tmp/boxstudio-v53-chrome.log || true
+          if test -f /tmp/boxstudio-v53-pass; then
+            echo 'Desktop collision repair:'; cat /tmp/boxstudio-v53-pass
+          elif test -f /tmp/boxstudio-v53-fail; then
+            cat /tmp/boxstudio-v53-fail; cat /tmp/boxstudio-v53-chrome.log || true; cat /tmp/boxstudio-v53-dom.log || true; exit 1
+          else
+            echo 'V0.53 desktop browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v53-http.log || true; cat /tmp/boxstudio-v53-chrome.log || true; cat /tmp/boxstudio-v53-dom.log || true; exit 1
+          fi
+          rm -f /tmp/boxstudio-v53-pass /tmp/boxstudio-v53-fail
+          timeout 140s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=390,844 --virtual-time-budget=100000 --dump-dom http://127.0.0.1:8783/tests/v53-browser-e2e.html >/tmp/boxstudio-v53-mobile-dom.log 2>/tmp/boxstudio-v53-mobile-chrome.log || true
+          if test -f /tmp/boxstudio-v53-pass; then
+            echo 'Mobile collision repair:'; cat /tmp/boxstudio-v53-pass
+          elif test -f /tmp/boxstudio-v53-fail; then
+            cat /tmp/boxstudio-v53-fail; cat /tmp/boxstudio-v53-mobile-chrome.log || true; cat /tmp/boxstudio-v53-mobile-dom.log || true; exit 1
+          else
+            echo 'V0.53 mobile browser E2E ended without PASS/FAIL signal.'; cat /tmp/boxstudio-v53-http.log || true; cat /tmp/boxstudio-v53-mobile-chrome.log || true; cat /tmp/boxstudio-v53-mobile-dom.log || true; exit 1
+          fi
