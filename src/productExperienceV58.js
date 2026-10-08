@@ -1,3 +1,4 @@
+import {BARCODE_SIZES_V70,BARCODE_SIZE_MESSAGE_V70} from './barcodeGroupV70.js';
 import { generateGeometry } from './geometry.js';
 import { cloneState, defaultState } from './model.js';
 
@@ -37,7 +38,7 @@ export const V58_MARK_PRESETS={
   origin:{id:'origin',label:'Made in',kind:'text',template:'Made in {{originCountry}}',fontSize:6,w:105,h:22},
   destination:{id:'destination',label:'目的国',kind:'text',template:'DEST: {{destinationCountry}}',fontSize:6,w:100,h:22,bold:true},
   variable:{id:'variable',label:'自定义变量文字',kind:'text',template:'{{sku}}',fontSize:7,w:105,h:22},
-  barcodeQr:{id:'barcodeQr',label:'Barcode + QR',kind:'barcode-qr-group',w:200,h:64,barcodeType:'CODE39'},
+  barcodeQr:{id:'barcodeQr',label:'Barcode + QR',kind:'barcode-qr-group',w:250,h:80,barcodeType:'CODE39'},
   up:{id:'up',label:'This Side Up',kind:'icon',icon:'up',w:40,h:40},
   fragile:{id:'fragile',label:'Fragile',kind:'icon',icon:'fragile',w:40,h:40},
   dry:{id:'dry',label:'Keep Dry',kind:'icon',icon:'dry',w:40,h:40},
@@ -66,9 +67,10 @@ function choosePanel(state,requested){
   return valid(requested)||valid(state.markEditorPanelId)||valid(state.linkedV49?.selectedPanelId)||valid(selectedElement?.panelId)||valid('front')||valid('lid')||valid('base')||panels[0];
 }
 
-function fitRect(panel,preset){
-  const margin=Math.min(10,Math.max(2,Math.min(panel.w,panel.h)*.06));
+function fitRect(panel,preset,safe=2){
+  const margin=preset.kind==='barcode-qr-group'?Math.max(2,Number(safe)||0):Math.min(10,Math.max(2,Math.min(panel.w,panel.h)*.06));
   const maxW=Math.max(12,panel.w-margin*2),maxH=Math.max(12,panel.h-margin*2);
+  if(preset.kind==='barcode-qr-group'){const size=BARCODE_SIZES_V70.find(s=>s.w<=maxW&&s.h<=maxH);if(!size)throw Object.assign(new Error(BARCODE_SIZE_MESSAGE_V70+' 当前面的空间不足。'),{code:'MARK_NO_SPACE'});return{x:margin,y:margin,...size};}
   const scale=Math.min(1,maxW/n(preset.w,100),maxH/n(preset.h,24));
   const w=n(preset.w,100)*scale,h=n(preset.h,24)*scale;
   return{x:margin,y:margin,w,h};
@@ -80,10 +82,10 @@ function uid(prefix='mark'){
 
 export function addMarkPresetV58(state,presetId,{panelId=null}={}){
   const preset=V58_MARK_PRESETS[presetId];if(!preset)throw new Error(`V58_UNKNOWN_MARK_PRESET:${presetId}`);
-  const next=deep(state),panel=choosePanel(next,panelId),rect=fitRect(panel,preset),id=uid(preset.id);
+  const next=deep(state),panel=choosePanel(next,panelId),rect=fitRect(panel,preset,next.structure.safe),id=uid(preset.id);
   let element;
   if(preset.kind==='text')element={id,type:'text',group:'marks',panelId:panel.id,...rect,r:0,template:preset.template,fontSize:Math.min(n(preset.fontSize,6),Math.max(3,rect.h*.42)),bold:Boolean(preset.bold)};
-  else if(preset.kind==='barcode-qr-group')element={id,type:'barcode-qr-group',group:'marks',panelId:panel.id,...rect,r:0,barcodeValue:'{{sku}}',qrValue:'{{qrValue}}',preset:rect.w>=190?'200x64':'custom',lockAspect:true,barcodeType:preset.barcodeType||'CODE39'};
+  else if(preset.kind==='barcode-qr-group')element={id,type:'barcode-qr-group',group:'marks',panelId:panel.id,...rect,r:0,barcodeValue:'{{sku}}',qrValue:'{{qrValue}}',preset:rect.w===250?'250x80':'200x64',lockAspect:true,barcodeType:preset.barcodeType||'CODE39'};
   else if(preset.kind==='icon')element={id,type:'icon',icon:preset.icon,group:'marks',panelId:panel.id,...rect,r:0};
   else throw new Error(`V58_UNSUPPORTED_MARK_KIND:${preset.kind}`);
   next.elements=[...(next.elements||[]),element];next.selectedId=id;next.markEditorPanelId=panel.id;next.page='editor';next.editorTab='Marks';

@@ -53,9 +53,7 @@ function damageOneBarcodeBar(pdfBytes){
 for(const angle of [90,180,270]){
   const state=clone(defaultState);
   codeGroup(state).r=angle;
-  const pdf=buildProductionPdfV27(state),geometry=geometryAcceptanceFromProductionPdfV31(state,pdf,{toleranceMm:.2});
-  assert.equal(geometry.ok,false,`rotation ${angle}° must not silently pass geometry acceptance`);
-  assert.ok(geometry.failed.some(x=>x.kind==='rotation'&&x.id==='rotation-barcodeQr'),`rotation ${angle}° must produce a rotation failure`);
+  assert.throws(()=>buildProductionPdfV27(state),e=>e.code==='BARCODE_PRODUCTION_BLOCKED'&&e.errors.some(x=>x.code==='BARCODE_DIRECTION'),`rotation ${angle}° must be blocked before generating a misleading PDF`);
 }
 
 // P0-4: Required means non-bypassable, including legacy/persisted state with the flag disabled.

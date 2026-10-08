@@ -1,3 +1,4 @@
+import {BARCODE_SIZES_V70,BARCODE_SIZE_MESSAGE_V70} from './barcodeGroupV70.js';
 import { cloneState } from './model.js';
 import { generateGeometry } from './geometry.js';
 import { addMarkPresetV58 } from './productExperienceV58.js';
@@ -64,13 +65,15 @@ export function addMarkPresetV66(state,presetId,{panelId=null}={}){
   const maxW=panel.w-safe*2,maxH=panel.h-safe*2;
   if(maxW<=0||maxH<=0)throw Object.assign(new Error('目标面的安全区不足，请选择更大的面。'),{code:'MARK_NO_SPACE'});
   // One scale factor preserves the locked Barcode + QR group and icon geometry.
-  const scale=Math.min(1,maxW/e.w,maxH/e.h);
+  const scale=e.type==='barcode-qr-group'?1:Math.min(1,maxW/e.w,maxH/e.h);
   e.w*=scale;e.h*=scale;
   if(e.fontSize)e.fontSize*=scale;
   const occupied=(state.elements||[]).filter(x=>x.panelId===panel.id&&!x.hidden&&!x.v61PanelFill&&!(x.type==='notice'&&!isPackageNoticeVisible(state.variables))).map(rotatedBounds);
   const xs=[safe,...occupied.map(r=>r.x+r.w+gap)].sort((a,b)=>a-b),ys=[safe,...occupied.map(r=>r.y+r.h+gap)].sort((a,b)=>a-b);
   const polygon=panel.points?.length>=3?panel.points:null;
   let placement=null;
+  const sizes=e.type==='barcode-qr-group'?BARCODE_SIZES_V70:[{w:e.w,h:e.h}];
+  for(const size of sizes){Object.assign(e,size);
   for(const y of ys){for(const x of xs){
     const r={x,y,w:e.w,h:e.h};
     if(x+e.w>panel.w-safe+1e-7||y+e.h>panel.h-safe+1e-7)continue;
@@ -79,7 +82,8 @@ export function addMarkPresetV66(state,presetId,{panelId=null}={}){
     if(polygon){let valid=true;for(let k=0;k<=20&&valid;k++){const t=k/20;for(const [px,py] of [[x+e.w*t,y],[x+e.w*t,y+e.h],[x,y+e.h*t],[x+e.w,y+e.h*t]])if(!insidePolygon(panel.x+px,panel.y+py,polygon)){valid=false;break}}if(!valid)continue;}
     placement=r;break;
   }if(placement)break;}
-  if(!placement)throw Object.assign(new Error('当前面没有足够空位。请移动已有对象，或选择其他目标面后插入。'),{code:'MARK_NO_SPACE'});
+  if(placement)break;}
+  if(!placement)throw Object.assign(new Error(e.type==='barcode-qr-group'?BARCODE_SIZE_MESSAGE_V70+' 当前面没有足够空位，请整理布局、选择更大的面或独立设计唛头。':'当前面没有足够空位。请移动已有对象，或选择其他目标面后插入。'),{code:'MARK_NO_SPACE'});
   Object.assign(e,placement);
   return result;
 }

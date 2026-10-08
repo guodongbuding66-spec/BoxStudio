@@ -34,6 +34,10 @@ try{
  const art=window.BoxStudioV63.getSummary().artwork,expectedCount=art.images+art.texts+art.marks+art.styledPanels;assert(document.querySelector('.v63-work-status > span:nth-child(2) b').textContent===String(expectedCount),'Live Artwork object count');
  document.querySelector('#undo').click();await settle();assert(!editor.getState().elements.some(e=>e.type==='image'),'Image undo');
  document.querySelector('#redo').click();await settle();assert(editor.getState().elements.some(e=>e.type==='image'),'Image redo');
+ let overlapBlocked=false;try{buildProductionPdf(editor.getState());}catch(error){overlapBlocked=error.code==='BARCODE_PRODUCTION_BLOCKED'&&error.errors.some(c=>c.code==='BARCODE_OVERLAP');}
+ assert(overlapBlocked,'A logo covering the code group blocks production export');
+ const imagePanel=document.querySelector('[data-prop="panelId"]');imagePanel.value='base';imagePanel.dispatchEvent(new Event('change',{bubbles:true}));await settle();
+ assert(editor.getState().elements.find(e=>e.type==='image').panelId==='base','Logo moved to another print face to preserve the complete code group');
  document.querySelector('[data-v63-stage="Marks"]').click();await wait(()=>document.querySelector('[data-v58-marks-studio]'),'Marks');
  const mark=document.querySelector('[data-v58-mark]'),count=editor.getState().elements.length;mark.click();await settle();
  assert(editor.getState().elements.length>count,'Shipping mark preset committed');

@@ -16,9 +16,9 @@ const TEMPLATE_IDS=['side-seal-rsc','mailer-150010','fefco-0427','reverse-tuck-e
 let checked=0;
 for(const id of TEMPLATE_IDS){
   const preset=stateForTemplate(id,defaultState.variables),s=structuredClone(defaultState);s.structure=preset.structure;s.elements=preset.elements;s.variables=preset.variables;s.selectedId=preset.selectedId;s.page='editor';s.editorTab='Marks';
-  const panels=markPanelOptionsV58(s);assert.ok(panels.length>0,`${id}: no mark panels`);const target=panels[0];let work=s;
-  for(const markId of ['sku','weights','barcodeQr','up','fragile','dry']){const r=addMarkPresetV58(work,markId,{panelId:target.id});work=r.state;const e=r.element;assert.equal(e.panelId,target.id);assert.ok(e.x>=0&&e.y>=0,`${id}/${markId}: negative mark position`);assert.ok(e.x+e.w<=target.w+0.001,`${id}/${markId}: mark exceeds panel width`);assert.ok(e.y+e.h<=target.h+0.001,`${id}/${markId}: mark exceeds panel height`);checked++}
-  const summary=studioSummaryV58(work);assert.equal(summary.templateId,id);assert.equal(summary.panelCount,panels.length);assert.ok(summary.markCount>=preset.elements.filter(e=>e.group==='marks').length+6);
+  const panels=markPanelOptionsV58(s);assert.ok(panels.length>0,`${id}: no mark panels`);const target=panels[0];let work=s,accepted=0;
+  for(const markId of ['sku','weights','barcodeQr','up','fragile','dry']){if(markId==='barcodeQr'&&(target.w-2*Math.max(2,s.structure.safe)<200||target.h-2*Math.max(2,s.structure.safe)<64)){assert.throws(()=>addMarkPresetV58(work,markId,{panelId:target.id}),e=>e.code==='MARK_NO_SPACE');continue;}accepted++;const r=addMarkPresetV58(work,markId,{panelId:target.id});work=r.state;const e=r.element;assert.equal(e.panelId,target.id);assert.ok(e.x>=0&&e.y>=0,`${id}/${markId}: negative mark position`);assert.ok(e.x+e.w<=target.w+0.001,`${id}/${markId}: mark exceeds panel width`);assert.ok(e.y+e.h<=target.h+0.001,`${id}/${markId}: mark exceeds panel height`);checked++}
+  const summary=studioSummaryV58(work);assert.equal(summary.templateId,id);assert.equal(summary.panelCount,panels.length);assert.ok(summary.markCount>=preset.elements.filter(e=>e.group==='marks').length+accepted);
   const g=generateGeometry(work.structure);assert.ok(g.width>0&&g.height>0,`${id}: invalid geometry after marks`);
 }
 assert.throws(()=>addMarkPresetV58(defaultState,'missing'),/V58_UNKNOWN_MARK_PRESET/);

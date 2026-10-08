@@ -1,3 +1,5 @@
+import {barcodeGroupLayoutV70,barcodeSizeV70,assertBarcodeProductionV70,BARCODE_SIZE_MESSAGE_V70} from './barcodeGroupV70.js';
+import {addMarkPresetV66} from './shippingMarkLayoutV66.js';
 import {iconV67} from './uiIconsV67.js';
 import { STORAGE_KEY, LEGACY_STORAGE_KEYS, defaultState, cloneState, stateForTemplate } from './model.js';
 import { renderTemplate, isPackageNoticeVisible, normalizeVariables } from './variables.js';
@@ -187,12 +189,11 @@ function textBlock(el,text,g){
 }
 function barcodeQrSvg(el,g){
   const rr=resolveElementRect(el,g), barcodeValue=renderTemplate(el.barcodeValue,state.variables), qrValue=renderTemplate(el.qrValue,state.variables);
-  const pad=5,gap=7,qrSide=Math.max(20,Math.min(el.h-pad*2,el.w*.30));
-  const bw=Math.max(30,el.w-pad*2-gap-qrSide),bh=Math.max(16,el.h-pad*2-11);
+  const {pad,gap,qrSide,bw,bh,fontSize,labelBaseline,stroke}=barcodeGroupLayoutV70(el);
   let bars;try{bars=barcodeSvg(el.barcodeType||'CODE39',barcodeValue,bw,bh)}catch(err){return `<g transform="translate(${rr.absX} ${rr.absY})" data-element-id="${el.id}" class="element-hit"><rect width="${el.w}" height="${el.h}" fill="#fff" stroke="#c74c4c" stroke-width="2"/><text x="8" y="20" class="warning-label">BARCODE ERROR: ${esc(err.message)}</text></g>`}let qr;
   try{qr=qrSvgRects(qrValue,qrSide,qrSide)}catch(err){return `<g transform="translate(${rr.absX} ${rr.absY})" data-element-id="${el.id}" class="element-hit"><rect width="${el.w}" height="${el.h}" fill="#fff" stroke="#c74c4c" stroke-width="2"/><text x="8" y="20" class="warning-label">QR ERROR: ${esc(err.message)}</text></g>`}
   const qx=el.w-pad-qrSide,qy=pad;
-  return `<g transform="translate(${rr.absX} ${rr.absY}) rotate(${el.r||0} ${el.w/2} ${el.h/2})" data-element-id="${el.id}" class="element-hit"><rect width="${el.w}" height="${el.h}" fill="#fff" stroke="#111" stroke-width="1.5"/>${bars.bearer?`<rect x="${pad}" y="${pad}" width="${bw}" height="${bh}" fill="none" stroke="#111" stroke-width="2"/>`:''}<g transform="translate(${pad} ${pad})" fill="#111">${bars.rects}</g><text x="${pad+bw/2}" y="${el.h-5}" text-anchor="middle" class="svg-text" font-size="7">${esc(bars.label)}</text><g transform="translate(${qx} ${qy})"><rect width="${qrSide}" height="${qrSide}" fill="#fff"/><g fill="#111">${qr.rects}</g></g><line x1="${qx-gap/2}" y1="${pad}" x2="${qx-gap/2}" y2="${el.h-pad}" stroke="#d1d5db" stroke-width="1"/></g>`;
+  return `<g transform="translate(${rr.absX} ${rr.absY}) rotate(${el.r||0} ${el.w/2} ${el.h/2})" data-element-id="${el.id}" class="element-hit"><rect width="${el.w}" height="${el.h}" fill="#fff" stroke="#111" stroke-width="${stroke}"/>${bars.bearer?`<rect x="${pad}" y="${pad}" width="${bw}" height="${bh}" fill="none" stroke="#111" stroke-width="${2*el.w/250}"/>`:''}<g transform="translate(${pad} ${pad})" fill="#111">${bars.rects}</g><text x="${pad+bw/2}" y="${labelBaseline}" text-anchor="middle" class="svg-text" font-size="${fontSize}">${esc(bars.label)}</text><g transform="translate(${qx} ${qy})"><rect width="${qrSide}" height="${qrSide}" fill="#fff"/><g fill="#111">${qr.rects}</g></g><line x1="${qx-gap/2}" y1="${pad}" x2="${qx-gap/2}" y2="${el.h-pad}" stroke="#d1d5db" stroke-width="${el.w/250}"/></g>`;
 }
 function shapeSvg(el,g){const rr=resolveElementRect(el,g);return `<g transform="translate(${rr.absX} ${rr.absY}) rotate(${el.r||0} ${el.w/2} ${el.h/2})" data-element-id="${el.id}" class="element-hit"><rect width="${el.w}" height="${el.h}" fill="${el.fill||'none'}" stroke="#111" stroke-width="2"/></g>`}
 function lineSvg(el,g){const rr=resolveElementRect(el,g);return `<g transform="translate(${rr.absX} ${rr.absY}) rotate(${el.r||0} ${el.w/2} ${el.h/2})" data-element-id="${el.id}" class="element-hit"><line x1="0" y1="0" x2="${el.w}" y2="${el.h}" stroke="#111" stroke-width="2"/><rect width="${Math.max(6,el.w)}" height="${Math.max(6,el.h)}" fill="transparent"/></g>`}
@@ -278,9 +279,9 @@ function batchPanel(){
 }
 function propertiesPanel(el,g){
   const p=g.panelMap[el.panelId]||g.panelMap.front||g.bodyPanels[0];if(!p)return'';
-  const fields=['x','y','w','h','r'].map(k=>`<div class="field"><label>${k==='r'?'Rotation':k.toUpperCase()} ${k==='r'?'°':'mm'}</label><input type="number" step="0.1" data-prop="${k}" value="${el[k]}"></div>`).join(''),panels=g.bodyPanels.filter(x=>x.kind==='panel').map(x=>`<option value="${x.id}" ${x.id===el.panelId?'selected':''}>${x.label}</option>`).join('');let special='';
+  const fields=['x','y','w','h','r'].map(k=>`<div class="field"><label>${k==='r'?'Rotation':k.toUpperCase()} ${k==='r'?'°':'mm'}</label><input type="number" step="0.1" data-prop="${k}" value="${el[k]}" ${el.type==='barcode-qr-group'&&['w','h','r'].includes(k)?'readonly':''}></div>`).join(''),panels=g.bodyPanels.filter(x=>x.kind==='panel').map(x=>`<option value="${x.id}" ${x.id===el.panelId?'selected':''}>${x.label}</option>`).join('');let special='';
   if(el.template!==undefined)special+=`<div class="field stack"><label>Template</label><textarea data-prop="template">${esc(el.template)}</textarea></div>`;if(el.fontSize!==undefined)special+=`<div class="field"><label>Font mm</label><input type="number" step="0.5" data-prop="fontSize" value="${el.fontSize}"></div>`;
-  if(el.type==='barcode-qr-group')special+=`<div class="field"><label>Barcode type</label><select id="barcodeType">${BARCODE_TYPES.map(t=>`<option value="${t.value}" ${(el.barcodeType||'CODE39')===t.value?'selected':''}>${t.label}</option>`).join('')}</select></div><div class="field"><label>Preset</label><select id="barcodePreset"><option value="250x80" ${el.preset==='250x80'?'selected':''}>250 × 80 mm</option><option value="200x64" ${el.preset==='200x64'?'selected':''}>200 × 64 mm</option></select></div><div class="field stack"><label>Barcode</label><input data-prop="barcodeValue" value="${esc(el.barcodeValue)}"></div><div class="field stack"><label>QR value</label><input data-prop="qrValue" value="${esc(el.qrValue)}"></div><div class="notice">支持 Code 39 / EAN-13 / UPC-A / ITF-14 / GS1-128。GS1-128 可输入 (01)…(10)… 格式；可变长度 AI 会自动插入 FNC1。</div>`;
+  if(el.type==='barcode-qr-group')special+=`<div class="field"><label>Barcode type</label><select id="barcodeType">${BARCODE_TYPES.map(t=>`<option value="${t.value}" ${(el.barcodeType||'CODE39')===t.value?'selected':''}>${t.label}</option>`).join('')}</select></div><div class="field"><label>整体规格</label><select id="barcodePreset"><option value="250x80" ${el.preset==='250x80'?'selected':''}>250 × 80 mm</option><option value="200x64" ${el.preset==='200x64'?'selected':''}>200 × 64 mm</option></select></div><div class="field stack"><label>Barcode</label><input data-prop="barcodeValue" value="${esc(el.barcodeValue)}"></div><div class="field stack"><label>QR value</label><input data-prop="qrValue" value="${esc(el.qrValue)}"></div><div class="notice">优先 250 × 80 mm，空间不足可用 200 × 64 mm；禁止拆分，统一等比例缩放。支持 Code 39 / EAN-13 / UPC-A / ITF-14 / GS1-128。GS1-128 可输入 (01)…(10)… 格式；可变长度 AI 会自动插入 FNC1。</div>`;
   return `<div class="panel-section"><h3>Properties · ${esc(el.id)}</h3><div class="field"><label>Panel</label><select data-prop="panelId">${panels}</select></div>${fields}${special}<div class="muted tiny">Panel size: ${p.w.toFixed(1)} × ${p.h.toFixed(1)} mm</div></div>`;
 }
 function bindEditor(){
@@ -296,7 +297,7 @@ function bindEditor(){
   document.querySelectorAll('[data-layer-visible]').forEach(inp=>inp.onchange=e=>setState(s=>s.hiddenGroups[e.target.dataset.layerVisible]=!e.target.checked,{history:false}));
   document.querySelectorAll('[data-structure]').forEach(inp=>inp.onchange=e=>setState(s=>{const k=e.target.dataset.structure;s.structure[k]=e.target.tagName==='SELECT'?e.target.value:Number(e.target.value);syncShippingDimensions()}));
   document.querySelectorAll('[data-structure-check]').forEach(inp=>inp.onchange=e=>setState(s=>{s.structure[e.target.dataset.structureCheck]=e.target.checked;syncShippingDimensions()}));
-  document.querySelectorAll('[data-prop]').forEach(inp=>inp.onchange=e=>setState(s=>{const g=geo(),el=s.elements.find(x=>x.id===s.selectedId);if(!el)return;const k=e.target.dataset.prop;if(k==='template'||k==='panelId'||k==='barcodeValue'||k==='qrValue'||k==='barcodeType')el[k]=e.target.value;else if(el.type==='barcode-qr-group'&&el.lockAspect&&['w','h'].includes(k)){const value=Number(e.target.value);if(!Number.isFinite(value))return;if(k==='w'){el.w=Math.max(12.5,value);el.h=el.w/3.125}else{el.h=Math.max(4,value);el.w=el.h*3.125}}else el[k]=Number(e.target.value);Object.assign(el,clampElementToPanel(el,g))}));
+  document.querySelectorAll('[data-prop]').forEach(inp=>inp.onchange=e=>setState(s=>{const g=geo(),el=s.elements.find(x=>x.id===s.selectedId);if(!el)return;const k=e.target.dataset.prop;if(k==='template'||k==='panelId'||k==='barcodeValue'||k==='qrValue'||k==='barcodeType')el[k]=e.target.value;else if(el.type==='barcode-qr-group'&&['w','h','r'].includes(k))return;else el[k]=Number(e.target.value);Object.assign(el,clampElementToPanel(el,g))}));
   const preset=document.querySelector('#barcodePreset');if(preset)preset.onchange=e=>setState(s=>{const el=s.elements.find(x=>x.id===s.selectedId);if(!el)return;el.preset=e.target.value;if(el.preset==='250x80'){el.w=250;el.h=80}else{el.w=200;el.h=64}Object.assign(el,clampElementToPanel(el,geo()))});
   const barcodeType=document.querySelector('#barcodeType');if(barcodeType)barcodeType.onchange=e=>setState(s=>{const el=s.elements.find(x=>x.id===s.selectedId);if(el)el.barcodeType=e.target.value});
 
@@ -386,7 +387,7 @@ function handleTool(tool){
   else if(tool==='mark')state.elements.push({id,type:'icon',icon:'up',group:'marks',panelId:front.id,x:10,y:10,w:Math.min(38,maxW),h:Math.min(38,maxH),r:0});
   else if(tool==='barcode'){
     const old=state.elements.find(e=>e.type==='barcode-qr-group');if(old){state.selectedId=old.id;state.editorTab='Marks';persist();render();return}
-    const scale=Math.min(1,maxW/200,maxH/64),w=200*scale,h=64*scale;state.elements.push({id,type:'barcode-qr-group',group:'marks',panelId:front.id,x:10,y:10,w,h,r:0,barcodeValue:'{{sku}}',qrValue:'{{qrValue}}',preset:scale===1?'200x64':'compact',lockAspect:true,barcodeType:'CODE39'});
+    try{const result=addMarkPresetV66(state,'barcodeQr',{panelId:front.id});state=result.state;pushHistory();render();return;}catch(error){alert(error.message);return;}
   } else return;
   state.selectedId=id;state.editorTab=tool==='mark'||tool==='barcode'?'Marks':'Design';pushHistory();render();
 }
@@ -466,3 +467,6 @@ window.BoxStudioEditor = {
   undo,redo,
   getHistory: () => ({canUndo:historyIndex>0,canRedo:historyIndex<history.length-1,index:historyIndex,length:history.length})
 };
+
+// Capture before any versioned export handler. Project JSON and structure-only DXF remain available.
+document.addEventListener('click',event=>{const button=event.target.closest?.('button');if(!button||state.page!=='editor')return;const id=button.id||'';if(!/exportSvg|exportPng|batchSvg|batchPdf|batchCombinedPdf|Pdf|PDF|Approved|Checked/.test(id))return;try{assertBarcodeProductionV70(state);}catch(error){event.preventDefault();event.stopImmediatePropagation();alert(error.message);}},true);

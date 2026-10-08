@@ -25,9 +25,9 @@ for(const id of ['side-seal-rsc','mailer-150010','fefco-0427','reverse-tuck-end'
       }catch(error){if(error.code!=='MARK_NO_SPACE')throw error;assert.equal(JSON.stringify(work),before,'failed insertion must not mutate project');}
     }
   }
-  // Legacy preset insertion preserves aspect even when the target is too small.
-  const target=geo.bodyPanels.find(p=>p.kind==='panel'),group=addMarkPresetV58(s,'barcodeQr',{panelId:target.id}).element;
-  assert(Math.abs(group.w/group.h-3.125)<1e-8);
+  // All insertion paths must reject a face that cannot fit the smaller fixed size.
+  const target=geo.bodyPanels.find(p=>p.kind==='panel');
+  if(target.w-2*Math.max(2,s.structure.safe)>=200&&target.h-2*Math.max(2,s.structure.safe)>=64){const group=addMarkPresetV58(s,'barcodeQr',{panelId:target.id}).element;assert([200,250].includes(group.w));assert(Math.abs(group.w/group.h-3.125)<1e-8);}else assert.throws(()=>addMarkPresetV58(s,'barcodeQr',{panelId:target.id}),e=>e.code==='MARK_NO_SPACE');
 }
 const initial=structuredClone(defaultState),updated=applyMarkDataV66(initial,{sku:'ISUNOR-001',nw:'12.5',gw:'14',crn:'NEW-CRN',packageIndex:'1',packageCount:'1'});
 assert.equal(initial.variables.sku,'KF210215US-02PM-001');

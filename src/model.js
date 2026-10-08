@@ -27,7 +27,7 @@ export const mailerElements = [
   {id:'sku',type:'text',group:'marks',panelId:'lid',x:18,y:18,w:180,h:22,r:0,template:'SKU: {{sku}}',fontSize:8,bold:true},
   {id:'origin',type:'text',group:'marks',panelId:'front',x:12,y:10,w:110,h:18,r:0,template:'Made in {{originCountry}}',fontSize:6},
   {id:'crn1',type:'text',group:'marks',panelId:'front',x:130,y:10,w:145,h:18,r:0,template:'CRN: {{crn}}',fontSize:6,bold:true},
-  {id:'barcodeQr',type:'barcode-qr-group',group:'marks',panelId:'lid',x:25,y:58,w:200,h:64,r:0,barcodeValue:'{{sku}}',qrValue:'{{qrValue}}',preset:'200x64',lockAspect:true,barcodeType:'CODE39'},
+  {id:'barcodeQr',type:'barcode-qr-group',group:'marks',panelId:'lid',x:25,y:58,w:250,h:80,r:0,barcodeValue:'{{sku}}',qrValue:'{{qrValue}}',preset:'250x80',lockAspect:true,barcodeType:'CODE39'},
   {id:'packageNotice',type:'notice',group:'marks',panelId:'base',x:18,y:24,w:260,h:34,r:0,template:'Please note the product has {{packageCount}} packages,\nand this is the package {{packageIndex}}',fontSize:6},
   {id:'thisSideUp',type:'icon',icon:'up',group:'marks',panelId:'lid',x:242,y:18,w:34,h:34,r:0},
 ];
