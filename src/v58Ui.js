@@ -2,6 +2,7 @@ import { STORAGE_KEY, defaultState, cloneState } from './model.js';
 import { mountArtworkProof } from './threeArtworkProof.js';
 import { buildLinkedWorkspaceModelV49 } from './linkedWorkspaceV49.js';
 import { V58_PRODUCT_VERSION, V58_FREE_POLICY, V58_STUDIO_FLOW, V58_MARK_GROUPS, V58_MARK_PRESETS, V58_PRINT_ADVISORIES, addMarkPresetV58, markPanelOptionsV58, studioSummaryV58, productAcceptanceV58 } from './productExperienceV58.js';
+import { addMarkPresetV66 } from './shippingMarkLayoutV66.js';
 
 const esc=(s='')=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let queued=false,miniProof=null,miniHost=null;
@@ -12,7 +13,7 @@ function readState(){
   try{const p=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null'),b=cloneState(defaultState);return p?{...b,...p,structure:{...b.structure,...(p.structure||{})},variables:{...b.variables,...(p.variables||{})},batch:{...b.batch,...(p.batch||{})}}:b}catch{return cloneState(defaultState)}
 }
 function saveState(state){state.savedAt=new Date().toISOString();localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
-function go(page,editorTab=null){const s=readState();s.page=page;if(editorTab)s.editorTab=editorTab;saveState(s);location.reload()}
+function go(page,editorTab=null){if(window.BoxStudioEditor?.navigate)return window.BoxStudioEditor.navigate(page,editorTab);const s=readState();s.page=page;if(editorTab)s.editorTab=editorTab;saveState(s);location.reload()}
 function currentPage(){return document.querySelector('.nav button.active')?.dataset.nav||readState().page}
 function currentTab(){return document.querySelector('.tabbar button.active')?.dataset.tab||readState().editorTab}
 
@@ -53,7 +54,7 @@ function marksPalette(){
 }
 function enhanceMarks(){
   const main=document.querySelector('.workspace .main');if(!main||currentTab()!=='Marks'||main.querySelector('[data-v58-marks-studio]'))return;const canvas=main.querySelector('.canvas-shell');if(!canvas)return;canvas.insertAdjacentHTML('beforebegin',marksPalette());const studio=main.querySelector('[data-v58-marks-studio]'),panel=studio.querySelector('[data-v58-mark-panel]');
-  studio.querySelectorAll('[data-v58-mark]').forEach(b=>b.onclick=()=>{try{const result=addMarkPresetV58(readState(),b.dataset.v58Mark,{panelId:panel.value});saveState(result.state);if(window.BoxStudioEditor?.reloadFromStorage)window.BoxStudioEditor.reloadFromStorage();else location.reload()}catch(error){studio.dataset.error=error?.message||String(error)}});
+  studio.querySelectorAll('[data-v58-mark]').forEach(b=>b.onclick=()=>{try{const result=addMarkPresetV66(readState(),b.dataset.v58Mark,{panelId:panel.value});saveState(result.state);if(window.BoxStudioEditor?.reloadFromStorage)window.BoxStudioEditor.reloadFromStorage();else location.reload()}catch(error){let message=studio.querySelector('[data-mark-error]');if(!message){message=document.createElement('p');message.dataset.markError='true';message.setAttribute('role','alert');studio.appendChild(message)}message.textContent=error?.message||String(error);studio.dataset.error=message.textContent}});
   studio.querySelector('[data-v58-batch-focus]').onclick=()=>{const file=document.querySelector('#batchFile')?.closest('.panel-section');file?.scrollIntoView({behavior:'smooth',block:'start'});document.querySelector('#batchFile')?.closest('.file-drop')?.classList.add('v58-pulse')};
 }
 

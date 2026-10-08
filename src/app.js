@@ -291,7 +291,7 @@ function bindEditor(){
   document.querySelectorAll('[data-layer-visible]').forEach(inp=>inp.onchange=e=>setState(s=>s.hiddenGroups[e.target.dataset.layerVisible]=!e.target.checked,{history:false}));
   document.querySelectorAll('[data-structure]').forEach(inp=>inp.onchange=e=>setState(s=>{const k=e.target.dataset.structure;s.structure[k]=e.target.tagName==='SELECT'?e.target.value:Number(e.target.value);syncShippingDimensions()}));
   document.querySelectorAll('[data-structure-check]').forEach(inp=>inp.onchange=e=>setState(s=>{s.structure[e.target.dataset.structureCheck]=e.target.checked;syncShippingDimensions()}));
-  document.querySelectorAll('[data-prop]').forEach(inp=>inp.onchange=e=>setState(s=>{const g=geo(),el=s.elements.find(x=>x.id===s.selectedId);if(!el)return;const k=e.target.dataset.prop;if(k==='template'||k==='panelId'||k==='barcodeValue'||k==='qrValue'||k==='barcodeType')el[k]=e.target.value;else el[k]=Number(e.target.value);Object.assign(el,clampElementToPanel(el,g))}));
+  document.querySelectorAll('[data-prop]').forEach(inp=>inp.onchange=e=>setState(s=>{const g=geo(),el=s.elements.find(x=>x.id===s.selectedId);if(!el)return;const k=e.target.dataset.prop;if(k==='template'||k==='panelId'||k==='barcodeValue'||k==='qrValue'||k==='barcodeType')el[k]=e.target.value;else if(el.type==='barcode-qr-group'&&el.lockAspect&&['w','h'].includes(k)){const value=Number(e.target.value);if(!Number.isFinite(value))return;if(k==='w'){el.w=Math.max(12.5,value);el.h=el.w/3.125}else{el.h=Math.max(4,value);el.w=el.h*3.125}}else el[k]=Number(e.target.value);Object.assign(el,clampElementToPanel(el,g))}));
   const preset=document.querySelector('#barcodePreset');if(preset)preset.onchange=e=>setState(s=>{const el=s.elements.find(x=>x.id===s.selectedId);if(!el)return;el.preset=e.target.value;if(el.preset==='250x80'){el.w=250;el.h=80}else{el.w=200;el.h=64}Object.assign(el,clampElementToPanel(el,geo()))});
   const barcodeType=document.querySelector('#barcodeType');if(barcodeType)barcodeType.onchange=e=>setState(s=>{const el=s.elements.find(x=>x.id===s.selectedId);if(el)el.barcodeType=e.target.value});
 
@@ -381,7 +381,7 @@ function handleTool(tool){
   else if(tool==='mark')state.elements.push({id,type:'icon',icon:'up',group:'marks',panelId:front.id,x:10,y:10,w:Math.min(38,maxW),h:Math.min(38,maxH),r:0});
   else if(tool==='barcode'){
     const old=state.elements.find(e=>e.type==='barcode-qr-group');if(old){state.selectedId=old.id;state.editorTab='Marks';persist();render();return}
-    const w=Math.min(200,maxW),h=Math.min(64,maxH);state.elements.push({id,type:'barcode-qr-group',group:'marks',panelId:front.id,x:10,y:10,w,h,r:0,barcodeValue:'{{sku}}',qrValue:'{{qrValue}}',preset:w/h>3?'200x64':'custom',lockAspect:true,barcodeType:'CODE39'});
+    const scale=Math.min(1,maxW/200,maxH/64),w=200*scale,h=64*scale;state.elements.push({id,type:'barcode-qr-group',group:'marks',panelId:front.id,x:10,y:10,w,h,r:0,barcodeValue:'{{sku}}',qrValue:'{{qrValue}}',preset:scale===1?'200x64':'compact',lockAspect:true,barcodeType:'CODE39'});
   } else return;
   state.selectedId=id;state.editorTab=tool==='mark'||tool==='barcode'?'Marks':'Design';pushHistory();render();
 }
@@ -446,6 +446,8 @@ render();
 // External Artwork modules commit through the same state/history as core tools.
 window.BoxStudioEditor = {
   getState: () => cloneState(state),
+  navigate: (page,tab=null) => {state.page=page;if(tab)state.editorTab=tab;persist();render();},
+  commitState: next => {state=cloneState(next);pushHistory();render();window.dispatchEvent(new CustomEvent('boxstudio:statechange'));return cloneState(state);},
   reloadFromStorage: ({history: record=true}={}) => {
     const scroll = [...document.querySelectorAll('.canvas-shell,.rightpanel')].map(node => ({selector: node.classList.contains('rightpanel')?'.rightpanel':'.canvas-shell',x:node.scrollLeft,y:node.scrollTop}));
     state=load();
@@ -457,5 +459,5 @@ window.BoxStudioEditor = {
   },
   fitCanvas: () => {const shell=document.querySelector('.canvas-shell'),svg=document.querySelector('#designSvg');if(!shell||!svg)return false;const g=geo(),base=fitCssSize(g,100),pad=innerWidth<=760?16:24,ratio=Math.min((shell.clientWidth-pad*2)/base.width,(shell.clientHeight-pad*2)/base.height);state.zoom=Math.max(10,Math.min(800,Math.round(ratio*100)));persist();const size=fitCssSize(g,state.zoom);svg.style.width=size.width+'px';svg.style.height=size.height+'px';const range=document.querySelector('#zoomRange');if(range){range.min='10';range.max='800';range.value=state.zoom}const label=document.querySelector('#zoomLabel');if(label)label.textContent=state.zoom+'%';shell.scrollLeft=0;shell.scrollTop=0;return state.zoom},
   undo,redo,
-  getHistory: () => ({canUndo:historyIndex>0,canRedo:historyIndex<history.length-1})
+  getHistory: () => ({canUndo:historyIndex>0,canRedo:historyIndex<history.length-1,index:historyIndex,length:history.length})
 };

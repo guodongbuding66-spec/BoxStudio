@@ -54,8 +54,8 @@ export function dimensionSummaryV48(templateId,input={}){
   return {templateId,mode:structure.sizeType||'internal',material,inside:raw,manufacturing:{L:r(manufacturing.L??raw.L),W:r(manufacturing.W??raw.W),H:r(manufacturing.H??raw.H)},external:{L:r(raw.L+2*material.thicknessMm),W:r(raw.W+2*material.thicknessMm),H:r(raw.H+2*material.thicknessMm)},thickness:r(material.thicknessMm),exact:false};
 }
 
-export function previewSvgForTemplateV48(templateId,{width=250,height=150}={}){
-  const g=generateGeometry(defaultsForTemplate(templateId));if(!g)return'';
+export function previewSvgForTemplateV48(templateId,{width=250,height=150,structure=null}={}){
+  const g=generateGeometry({...defaultsForTemplate(templateId),...(structure||{}),template:templateId});if(!g)return'';
   const sx=width/Math.max(1,g.width),sy=height/Math.max(1,g.height),scale=Math.min(sx,sy)*.9,ox=(width-g.width*scale)/2,oy=(height-g.height*scale)/2;
   const seg=(l,kind)=>`<line x1="${r(ox+l.x1*scale)}" y1="${r(oy+l.y1*scale)}" x2="${r(ox+l.x2*scale)}" y2="${r(oy+l.y2*scale)}" class="${kind}"/>`;
   return `<svg class="v48-template-svg" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(g.documentTitle||templateId)}"><rect width="100%" height="100%" rx="8" class="paper"/>${(g.cutLines||[]).map(l=>seg(l,'cut')).join('')}${(g.creaseLines||[]).map(l=>seg(l,'crease')).join('')}</svg>`;

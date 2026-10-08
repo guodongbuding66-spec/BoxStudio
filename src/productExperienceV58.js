@@ -69,7 +69,8 @@ function choosePanel(state,requested){
 function fitRect(panel,preset){
   const margin=Math.min(10,Math.max(2,Math.min(panel.w,panel.h)*.06));
   const maxW=Math.max(12,panel.w-margin*2),maxH=Math.max(12,panel.h-margin*2);
-  const w=Math.min(n(preset.w,100),maxW),h=Math.min(n(preset.h,24),maxH);
+  const scale=Math.min(1,maxW/n(preset.w,100),maxH/n(preset.h,24));
+  const w=n(preset.w,100)*scale,h=n(preset.h,24)*scale;
   return{x:margin,y:margin,w,h};
 }
 

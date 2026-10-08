@@ -35,7 +35,9 @@ export function prepareTemplateStateV47(currentState,templateId,quickSize={}){
   const quickOwnsThickness=Object.prototype.hasOwnProperty.call(quickSize,'thickness')&&quickSize.thickness!==undefined&&quickSize.thickness!==null&&String(quickSize.thickness).trim()!=='';
   if(!quickOwnsThickness&&(Object.prototype.hasOwnProperty.call(quickSize,'flute')||Object.prototype.hasOwnProperty.call(quickSize,'materialId')))delete sizeInput.thickness;
   const size=sanitizeQuickSizeV47(sizeInput);
-  next.structure={...preset.structure,...size,template:templateId};next.elements=preset.elements;next.variables={...preset.variables};next.selectedId=preset.selectedId;next.projectName=`${found.nameZh||found.name} / Free Project`;next.page='editor';next.editorTab='Structure';next.foldProgress=100;next.savedAt=new Date().toISOString();return next;
+  next.structure={...preset.structure,...size,template:templateId};next.elements=preset.elements;next.variables={...preset.variables};next.selectedId=preset.selectedId;next.projectName=`${found.nameZh||found.name} / Free Project`;next.page='editor';next.editorTab='Structure';next.foldProgress=100;next.savedAt=new Date().toISOString();next.projectId='';next.projectRemoteRevision=0;
+  if(next.syncDimensions){const unit=String(next.variables.dimensionUnit||'MM').toUpperCase(),factor=unit==='INCH'?1/25.4:unit==='CM'?1/10:1;for(const key of ['length','width','height'])next.variables[key]=(next.structure[key]*factor).toFixed(unit==='INCH'?2:unit==='CM'?1:0);}
+  return next;
 }
 
 export const V47_MARK_GROUPS=Object.freeze([

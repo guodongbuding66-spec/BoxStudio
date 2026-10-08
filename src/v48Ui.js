@@ -20,7 +20,7 @@ function renderSummary(panel){
 function enhanceConfig(panel){
   if(panel.dataset.v48Enhanced==='true')return;const id=panel.dataset.v47Config;if(!id)return;panel.dataset.v48Enhanced='true';const foot=panel.querySelector('.v47-config-foot');if(!foot)return;
   const presets=presetsForTemplateV48(id);foot.insertAdjacentHTML('beforebegin',`<section class="v48-config-extra"><div class="v48-preset-head"><b>常用尺寸</b><span>一键填入后仍可继续修改</span></div><div class="v48-presets">${presets.map(p=>`<button type="button" data-v48-preset="${esc(p.id)}" data-l="${p.length}" data-w="${p.width}" data-h="${p.height}">${esc(p.label)}<small>${p.length}×${p.width}×${p.height}</small></button>`).join('')}</div><div class="v48-dimension-summary" data-v48-summary></div></section>`);
-  panel.querySelectorAll('[data-v48-preset]').forEach(b=>b.onclick=()=>{panel.querySelector('[data-v47-l]').value=b.dataset.l;panel.querySelector('[data-v47-w]').value=b.dataset.w;panel.querySelector('[data-v47-h]').value=b.dataset.h;renderSummary(panel)});
+  panel.querySelectorAll('[data-v48-preset]').forEach(b=>b.onclick=()=>{panel.querySelector('[data-v47-l]').value=b.dataset.l;panel.querySelector('[data-v47-w]').value=b.dataset.w;panel.querySelector('[data-v47-h]').value=b.dataset.h;panel.querySelectorAll('[data-v47-l],[data-v47-w],[data-v47-h]').forEach(input=>input.dispatchEvent(new Event('change',{bubbles:true})));renderSummary(panel)});
   panel.querySelectorAll('[data-v47-l],[data-v47-w],[data-v47-h],[data-v47-size-type],[data-v47-material],[data-v47-flute],[data-v47-thickness]').forEach(el=>{el.addEventListener('input',()=>queueMicrotask(()=>renderSummary(panel)));el.addEventListener('change',()=>queueMicrotask(()=>renderSummary(panel)))});
   renderSummary(panel);
 }

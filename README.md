@@ -1,4 +1,18 @@
-# BoxStudio V0.31
+# BoxStudio V0.66
+
+免费纸盒设计与唛头编辑网站：选择盒型 → 配置毫米尺寸 / 材料 / 纸厚 → 2D 图文和唛头 → 3D 校样 → 印前检查 → 导出。
+
+所有已实现的设计功能无需登录、试用期或付费墙。当前有 8 个参数化盒型，支持结构化唛头、多位置变量绑定、Excel / CSV 批量数据以及 PDF / SVG / DXF 输出。
+
+V0.66 增加可访问的盒型库与项目入口、项目保存 / 副本 / JSON 备份恢复、主界面唛头数据表单、同面自动避让、Barcode + QR 比例锁定、真实参数预览和手机组件折叠。项目快照保存在浏览器；在线多人同步需单独部署验收。
+
+运行：`npm run dev`。测试：`node tests/full-entry.mjs`、`npm run test:v66`。数据库测试需要 `BOXSTUDIO_DATABASE_URL`。
+
+本次参考核对、测试范围与未完成事项见 [V0.66 验收记录](docs/V0.66_REFERENCE_AND_TEST_REPORT.md)。产品范围仍以 [当前开发主基准](docs/BOXSTUDIO_DEVELOPMENT_SPEC_CURRENT.md) 为准。
+
+---
+
+# V0.31 历史验收记录
 
 BoxStudio 是浏览器内运行的包装纸盒结构、2D 刀版、唛头 Artwork、3D 折叠校样、Excel 批量生产、印前检查、生产审批与生产文件导出原型。
 
