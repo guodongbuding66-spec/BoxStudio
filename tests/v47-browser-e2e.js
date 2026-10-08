@@ -25,5 +25,7 @@ try{
     panel.querySelector('[data-v47-l]').value='360';panel.querySelector('[data-v47-w]').value='240';panel.querySelector('[data-v47-h]').value='95';panel.querySelector('[data-v47-size-type]').value='external';panel.querySelector('[data-v47-material]').value='corrugated-kraft';panel.querySelector('[data-v47-flute]').value='B';
     sessionStorage.setItem('boxstudio-v47-continuation','1');
     click(panel.querySelector('[data-v47-start]'));
+    // Navigation is in-page; reload explicitly to test persisted recovery.
+    await waitFor(()=>document.querySelector('.tabbar button.active')?.dataset.tab==='Structure','in-page structure handoff');location.reload();
   }
 }catch(error){sessionStorage.removeItem('boxstudio-v47-continuation');const text=`FAIL ${error?.stack||error}`;document.body.dataset.fail=text;await signal('fail',text);throw error;}

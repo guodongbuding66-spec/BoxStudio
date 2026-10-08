@@ -24,7 +24,7 @@ async function main(){
       setVal(studio.querySelector('[data-v47-l]'),360);setVal(studio.querySelector('[data-v47-w]'),240);setVal(studio.querySelector('[data-v47-h]'),95);
       await waitFor(()=>studio.querySelector('[data-v59-metric]')?.textContent.includes('外尺寸'),'three-size live summary');
       if(!studio.querySelector('[data-v59-stage-size]')?.textContent.includes('mm'))throw new Error('Live manufacturing size missing from stage header.');
-      noOverflow('template-studio');sessionStorage.setItem('boxstudio-v59-phase','editor');studio.querySelector('[data-v59-generate-3d]').click();return;
+      noOverflow('template-studio');sessionStorage.setItem('boxstudio-v59-phase','editor');studio.querySelector('[data-v59-generate-3d]').click();await main();return;
     }
 
     if(phase==='editor'){

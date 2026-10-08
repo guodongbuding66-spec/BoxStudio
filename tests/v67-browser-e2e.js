@@ -6,7 +6,7 @@ const settle=()=>new Promise(r=>setTimeout(r,180));
 const change=(s,v)=>{const n=q(s);if(!n)throw new Error('Missing '+s);n.value=v;n.dispatchEvent(new Event('change',{bubbles:true}));};
 const submit=s=>q(s).requestSubmit();
 const chooseTab=async name=>{click(`[data-inspector="${name}"]`);await settle();};
-async function importJson(text){const d=new DataTransfer();d.items.add(new File([text],'mark.json',{type:'application/json'}));q('[data-v67-mark-projects] [data-file]').files=d.files;q('[data-v67-mark-projects] [data-file]').dispatchEvent(new Event('change',{bubbles:true}));await settle();}
+async function importJson(text){const previous=q('[data-v67-mark-projects] [data-result]').textContent,d=new DataTransfer();d.items.add(new File([text],'mark.json',{type:'application/json'}));q('[data-v67-mark-projects] [data-file]').files=d.files;q('[data-v67-mark-projects] [data-file]').dispatchEvent(new Event('change',{bubbles:true}));await wait(()=>!q('[data-v67-mark-projects]')||q('[data-v67-mark-projects] [data-result]').textContent!==previous,'JSON import result');}
 try{
  await wait(()=>window.BoxStudioV67&&q('[data-v67-mode="mark"]'),'runtime');await document.fonts.ready;
  const editor=window.BoxStudioEditor,api=window.BoxStudioV67;const baseline=editor.getState(),structure=JSON.stringify(baseline.structure),elements=JSON.stringify(baseline.elements),variables=JSON.stringify(baseline.variables),cartonHistory=editor.getHistory();

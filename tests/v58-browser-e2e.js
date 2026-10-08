@@ -17,7 +17,7 @@ async function main(){
       const nav=[...document.querySelectorAll('.v58-quicknav [data-v58-go]')].map(x=>x.dataset.v58Go);for(const need of ['templates','Design','3D','Marks','Export'])if(!nav.includes(need))throw new Error(`Missing quick nav ${need}`);
       const tool=document.querySelector('.toolbar [data-tool="barcode"] span');if(!tool||!tool.textContent.includes('条码'))throw new Error('Labeled packaging toolbar missing barcode label.');
       if(document.body.dataset.v58Advanced!=='false')throw new Error('Advanced production should be collapsed by default.');
-      noOverflow('design');sessionStorage.setItem('boxstudio-v58-phase','marks');api.go('editor','Marks');return;
+      noOverflow('design');sessionStorage.setItem('boxstudio-v58-phase','marks');api.go('editor','Marks');await main();return;
     }
 
     if(phase==='marks'){
@@ -35,14 +35,14 @@ async function main(){
       await waitFor(()=>document.querySelector(`[data-element-id="${CSS.escape(id)}"]`),'inserted mark rendered on dieline');
       if(api.getSummary().markCount!==before+1)throw new Error(`Mark count did not persist: ${api.getSummary().markCount} vs ${before+1}`);
       const adv=document.querySelector('.v58-quicknav [data-v58-advanced]');if(!adv)throw new Error('Advanced-production button missing.');adv.click();if(document.body.dataset.v58Advanced!=='true')throw new Error('Advanced-production toggle did not open.');adv.click();if(document.body.dataset.v58Advanced!=='false')throw new Error('Advanced-production toggle did not close.');
-      noOverflow('marks');sessionStorage.setItem('boxstudio-v58-phase','templates');api.go('templates');return;
+      noOverflow('marks');sessionStorage.setItem('boxstudio-v58-phase','templates');api.go('templates');await main();return;
     }
 
     if(phase==='templates'){
       await waitFor(()=>document.querySelector('.v58-library-head'),'reference-aligned template library');
       const cards=await waitFor(()=>document.querySelectorAll('.v47-template-card').length>=5&&document.querySelectorAll('.v47-template-card'),'template cards');if(cards.length<5)throw new Error('Verified template library unexpectedly small.');
       const search=document.querySelector('[data-v47-search]');if(!search)throw new Error('Template search missing.');search.value='0427';search.dispatchEvent(new Event('input',{bubbles:true}));await waitFor(()=>document.querySelectorAll('.v47-template-card').length===1,'0427 filter');if(!document.body.textContent.includes('0427'))throw new Error('0427 search result missing.');
-      noOverflow('templates');sessionStorage.setItem('boxstudio-v58-phase','export');api.go('editor','Export');return;
+      noOverflow('templates');sessionStorage.setItem('boxstudio-v58-phase','export');api.go('editor','Export');await main();return;
     }
 
     if(phase==='export'){

@@ -34,5 +34,7 @@ try{
     const summary=window.BoxStudioV48.dimensionSummary('fefco-0203',{length:450,width:320,height:260,sizeType:'external',materialId:'corrugated-kraft',flute:'B',thickness:3});
     if(summary.external.L!==450||summary.inside.L!==444)throw new Error('External/internal dimension conversion is incorrect.');
     sessionStorage.setItem('boxstudio-v48-continuation','1');click(panel.querySelector('[data-v47-start]'));
+    // Navigation is in-page; reload explicitly to test persisted recovery.
+    await waitFor(()=>document.querySelector('.tabbar button.active')?.dataset.tab==='Structure','in-page structure handoff');location.reload();
   }
 }catch(error){sessionStorage.removeItem('boxstudio-v48-continuation');const text=`FAIL ${error?.stack||error}`;document.body.dataset.fail=text;await signal('fail',text);throw error;}
