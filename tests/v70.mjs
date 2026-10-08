@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {withPngDpiV70} from '../src/pngPrintV70.js';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {createMarkDocumentV67,setMarkArtboardV67,insertStandaloneMarkV67,patchStandaloneElementV67,markPreflightV67,buildMarkPdfV67,buildMarkSvgV67,parseMarkDocumentV67} from '../src/standaloneMarksV67.js';
 import {barcodeGroupLayoutV70,barcodeChecksV70,assertBarcodeProductionV70} from '../src/barcodeGroupV70.js';
@@ -66,6 +67,11 @@ check(()=>assert.throws(()=>buildProductionPdf(badCarton),/250 × 80/));
 check(()=>assert.throws(()=>buildProductionPdfV27(badCarton),/250 × 80/));
 check(()=>assert.throws(()=>buildMultiPagePdf([defaultState,badCarton]),/250 × 80/));
 check(()=>assert.doesNotMatch(buildMarkSvgV67(large),/selection-box|data-mark-resize/));
+const sourcePng=new Uint8Array(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=','base64'));
+for(const dpi of [300,600]){const png=withPngDpiV70(sourcePng,dpi);let offset=8,physical=[];while(offset+12<=png.length){const view=new DataView(png.buffer),length=view.getUint32(offset),type=String.fromCharCode(...png.slice(offset+4,offset+8));if(type==='pHYs')physical.push([view.getUint32(offset+8),view.getUint32(offset+12),png[offset+16]]);offset+=length+12;}check(()=>assert.deepEqual(physical,[[Math.round(dpi/.0254),Math.round(dpi/.0254),1]]));writeFileSync(`artifacts/v70/metadata-${dpi}.png`,png);check(()=>assert.deepEqual(withPngDpiV70(png,dpi),png));}
+check(()=>assert.throws(()=>withPngDpiV70(new Uint8Array([1]),300),/无效/));
+check(()=>assert.throws(()=>withPngDpiV70(sourcePng,NaN),/无效/));
+check(()=>assert.throws(()=>withPngDpiV70(sourcePng.slice(0,40),300),/不完整/));
 writeFileSync('artifacts/v70/scan-manifest.json',JSON.stringify(manifest,null,2));
 writeFileSync('artifacts/v70/model-results.json',JSON.stringify({status:'PASS',checks,printCases:manifest.length},null,2));
 console.log(`PASS V0.70: ${checks} fixed-size, uniform layout, whole-group, fallback, obstruction, encoding density and generated-PDF decode checks; ${manifest.length} PDF scan fixtures`);

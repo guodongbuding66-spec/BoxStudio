@@ -32,6 +32,10 @@ try{
  const beforeSvg=blobs.length;click('[data-export="svg"]');await settle();
  const svg=blobs.slice(beforeSvg).find(b=>b.type==='image/svg+xml');assert(Boolean(svg),'SVG export creates the actual vector file');
  const svgText=await svg.text();assert(/width="200" height="64"/.test(svgText)&&!/data-mark-resize|selection-box/.test(svgText),'SVG has the fixed physical group and no editing handles');
+ const beforePng=blobs.length;click('[data-export="png"]');await wait(()=>blobs.slice(beforePng).some(b=>b.type==='image/png'),'PNG download');
+ const pngBytes=new Uint8Array(await blobs.slice(beforePng).find(b=>b.type==='image/png').arrayBuffer());let offset=8,physical=[];while(offset+12<=pngBytes.length){const view=new DataView(pngBytes.buffer),length=view.getUint32(offset),type=String.fromCharCode(...pngBytes.slice(offset+4,offset+8));if(type==='pHYs')physical.push([view.getUint32(offset+8),view.getUint32(offset+12),pngBytes[offset+16]]);offset+=length+12;}
+ assert(physical.length===1&&physical[0][0]===11811&&physical[0][1]===11811&&physical[0][2]===1,'Downloaded PNG declares genuine 300 DPI physical resolution');
+ assert(new DataView(pngBytes.buffer).getUint32(16)===3780&&new DataView(pngBytes.buffer).getUint32(20)===2598,'PNG pixel size and physical metadata match the mm artboard');
  click('.v67-dialog [data-close]');await settle();
  const invalid=structuredClone(sample);Object.assign(invalid.elements.find(e=>e.id==='label-barcode'),{w:100,h:32,preset:'legacy'});api().commitMarkState(invalid);await settle();
  click('#quickExport');await wait(()=>q('[data-export="pdf"]'),'invalid export');const beforeBlocked=blobs.length;click('[data-export="pdf"]');await settle();
