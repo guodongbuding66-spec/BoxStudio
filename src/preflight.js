@@ -1,3 +1,4 @@
+import {barcodeChecksV70} from './barcodeGroupV70.js';
 import { isPackageNoticeVisible } from './variables.js';
 import { elementInsidePanel, elementInsideSafeArea, generateGeometry } from './geometry.js';
 import { qrMatrix } from './qrcode.js';
@@ -13,7 +14,7 @@ import { validateCustomerProfile } from './customerProfiles.js';
 import { validateMarkTemplate } from './markTemplates.js';
 
 export function runPreflight(state) {
-  const r = [];
+  const r = [...barcodeChecksV70(state)];
   const v = state.variables || {};
   const geo = generateGeometry(state.structure);
 
@@ -72,7 +73,7 @@ export function runPreflight(state) {
     try {
       const qrValue = String(group.qrValue || '').replace(/{{\s*qrValue\s*}}/,v.qrValue||'').replace(/{{\s*sku\s*}}/,v.sku||'');
       const qr = qrMatrix(qrValue);
-      r.push({ severity:'pass', title:'QR Code 编码', detail:`真实 QR Version ${qr.version}-L，可扫描；${qr.bytes} bytes` });
+      r.push({ severity:'pass', title:'QR Code 编码', detail:`QR Version ${qr.version}-L，编码通过；${qr.bytes} bytes` });
     } catch (err) {
       r.push({ severity:'error', title:'QR Code 编码', detail:String(err?.message || err) });
     }

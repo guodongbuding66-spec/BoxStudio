@@ -1,3 +1,4 @@
+import {barcodeSizeV70,barcodeGroupLayoutV70,barcodeChecksV70,BARCODE_SIZE_MESSAGE_V70} from './barcodeGroupV70.js';
 import {standaloneIconSvgV67} from './standaloneIconV67.js';
 import {defaultState} from './model.js';
 import {addMarkPresetV66,validateMarkDataV66} from './shippingMarkLayoutV66.js';
@@ -21,8 +22,8 @@ function text(id,template,x,y,w,h,fontSize=5,bold=false){return{id,type:'text',g
 export function createMarkDocumentV67(template='shipping'){
  let next=clone(defaultState);next.schema=MARK_DOCUMENT_SCHEMA_V67;next.schemaVersion=1;next.projectId=uid();next.projectName='未命名唛头';next.page='mark-studio';next.editorTab='Marks';next.syncDimensions=false;next.elements=[];next.selectedId='';next.hiddenGroups={marks:false,dieline:true};next.variables={...next.variables,sku:'ITEM-001',qrValue:'ITEM-001',nw:'12.5',gw:'14',weightUnit:'KG',length:'32',width:'22',height:'8',dimensionUnit:'CM',crn:'CRN-000001',contractNo:'CONTRACT-001',packageIndex:'1',packageCount:'1',originCountry:'China',destinationCountry:'US'};next.exportOptions={outlineText:false,spotDielines:false,pdfxMode:'off'};next=setMarkArtboardV67(next,320,220);
  if(template!=='blank'){
-  next.elements=[text('label-sku','SKU: {{sku}}',12,16,230,20,7,true),text('label-destination','{{destinationCountry}}',262,16,42,22,12,true),text('label-weight','N.W.: {{nw}} {{weightUnit}}\nG.W.: {{gw}} {{weightUnit}}',12,50,145,27,5),text('label-contract','Contract No.: {{contractNo}}',178,50,128,12,4.5),text('label-crn','CRN: {{crn}}',178,66,128,12,4.5),text('label-origin','Made in {{originCountry}}',178,82,128,12,4.5),text('label-dimensions','Package Meas: {{length}} x {{width}} x {{height}} {{dimensionUnit}}',12,94,290,15,4.5),text('label-crn-repeat','CRN: {{crn}}',12,196,155,12,4),{...text('label-notice','Please note the product has {{packageCount}} packages,\nand this is the package {{packageIndex}}',12,181,202,12,4),type:'notice'}];
-  if(template==='shipping')next.elements.push({id:'label-barcode',type:'barcode-qr-group',group:'marks',panelId:'label',x:12,y:114,w:200,h:64,r:0,barcodeValue:'{{sku}}',qrValue:'{{qrValue}}',barcodeType:'CODE39',lockAspect:true,preset:'200x64'},...['up','fragile','dry'].map((icon,i)=>({id:`label-${icon}`,type:'icon',icon,group:'marks',panelId:'label',x:230+i*26,y:120,w:24,h:24,r:0})));
+  next.elements=[text('label-sku','SKU: {{sku}}',12,16,230,20,7,true),text('label-destination','{{destinationCountry}}',262,16,42,22,12,true),text('label-weight','N.W.: {{nw}} {{weightUnit}}\nG.W.: {{gw}} {{weightUnit}}',12,50,145,27,5),text('label-contract','Contract No.: {{contractNo}}',178,50,128,12,4.5),text('label-crn','CRN: {{crn}}',178,66,128,12,4.5),text('label-origin','Made in {{originCountry}}',178,82,128,12,4.5),text('label-dimensions','Package Meas: {{length}} x {{width}} x {{height}} {{dimensionUnit}}',12,94,290,15,4.5),text('label-crn-repeat','CRN: {{crn}}',12,80,155,12,4),{...text('label-notice','Please note the product has {{packageCount}} packages,\nand this is the package {{packageIndex}}',12,198,250,12,4),type:'notice'}];
+  if(template==='shipping')next.elements.push({id:'label-barcode',type:'barcode-qr-group',group:'marks',panelId:'label',x:12,y:114,w:250,h:80,r:0,barcodeValue:'{{sku}}',qrValue:'{{qrValue}}',barcodeType:'CODE39',lockAspect:true,preset:'250x80'},...['up','fragile','dry'].map((icon,i)=>({id:`label-${icon}`,type:'icon',icon,group:'marks',panelId:'label',x:278,y:114+i*26,w:24,h:24,r:0})));
  }
  next.selectedId=next.elements[0]?.id||'';return next;
 }
@@ -31,10 +32,10 @@ export function insertStandaloneMarkV67(state,id){const result=addMarkPresetV66(
 export function patchStandaloneElementV67(state,id,patch){
  const next=clone(state),e=next.elements.find(e=>e.id===id);if(!e)throw new Error('所选对象不存在。');
  if(e.locked)throw new Error('所选图层已锁定，请先解锁。');
- const allowed=['x','y','w','h','fontSize','template','bold','barcodeValue','qrValue','barcodeType','hidden'];
+ const allowed=['preset','x','y','w','h','fontSize','template','bold','barcodeValue','qrValue','barcodeType','hidden'];
  for(const [key,value] of Object.entries(patch))if(allowed.includes(key))e[key]=['x','y','w','h','fontSize'].includes(key)?Number(value):value;
  if(['x','y','w','h'].some(k=>!Number.isFinite(e[k]))||e.w<4||e.h<4)throw new Error('对象位置必须为数字，宽高至少 4 mm。');
- if(e.type==='barcode-qr-group'){if('w'in patch){e.w=Math.max(100,e.w);e.h=e.w/3.125}else if('h'in patch){e.h=Math.max(32,e.h);e.w=e.h*3.125}}
+ if(e.type==='barcode-qr-group'){if('preset'in patch){if(!['250x80','200x64'].includes(patch.preset))throw new Error(BARCODE_SIZE_MESSAGE_V70);[e.w,e.h]=patch.preset==='250x80'?[250,80]:[200,64];}else if('w'in patch)e.h=e.w/3.125;else if('h'in patch)e.w=e.h*3.125;const size=barcodeSizeV70(e.w,e.h);if(!size)throw new Error(BARCODE_SIZE_MESSAGE_V70);e.preset=size.preset;e.lockAspect=true;}
  if('fontSize'in patch&&(!Number.isFinite(e.fontSize)||e.fontSize<1||e.fontSize>80))throw new Error('字号需为 1–80 mm。');
  next.selectedId=id;return next;
 }
@@ -53,24 +54,23 @@ export function markPreflightV67(state,{pdf=false}={}){
  for(const e of visibleMarkElementsV67(state)){
   if(e.x<0||e.y<0||e.x+e.w>state.artboard.width+.01||e.y+e.h>state.artboard.height+.01)errors.push({severity:'error',message:`${e.id} 超出画布。`});
   else if(e.x<8||e.y<8||e.x+e.w>state.artboard.width-8||e.y+e.h>state.artboard.height-8)warnings.push({severity:'warning',message:`${e.id} 靠近画布边缘。`});
-  if(e.type==='barcode-qr-group'&&(e.w<100||e.h<32))errors.push({severity:'error',message:'条码组合至少需要 100 × 32 mm，以容纳完整条码、QR 和留白。'});
-  if(e.type==='barcode-qr-group')try{if((e.barcodeType||'CODE39')==='CODE39'&&!/^[0-9A-Z .$/+%\-]+$/.test(renderTemplate(e.barcodeValue,state.variables).trim().toUpperCase()))throw new Error('Code 39 仅支持字母、数字和标准符号。');barcodeSvg(e.barcodeType||'CODE39',renderTemplate(e.barcodeValue,state.variables),e.w*.65,e.h*.65);qrSvgRects(renderTemplate(e.qrValue,state.variables),40,40)}catch(error){errors.push({severity:'error',message:`条码 / QR：${error.message}`});}
   if(['text','notice'].includes(e.type)){
    const value=renderTemplate(e.template,state.variables);for(const key of [...String(e.template).matchAll(/{{\s*(\w+)\s*}}/g)].map(m=>m[1]))if(!String(state.variables[key]??'').trim())errors.push({severity:'error',message:`变量 ${key} 未填写。`});
    if(pdf&&getUserTtf()&&[...value].some(c=>c.codePointAt(0)>32&&!getUserTtf().cmap(c.codePointAt(0))))errors.push({severity:'error',message:'所加载的字体缺少当前文字中的字符，请更换 TTF 字体。'});
    if(pdf&&/[^\x00-\x7f]/.test(value)&&!getUserTtf())errors.push({severity:'error',message:'中文生产 PDF 请先在导出窗口加载支持中文的 TTF 字体。'});
   }
  }
+ for(const c of barcodeChecksV70(state))if(c.severity==='error')errors.push(c);
  for(const c of imagePreflightChecksV60({...state,elements:visibleMarkElementsV67(state)}))if(c.severity!=='pass')(c.severity==='error'?errors:warnings).push({severity:c.severity,message:c.detail});
  return{errors,warnings,ok:errors.length===0};
 }
-export function buildMarkPdfV67(state){const report=markPreflightV67(state,{pdf:true});if(!report.ok)throw new Error(report.errors.map(x=>x.message).join('\n'));const next=clone(state);next.elements=visibleMarkElementsV67(state).map(e=>e.type==='icon'?{...e,standaloneIconV67:true}:e);next.exportOptions={...next.exportOptions,pdfxMode:'off',outlineText:Boolean(getUserTtf()),fontMode:getUserTtf()?'ttf':'technical',producer:'BoxStudio V0.69',documentTitle:'Standalone Shipping Mark Artwork'};return buildProductionPdf(next);}
+export function buildMarkPdfV67(state){const report=markPreflightV67(state,{pdf:true});if(!report.ok)throw new Error(report.errors.map(x=>x.message).join('\n'));const next=clone(state);next.elements=visibleMarkElementsV67(state).map(e=>e.type==='icon'?{...e,standaloneIconV67:true}:e);next.exportOptions={...next.exportOptions,pdfxMode:'off',outlineText:Boolean(getUserTtf()),fontMode:getUserTtf()?'ttf':'technical',producer:'BoxStudio V0.70',documentTitle:'Standalone Shipping Mark Artwork'};return buildProductionPdf(next);}
 function markContent(e,state){
  if(e.type==='text'||e.type==='notice'){const fs=e.fontSize||5;return renderTemplate(e.template,state.variables).split('\n').map((line,i)=>`<text x="3" y="${(i+1)*fs*1.15}" font-size="${fs}" font-family="Arial,Helvetica,sans-serif" font-weight="${e.bold?700:400}" fill="#111" class="svg-text">${esc(line)}</text>`).join('');}
  if(e.type==='icon')return standaloneIconSvgV67(e);
  if(e.type==='image')return `<image href="${esc(e.src)}" width="${e.w}" height="${e.h}" preserveAspectRatio="xMidYMid meet"/>`;
  if(e.type==='shape')return `<rect width="${e.w}" height="${e.h}" fill="none" stroke="#111" stroke-width=".6"/>`;
- if(e.type==='barcode-qr-group'){const pad=5,gap=7,side=Math.max(20,Math.min(e.h-pad*2,e.w*.3)),bw=Math.max(30,e.w-pad*2-gap-side),bh=Math.max(16,e.h-pad*2-11),bars=barcodeSvg(e.barcodeType||'CODE39',renderTemplate(e.barcodeValue,state.variables),bw,bh),qr=qrSvgRects(renderTemplate(e.qrValue,state.variables),side,side);return `<rect width="${e.w}" height="${e.h}" fill="#fff" stroke="#111" stroke-width=".4"/><g transform="translate(5 5)" fill="#111">${bars.rects}</g><text x="5" y="${e.h-6}" font-family="Arial,sans-serif" font-size="3.3">${esc(bars.label)}</text><g transform="translate(${e.w-pad-side} 5)" fill="#111">${qr.rects}</g>`;}
+ if(e.type==='barcode-qr-group'){const {pad,qrSide:side,bw,bh,fontSize,labelBaseline,stroke}=barcodeGroupLayoutV70(e),bars=barcodeSvg(e.barcodeType||'CODE39',renderTemplate(e.barcodeValue,state.variables),bw,bh),qr=qrSvgRects(renderTemplate(e.qrValue,state.variables),side,side);return `<rect width="${e.w}" height="${e.h}" fill="#fff" stroke="#111" stroke-width="${stroke}"/><g transform="translate(${pad} ${pad})" fill="#111">${bars.rects}</g><text x="${pad}" y="${labelBaseline}" font-family="Arial,sans-serif" font-size="${fontSize}">${esc(bars.label)}</text><g transform="translate(${e.w-pad-side} ${pad})" fill="#111">${qr.rects}</g>`;}
  return'';
 }
 function resizeHandlesSvgV69(e,size){

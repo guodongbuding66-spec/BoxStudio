@@ -22,9 +22,9 @@ try{
  const beforeCancel=JSON.stringify(state().elements),cancelHistory=history();resize('label-up',-10,-10,{corner:'nw',cancel:'escape'});await settle();assert(JSON.stringify(state().elements)===beforeCancel&&history()===cancelHistory,'Escape cancels resize without changing history');
  assert(q('[data-mark-object="label-up"] [data-mark-resize="se"]').getAttribute('transform')==='translate(32 32)','Cancelled draft restores the rendered size');
  resize('label-up',10,10,{cancel:'pointer'});await settle();assert(JSON.stringify(state().elements)===beforeCancel&&history()===cancelHistory,'Pointer cancellation restores geometry');
- api().selectMarks(['label-barcode']);resize('label-barcode',-1000,-1000);await settle();assert(el('label-barcode').w===100&&el('label-barcode').h===32,'Barcode corner resize enforces minimum readable dimensions');
- const ratioHistory=history();resize('label-barcode',12.345,7.89);await settle();assert(Math.abs(el('label-barcode').w/el('label-barcode').h-3.125)<1e-8,'Barcode drag preserves printable aspect ratio');
- assert(history()===ratioHistory+1,'Fractional barcode resize is accepted by document validation');
+ api().selectMarks(['label-barcode']);resize('label-barcode',-1000,-1000);await settle();assert(el('label-barcode').w===200&&el('label-barcode').h===64,'Barcode corner resize enforces minimum readable dimensions');
+ const ratioHistory=history();resize('label-barcode',40,12.8);await settle();assert(Math.abs(el('label-barcode').w/el('label-barcode').h-3.125)<1e-8,'Barcode drag preserves printable aspect ratio');
+ assert(history()===ratioHistory+1,'Approved barcode resize is one undo transaction');
  api().selectMarks(['label-sku']);const sku=el('label-sku');resize('label-sku',10,5);await settle();assert(el('label-sku').w===sku.w+10&&el('label-sku').h===sku.h+5,'Text bounding box resizes independently');
  assert(el('label-sku').fontSize===sku.fontSize&&el('label-sku').template===sku.template,'Text resize preserves font size and variable binding');
  api().selectMarks(['label-up','label-fragile']);assert(!q('[data-mark-resize]'),'Multi-selection avoids ambiguous resize handles');

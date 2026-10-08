@@ -41,8 +41,8 @@ try{
  click('#undo');await settle();assert(editor.getState().variables.nw===JSON.parse(before).nw,'Shipping form undo');click('#redo');await settle();assert(editor.getState().variables.nw==='12','Shipping form redo');
  change('[data-v58-mark-panel]','base');click('[data-v58-mark="barcodeQr"]');await settle();let group=editor.getState().elements.find(e=>e.id===editor.getState().selectedId);
  assert(group.type==='barcode-qr-group'&&Math.abs(group.w/group.h-3.125)<1e-8,'Barcode and QR insert with locked ratio');
- change('[data-prop="w"]','125');await settle();group=editor.getState().elements.find(e=>e.id===editor.getState().selectedId);assert(group.w===125&&group.h===40,'Changing width preserves barcode group ratio');
- change('[data-prop="h"]','32');await settle();group=editor.getState().elements.find(e=>e.id===editor.getState().selectedId);assert(group.w===100&&group.h===32,'Changing height preserves barcode group ratio');
+ change('#barcodePreset','250x80');await settle();group=editor.getState().elements.find(e=>e.id===editor.getState().selectedId);assert(group.w===250&&group.h===80,'Large preset keeps the barcode group intact');
+ change('#barcodePreset','200x64');await settle();group=editor.getState().elements.find(e=>e.id===editor.getState().selectedId);assert(group.w===200&&group.h===64,'Small preset keeps the barcode group intact');
  document.dispatchEvent(new KeyboardEvent('keydown',{key:'s',ctrlKey:true,bubbles:true}));await settle();assert(editor.getState().projectId&&lib.list().length===2,'Ctrl S saves in HTTP browser context');
  click('[data-v66-projects]');await settle();change('[data-project-name]','V66 验收项目');submit('[data-name-form]');await settle();click('[data-save]');await settle();
  const savedId=editor.getState().projectId;assert(lib.load(savedId).label==='V66 验收项目','Rename and save project');

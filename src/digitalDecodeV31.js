@@ -1,3 +1,4 @@
+import {barcodeGroupLayoutV70} from './barcodeGroupV70.js';
 import { barcodeLayout } from './barcode.js';
 import { renderTemplate } from './variables.js';
 import { generateGeometry, resolveElementRect } from './geometry.js';
@@ -18,7 +19,7 @@ const C128_INV=new Map(C128_CANON.map((p,i)=>[p,i]));
 const num=(v,d=0)=>{const n=Number(v);return Number.isFinite(n)?n:d};
 const inside=(r,b,eps=.08)=>r.x>=b.x-eps&&r.y>=b.y-eps&&r.x+r.w<=b.x+b.w+eps&&r.y+r.h<=b.y+b.h+eps;
 
-export function productionCodeBoxesV31(state){const geo=generateGeometry(state.structure),el=(state.elements||[]).find(e=>e?.type==='barcode-qr-group');if(!el)throw new Error('Barcode + QR Group is missing.');const rr=resolveElementRect(el,geo),absX=rr.absX,absY=rr.absY,pad=5,gap=7,qrSide=Math.max(20,Math.min(num(el.h)-pad*2,num(el.w)*.30)),bx=absX+pad,by=absY+pad,bw=Math.max(30,num(el.w)-pad*2-gap-qrSide),bh=Math.max(16,num(el.h)-pad*2-11),qx=absX+num(el.w)-pad-qrSide,qy=absY+pad;return{geo,el,barcode:{x:bx,y:by,w:bw,h:bh},qr:{x:qx,y:qy,w:qrSide,h:qrSide}};}
+export function productionCodeBoxesV31(state){const geo=generateGeometry(state.structure),el=(state.elements||[]).find(e=>e?.type==='barcode-qr-group');if(!el)throw new Error('Barcode + QR Group is missing.');const rr=resolveElementRect(el,geo),absX=rr.absX,absY=rr.absY,{pad,qrSide,bw,bh}=barcodeGroupLayoutV70(el),bx=absX+pad,by=absY+pad,qx=absX+num(el.w)-pad-qrSide,qy=absY+pad;return{geo,el,barcode:{x:bx,y:by,w:bw,h:bh},qr:{x:qx,y:qy,w:qrSide,h:qrSide}};}
 
 export function pdfFilledRectsV31(bytes,pageHeightMm){const text=new TextDecoder().decode(bytes),out=[],re=/(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+re\s+f\b/g;let m;while((m=re.exec(text))){const x=num(m[1])/PT,yBottom=num(m[2])/PT,w=num(m[3])/PT,h=num(m[4])/PT;out.push({x,y:num(pageHeightMm)-yBottom-h,w,h});}return out;}
 
