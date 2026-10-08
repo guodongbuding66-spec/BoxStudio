@@ -1,4 +1,5 @@
 const paths={
+ focus:'M3 9V3h6M15 3h6v6M21 15v6h-6M9 21H3v-6',
  lock:'M6 10h12v11H6zM8 10V6a4 4 0 0 1 8 0v4M12 15v2',unlock:'M6 10h12v11H6zM8 10V6a4 4 0 0 1 8 0M12 15v2',eye:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Zm13 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0',eyeOff:'m3 3 18 18M9 5c6-2 11 5 13 7a20 20 0 0 1-4 4M6 6a25 25 0 0 0-4 6s4 7 10 7c2 0 3-.5 5-1',multi:'M3 3h7v7H3zM14 14h7v7h-7zM14 3h7v7M3 14v7h7',
  alignLeft:'M3 3v18M7 6h14v4H7zM7 14h9v4H7z',alignCenter:'M12 3v18M3 6h18v4H3zM7 14h10v4H7z',alignRight:'M21 3v18M3 6h14v4H3zM8 14h9v4H8z',alignTop:'M3 3h18M6 7h4v14H6zM14 7h4v9h-4z',alignMiddle:'M3 12h18M6 3h4v18H6zM14 7h4v10h-4z',alignBottom:'M3 21h18M6 3h4v14H6zM14 8h4v9h-4z',distributeX:'M3 3v18M21 3v18M9 6h6v12H9z',distributeY:'M3 3h18M3 21h18M6 9h12v6H6z',
  box:'M12 3 3 7.5v9L12 21l9-4.5v-9L12 3ZM3 7.5l9 4.5 9-4.5M12 12v9M7.5 5.3l9 4.5',

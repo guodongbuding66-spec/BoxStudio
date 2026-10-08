@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 const index=readFileSync('index.html','utf8');
 const modules=html=>[...html.matchAll(/<script type="module" src="(?:\.\/|\.\.\/)(src\/[^"\s]+)"/g)].map(x=>x[1]);
 const styles=html=>[...html.matchAll(/<link rel="stylesheet" href="(?:\.\/|\.\.\/)(src\/[^"\s]+)"/g)].map(x=>x[1]);
-for(const path of ['tests/studio-screenshots.html','tests/artwork-live.html','tests/v66-browser-e2e.html','tests/v67-browser-e2e.html','tests/v68-browser-e2e.html']){
+for(const path of ['tests/studio-screenshots.html','tests/artwork-live.html','tests/v66-browser-e2e.html','tests/v67-browser-e2e.html','tests/v68-browser-e2e.html','tests/v69-browser-e2e.html']){
  const fixture=readFileSync(path,'utf8');
  assert.deepEqual(modules(fixture),modules(index),`${path} must load every production module in order`);
  assert.deepEqual(styles(fixture),styles(index),`${path} must load production styles in order`);

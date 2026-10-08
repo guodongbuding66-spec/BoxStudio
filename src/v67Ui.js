@@ -1,13 +1,26 @@
 import {iconV67} from './uiIconsV67.js';
 import {standaloneMarkUiV67 as marks} from './standaloneMarkUiV67.js';
 const editor=()=>window.BoxStudioEditor,esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let cartonInspector='data',lastSelection='';const fitted=new WeakSet();
-function openMarkStudio(){editor().navigate('mark-studio');}
+let cartonInspector='data',lastSelection='',focusMode=false,lastPage='';const fitted=new WeakSet();
+function entryRoute(page){if(['','/marks','/box'].includes(location.pathname.replace(/\/$/,''))){const path=page==='mark-studio'?'/marks':'/';if(location.pathname!==path)history.pushState(null,'',path+location.search+location.hash);}}
+function openMarkStudio(){entryRoute('mark-studio');editor().navigate('mark-studio');}
+function setCanvasFocus(value){
+ focusMode=value;document.body.dataset.v69Focus=String(value);
+ document.querySelectorAll('[data-v69-focus]').forEach(b=>{b.setAttribute('aria-pressed',String(value));b.setAttribute('aria-label',value?'恢复工作区面板':'专注画布');b.title=value?'恢复工作区面板 · Escape':'专注画布';});
+ requestAnimationFrame(()=>{if(editor().getState().page==='mark-studio')marks.fit();else editor().fitCanvas();});
+}
+function canvasFocus(){
+ const s=editor().getState(),eligible=s.page==='mark-studio'||s.page==='editor'&&['Design','Marks','Structure','3D'].includes(s.editorTab);
+ if(lastPage!==s.page||!eligible){if(focusMode)setCanvasFocus(false);lastPage=s.page;}
+ const bar=document.querySelector(s.page==='mark-studio'?'.v67-mark-status':'.workspace .tabbar');
+ if(!eligible||!bar||bar.querySelector('[data-v69-focus]'))return;
+ const b=document.createElement('button');b.dataset.v69Focus='true';b.className='v69-focus-button';b.innerHTML=iconV67('focus',18);b.setAttribute('aria-label',focusMode?'恢复工作区面板':'专注画布');b.title=focusMode?'恢复工作区面板 · Escape':'专注画布';b.setAttribute('aria-pressed',String(focusMode));b.onclick=()=>setCanvasFocus(!focusMode);const spacer=bar.querySelector('.spacer');if(spacer)spacer.before(b);else bar.prepend(b);
+}
 function header(){
  const top=document.querySelector('.topbar');if(!top)return;const state=editor().getState(),independent=state.page==='mark-studio';
  if(!top.dataset.v67Header){top.dataset.v67Header='true';const brand=top.querySelector('.brand');for(const node of [...brand.childNodes])if(node.nodeType===Node.TEXT_NODE)node.remove();const word=document.createElement('span');word.className='v67-brand';word.innerHTML=`${iconV67('box',24)}<b>BoxStudio</b>`;brand.prepend(word);
-  const modes=document.createElement('nav');modes.className='v67-modes';modes.setAttribute('aria-label','设计工作台');modes.innerHTML=`<button data-v67-mode="box">${iconV67('box',18)}<span>纸盒设计</span></button><button data-v67-mode="mark">${iconV67('label',18)}<span>唛头设计</span></button>`;brand.after(modes);modes.querySelector('[data-v67-mode="box"]').onclick=()=>editor().navigate('editor','Design');modes.querySelector('[data-v67-mode="mark"]').onclick=openMarkStudio;
-  const badge=document.createElement('span');badge.dataset.v67Version='true';badge.className='v67-version';badge.textContent='V0.68';brand.append(badge);
+  const modes=document.createElement('nav');modes.className='v67-modes';modes.setAttribute('aria-label','设计工作台');modes.innerHTML=`<button data-v67-mode="box">${iconV67('box',18)}<span>纸盒设计</span></button><button data-v67-mode="mark">${iconV67('label',18)}<span>唛头设计</span></button>`;brand.after(modes);modes.querySelector('[data-v67-mode="box"]').onclick=()=>{entryRoute('editor');editor().navigate('editor','Design');};modes.querySelector('[data-v67-mode="mark"]').onclick=openMarkStudio;
+  const badge=document.createElement('span');badge.dataset.v67Version='true';badge.className='v67-version';badge.textContent='V0.69';brand.append(badge);
   const save=document.createElement('button');save.dataset.v67Save='true';save.title='保存项目 · Ctrl / Cmd + S';save.innerHTML=iconV67('save',18)+'<span>保存</span>';save.onclick=()=>{try{editor().getState().page==='mark-studio'?marks.saveProject():window.BoxStudioV66.saveProject();}catch(e){const t=document.querySelector('[data-v67-toast]');t.textContent=e.message;t.dataset.show='true';}};top.querySelector('#quickExport').before(save);
   const advanced=document.createElement('details');advanced.className='v67-advanced-menu';advanced.innerHTML=`<summary aria-label="工作台设置">${iconV67('settings',18)}</summary><div data-v67-settings><b data-v67-settings-title>工作台设置</b><p data-v67-settings-hint>切换界面复杂度与印刷配置</p><section data-v67-mark-settings><button data-v67-size>画布尺寸</button><button data-v67-font>导出与字体</button></section></div>`;top.querySelector('#quickExport').before(advanced);advanced.querySelector('[data-v67-size]').onclick=()=>{advanced.open=false;const options=document.querySelector('.v67-artboard-options');if(options){options.open=true;options.scrollIntoView({block:'nearest'});options.querySelector('input').focus();}};advanced.querySelector('[data-v67-font]').onclick=()=>{advanced.open=false;marks.openExport();};
  }
@@ -46,7 +59,10 @@ function carton(){
  }
  if(!fitted.has(workspace)){fitted.add(workspace);requestAnimationFrame(()=>{if(workspace.isConnected)editor().fitCanvas();});}
 }
-function enhance(){if(!editor())return;document.body.dataset.v67='true';const s=editor().getState();document.body.dataset.v67Page=s.page;header();if(s.page==='mark-studio'){const page=document.querySelector('[data-v67-mark-page]');if(page&&!page.dataset.mounted){page.dataset.mounted='true';marks.mount(page);}}else carton();}
-window.BoxStudioV67={version:'V0.68',getMarkState:marks.getState,openMarkStudio,saveMarkProject:marks.saveProject,openMarkProjects:marks.openProjects,openMarkExport:marks.openExport,commitMarkState:marks.commit};
+function enhance(){if(!editor())return;document.body.dataset.v67='true';const s=editor().getState();document.body.dataset.v67Page=s.page;header();if(s.page==='mark-studio'){const page=document.querySelector('[data-v67-mark-page]');if(page&&!page.dataset.mounted){page.dataset.mounted='true';marks.mount(page);}}else carton();canvasFocus();}
+window.BoxStudioV67={version:'V0.69',getMarkState:marks.getState,openMarkStudio,saveMarkProject:marks.saveProject,openMarkProjects:marks.openProjects,openMarkExport:marks.openExport,commitMarkState:marks.commit};
 window.BoxStudioV68={...window.BoxStudioV67,getMarkSelection:marks.getSelection,getMarkHistory:marks.getHistory,selectMarks:marks.select};
+window.BoxStudioV69={...window.BoxStudioV68,setCanvasFocus,getCanvasFocus:()=>focusMode};
+window.addEventListener('keydown',e=>{if(e.key!=='Escape'||!focusMode||e.target?.closest?.('input,textarea,select,[contenteditable="true"]')||document.querySelector('dialog[open]'))return;e.preventDefault();e.stopImmediatePropagation();if(editor().getState().page==='mark-studio'&&marks.cancelGesture())return;setCanvasFocus(false);},true);
+window.addEventListener('popstate',()=>{const path=location.pathname.replace(/\/$/,'');if(path==='/marks')editor().navigate('mark-studio');else if(path===''||path==='/box')editor().navigate('editor','Design');});
 window.BoxStudioUiRuntimeV64.register('v67',enhance);

@@ -3,3 +3,5 @@ artifacts/
 .sites-runtime/
 __pycache__/
 *.pyc
+dist/
+.vercel/

@@ -1,4 +1,4 @@
-# BoxStudio V0.68
+# BoxStudio V0.69
 
 免费纸盒设计与唛头编辑网站：选择盒型 → 配置毫米尺寸 / 材料 / 纸厚 → 2D 图文和唛头 → 3D 校样 → 印前检查 → 导出。
 
@@ -8,7 +8,9 @@ V0.67 按 ui-skills、interface-design 与 better-ui 重排工作台。顶部可
 
 V0.68 增加独立唛头多选与框选、6 向对齐、等间距分布、整体拖动与毫米微移、图层锁定、10 mm 网格吸附和 Ctrl+D 复制。图层锁定保护排版，运输数据仍同步更新；多选只占一条撤销记录，选取和边缘无效移动不会增加历史。
 
-运行：`npm run dev`。测试：`node tests/full-entry.mjs`、`npm run test:v68`、`npm run test:v67`、`npm run test:v66`。数据库测试需要 `BOXSTUDIO_DATABASE_URL`。
+V0.69 补齐独立唛头四角拖拽缩放、条码比例和最小尺寸保护，以及两个工作台的专注画布。独立唛头可以通过 `/marks` 直接打开。Vercel 构建方式和验收范围见 [V0.69 公开部署](docs/V0.69_PUBLIC_RELEASE.md)。
+
+运行：`npm run dev`。构建：`npm run build`。测试：`node tests/full-entry.mjs`、`npm run test:v69`、`npm run test:v68`、`npm run test:v67`、`npm run test:v66`。数据库测试需要 `BOXSTUDIO_DATABASE_URL`。
 
 本轮排版交互与测试范围见 [V0.68 唛头排版](docs/V0.68_MARK_LAYOUT.md)。前一轮参考核对、测试范围与未完成事项见 [V0.67 界面与独立唛头验收](docs/V0.67_UI_AND_INDEPENDENT_MARKS.md)。产品范围仍以 [当前开发主基准](docs/BOXSTUDIO_DEVELOPMENT_SPEC_CURRENT.md) 为准。
 

@@ -1,3 +1,4 @@
+import {resizeStandaloneMarkV69} from './standaloneTransformV69.js';
 import {MARK_DOCUMENT_KEY_V67,MARK_TEMPLATES_V67,createMarkDocumentV67,parseMarkDocumentV67,setMarkArtboardV67,insertStandaloneMarkV67,patchStandaloneElementV67,duplicateStandaloneElementV67,validateMarkDocumentV67,markPreflightV67,buildMarkSvgV67,buildMarkPdfV67,visibleMarkElementsV67} from './standaloneMarksV67.js';
 import {MARK_FIELDS_V66,applyMarkDataV66} from './shippingMarkLayoutV66.js';
 import {V58_MARK_GROUPS,V58_MARK_PRESETS} from './productExperienceV58.js';
@@ -70,7 +71,7 @@ function selectionPropertiesHtml(list){
  const b=markBoundsV68(list),locked=list.filter(e=>e.locked).length;
  return `<section class="v68-selection-summary"><div class="v67-section-head"><b>已选择 ${list.length} 个对象</b><small>${locked?`${locked} 个已锁定`:'整体排版'}</small></div><dl><div><dt>X / Y</dt><dd>${b.x.toFixed(1)} / ${b.y.toFixed(1)} mm</dd></div><div><dt>整体宽 / 高</dt><dd>${b.w.toFixed(1)} / ${b.h.toFixed(1)} mm</dd></div></dl><p>拖动任一选中对象可整体移动；空白处拖动可框选。</p></section><form data-mark-move><fieldset ${locked?'disabled':''}><div class="v67-fields"><label>水平移动 · mm<input name="dx" type="number" value="0" step="0.5" required></label><label>垂直移动 · mm<input name="dy" type="number" value="0" step="0.5" required></label></div><button type="submit">移动所选对象</button></fieldset></form>${selectionActionsHtml(list)}${layoutHtml(list)}`;
 }
-function propertiesHtml(){const e=selected(),list=selection();if(list.length>1)return selectionPropertiesHtml(list);if(!e)return`<div class="v67-empty">${iconV67('select',32)}<b>选择一个对象</b><p>在画布或图层中选择后，调整位置、尺寸和内容。</p></div>`;return`<form data-mark-properties><fieldset ${e.locked?'disabled':''}><div class="v67-section-head"><b>${esc(e.type==='barcode-qr-group'?'条码 + QR 组合':e.type==='text'?'变量文字':e.type==='icon'?'搬运标识':e.type==='notice'?'多包裹提示':e.type==='image'?'图片':'矩形')}</b><small>单位 mm</small></div><div class="v67-fields">${['x','y','w','h'].map((k,i)=>`<label>${['X','Y','宽度','高度'][i]}<input name="${k}" type="number" step="0.5" value="${e[k]}" ${i>1?'min="4"':''}></label>`).join('')}</div>${e.type==='barcode-qr-group'?`<p class="v67-lock-note">组合比例锁定 3.125 : 1 · 条码与 QR 同步缩放</p><label>条码类型<select name="barcodeType">${['CODE39','EAN13','UPCA','ITF14','GS1_128'].map(t=>`<option ${t===e.barcodeType?'selected':''}>${t}</option>`).join('')}</select></label><label>条码内容<input name="barcodeValue" value="${esc(e.barcodeValue)}"></label><label>QR 内容<input name="qrValue" value="${esc(e.qrValue)}"></label>`:''}${['text','notice'].includes(e.type)?`<label>文字内容<textarea name="template" rows="4">${esc(e.template)}</textarea></label><div class="v67-fields"><label>字号 · mm<input name="fontSize" type="number" min="1" max="80" step="0.5" value="${e.fontSize}"></label><label class="v67-check"><input name="bold" type="checkbox" ${e.bold?'checked':''}>加粗</label></div><small>使用 {{sku}}、{{crn}} 等变量绑定运输数据。</small>`:''}<p role="alert" data-property-error></p><button class="primary" type="submit">应用对象属性</button></fieldset></form>${selectionActionsHtml(list)}${layoutHtml(list)}`;}
+function propertiesHtml(){const e=selected(),list=selection();if(list.length>1)return selectionPropertiesHtml(list);if(!e)return`<div class="v67-empty">${iconV67('select',32)}<b>选择一个对象</b><p>在画布或图层中选择后，调整位置、尺寸和内容。</p></div>`;return`<form data-mark-properties><fieldset ${e.locked?'disabled':''}><div class="v67-section-head"><b>${esc(e.type==='barcode-qr-group'?'条码 + QR 组合':e.type==='text'?'变量文字':e.type==='icon'?'搬运标识':e.type==='notice'?'多包裹提示':e.type==='image'?'图片':'矩形')}</b><small>单位 mm · 拖动角点调整尺寸</small></div><div class="v67-fields">${['x','y','w','h'].map((k,i)=>`<label>${['X','Y','宽度','高度'][i]}<input name="${k}" type="number" step="0.5" value="${e[k]}" ${i>1?'min="4"':''}></label>`).join('')}</div>${e.type==='barcode-qr-group'?`<p class="v67-lock-note">组合比例锁定 3.125 : 1 · 条码与 QR 同步缩放</p><label>条码类型<select name="barcodeType">${['CODE39','EAN13','UPCA','ITF14','GS1_128'].map(t=>`<option ${t===e.barcodeType?'selected':''}>${t}</option>`).join('')}</select></label><label>条码内容<input name="barcodeValue" value="${esc(e.barcodeValue)}"></label><label>QR 内容<input name="qrValue" value="${esc(e.qrValue)}"></label>`:''}${['text','notice'].includes(e.type)?`<label>文字内容<textarea name="template" rows="4">${esc(e.template)}</textarea></label><div class="v67-fields"><label>字号 · mm<input name="fontSize" type="number" min="1" max="80" step="0.5" value="${e.fontSize}"></label><label class="v67-check"><input name="bold" type="checkbox" ${e.bold?'checked':''}>加粗</label></div><small>使用 {{sku}}、{{crn}} 等变量绑定运输数据。</small>`:''}<p role="alert" data-property-error></p><button class="primary" type="submit">应用对象属性</button></fieldset></form>${selectionActionsHtml(list)}${layoutHtml(list)}`;}
 function renderInspector(){if(!host)return;const right=host.querySelector('[data-mark-inspector]');right.innerHTML=`<div class="v67-inspector-tabs" role="tablist" aria-label="唛头检查器"><button role="tab" data-inspector="data" aria-selected="${inspectorTab==='data'}">唛头数据</button><button role="tab" data-inspector="object" aria-selected="${inspectorTab==='object'}">对象属性</button></div><div class="v67-inspector-content">${inspectorTab==='data'?`<div class="v67-section-head"><b>运输与包装信息</b><small>所有绑定位置同步更新</small></div><form data-mark-data><div class="v67-fields">${fieldsHtml()}</div><p role="alert" data-data-error></p><button type="submit" class="primary">应用唛头数据</button></form>`:propertiesHtml()}<details class="v67-artboard-options"><summary>画布尺寸</summary><form data-artboard><div class="v67-fields"><label>宽度 · mm<input name="width" type="number" min="40" max="1500" value="${doc.artboard.width}" required></label><label>高度 · mm<input name="height" type="number" min="30" max="1500" value="${doc.artboard.height}" required></label></div><button type="submit">应用画布尺寸</button><p role="alert" data-size-error></p></form></details><p role="alert" data-mark-error>${esc(startupError)}</p></div>`;
  right.querySelectorAll('[data-inspector]').forEach(b=>b.onclick=()=>{inspectorTab=b.dataset.inspector;renderInspector();});
  const data=right.querySelector('[data-mark-data]');if(data)data.onsubmit=e=>{e.preventDefault();try{commit(applyMarkDataV66(doc,Object.fromEntries(new FormData(data)),{syncDimensions:false}));toast('唛头数据已同步');}catch(e){data.querySelector('[data-data-error]').textContent=e.message;}};
@@ -116,7 +117,7 @@ function objectAction(action){safely(()=>{
  });}
 
 function renderToolbar(){if(!host)return;host.querySelector('[data-mark-undo]').disabled=index<=0;host.querySelector('[data-mark-redo]').disabled=index>=history.length-1;const list=selection(),locked=list.some(e=>e.locked);host.querySelector('[data-mark-copy]').disabled=!list.length;host.querySelector('[data-mark-delete]').disabled=!list.length||locked;host.querySelector('[data-mark-multiselect]').setAttribute('aria-pressed',String(multiSelect));host.querySelector('[data-mark-selection-count]').textContent=list.length?`${list.length} 个对象${locked?' · 已锁定':''}`:'独立唛头画布';host.querySelector('[data-mark-size]').textContent=`${doc.artboard.width} × ${doc.artboard.height} mm`;host.querySelector('[data-mark-zoom-label]').textContent=`${Math.round(zoom*100)}%`;const p=markPreflightV67(doc);const n=host.querySelector('[data-mark-preflight]');n.textContent=p.errors.length?`${p.errors.length} 项待修正`:p.warnings.length?`${p.warnings.length} 项提示`:'检查通过';n.className=p.errors.length?'error':p.warnings.length?'warn':'ok';const title=document.querySelector('[data-v66-project-title]');if(title&&title.textContent!==doc.projectName)title.textContent=doc.projectName;const saved=document.querySelector('.save-state');if(saved&&saved.textContent!=='已自动保存')saved.textContent='已自动保存';}
-function renderBoard(){if(!host)return;const board=host.querySelector('[data-mark-board]');board.innerHTML=buildMarkSvgV67(doc,{ui:true,grid,selectedIds:selectionIds});const svg=board.querySelector('svg');svg.style.width=`${doc.artboard.width*96/25.4*zoom}px`;svg.style.height=`${doc.artboard.height*96/25.4*zoom}px`;}
+function renderBoard(document=doc){if(!host)return;const board=host.querySelector('[data-mark-board]');board.innerHTML=buildMarkSvgV67(document,{ui:true,grid,selectedIds:selectionIds,resizeHandles:true,handleSize:(matchMedia('(pointer:coarse)').matches?24:14)/(96/25.4*zoom)});const svg=board.querySelector('svg');svg.style.width=`${doc.artboard.width*96/25.4*zoom}px`;svg.style.height=`${doc.artboard.height*96/25.4*zoom}px`;}
 function fit(){if(!host)return;const stage=host.querySelector('[data-mark-stage]'),r=stage.getBoundingClientRect();zoom=Math.max(.12,Math.min(2,Math.min((r.width-72)/(doc.artboard.width*96/25.4),(r.height-72)/(doc.artboard.height*96/25.4))));renderBoard();renderToolbar();}
 function render(){normalizeSelection();if(!host||!host.isConnected)return;renderBoard();renderInspector();renderLibrary();renderToolbar();}
 function releasePointer(stage,id){if(stage?.hasPointerCapture(id))stage.releasePointerCapture(id);}
@@ -129,9 +130,13 @@ function mount(page){cancelDrag();host=page;page.innerHTML=`<div class="v67-mark
  const stage=page.querySelector('[data-mark-stage]');stage.ondragover=e=>e.preventDefault();stage.ondrop=e=>{e.preventDefault();const id=e.dataTransfer.getData('application/boxstudio-mark');if(id)insert(id,point(e));};
  stage.onpointerdown=e=>{
   if(e.button!==0||drag)return;
-  const g=e.target.closest('[data-mark-object]'),additive=e.shiftKey||e.ctrlKey||e.metaKey||multiSelect;
+  const handle=e.target.closest('[data-mark-resize]'),g=e.target.closest('[data-mark-object]'),additive=e.shiftKey||e.ctrlKey||e.metaKey||multiSelect;
   stage.focus({preventScroll:true});
-  if(!g){
+  if(handle&&g){
+   e.preventDefault();const id=g.dataset.markObject;
+   if(selectionIds.length!==1||selectionIds[0]!==id||selected()?.locked)return;
+   drag={kind:'resize',pointerId:e.pointerId,start:point(e),id,corner:handle.dataset.markResize,original:clone(doc),candidate:null,moved:false};
+  }else if(!g){
    if(!e.target.closest('[data-mark-board] svg')){if(!additive)select('');return;}
    e.preventDefault();const start=point(e);
    drag={kind:'marquee',start,current:start,pointerId:e.pointerId,originalIds:[...selectionIds],additive,moved:false};
@@ -147,7 +152,9 @@ function mount(page){cancelDrag();host=page;page.innerHTML=`<div class="v67-mark
  stage.onpointermove=e=>{
   if(!drag||e.pointerId!==drag.pointerId)return;
   const p=point(e);
-  if(drag.kind==='marquee'){
+  if(drag.kind==='resize'){
+   try{drag.candidate=resizeStandaloneMarkV69(drag.original,drag.id,drag.corner,p.x-drag.start.x,p.y-drag.start.y,{preserveAspect:e.shiftKey});drag.moved=JSON.stringify(drag.candidate.elements)!==JSON.stringify(doc.elements);renderBoard(drag.candidate);}catch(error){cancelDrag();toast(error.message);return;}
+  }else if(drag.kind==='marquee'){
    drag.current=p;drag.moved=Math.abs(p.x-drag.start.x)+Math.abs(p.y-drag.start.y)>.5;
    const r=marqueeBounds(drag),svg=host.querySelector('[data-mark-board] svg');
    let rect=svg.querySelector('.v68-marquee');if(!rect){rect=document.createElementNS('http://www.w3.org/2000/svg','rect');rect.setAttribute('class','ui-only v68-marquee');rect.setAttribute('aria-hidden','true');svg.append(rect);}
@@ -163,7 +170,8 @@ function mount(page){cancelDrag();host=page;page.innerHTML=`<div class="v67-mark
  };
  stage.onpointerup=e=>{
   if(!drag||e.pointerId!==drag.pointerId)return;const d=drag;drag=null;releasePointer(stage,d.pointerId);stage.classList.remove('is-dragging');
-  if(d.kind==='marquee'){
+  if(d.kind==='resize'){if(d.moved)safely(()=>commit(d.candidate));renderBoard();}
+  else if(d.kind==='marquee'){
    const r=marqueeBounds(d),ids=d.moved?visibleMarkElementsV67(doc).filter(x=>!x.locked&&x.x>=r.x&&x.y>=r.y&&x.x+x.w<=r.x+r.w&&x.y+x.h<=r.y+r.h).map(x=>x.id):[];
    normalizeSelection(d.additive?[...d.originalIds,...ids]:ids);inspectorTab='object';render();
   }else if(d.moved){safely(()=>commit(moveMarkSelectionV68(doc,d.ids,d.dx,d.dy)));renderBoard();}
@@ -192,4 +200,4 @@ window.addEventListener('keydown',e=>{
  if(delta&&!mod&&selectionIds.length){e.preventDefault();cancelDrag();const step=e.shiftKey?10:1;safely(()=>commit(moveMarkSelectionV68(doc,selectionIds,delta[0]*step,delta[1]*step)));}
 });
 
-export const standaloneMarkUiV67={getState:()=>clone(doc),getSelection:()=>[...selectionIds],getHistory:()=>({index,length:history.length}),select:ids=>{cancelDrag();normalizeSelection(ids);inspectorTab='object';render();},mount,saveProject,openProjects,openExport,commit,undo:()=>historyStep(-1),redo:()=>historyStep(1),fit,exportPng};
+export const standaloneMarkUiV67={getState:()=>clone(doc),getSelection:()=>[...selectionIds],getHistory:()=>({index,length:history.length}),select:ids=>{cancelDrag();normalizeSelection(ids);inspectorTab='object';render();},mount,cancelGesture:()=>{if(!drag)return false;cancelDrag();return true;},saveProject,openProjects,openExport,commit,undo:()=>historyStep(-1),redo:()=>historyStep(1),fit,exportPng};

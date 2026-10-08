@@ -18,6 +18,9 @@ import { PRINT_PROFILES, applyPrintProfile, spotNameFor } from './printProfiles.
 
 const app = document.getElementById('app');
 let state = load();
+const entryPathV69=location.pathname.replace(/\/$/,'');
+if(entryPathV69==='/marks')state.page='mark-studio';
+else if(entryPathV69==='/box'){state.page='editor';state.editorTab='Structure';}
 let history = [cloneState(state)];
 let historyIndex = 0;
 let dragging = null;

@@ -60,3 +60,15 @@ body[data-v67=true] .v67-mark-board .selection-box.is-locked{stroke:#929aaa}
 .v67-mark-board .selection-box{pointer-events:none}
 @media(max-width:760px){.v68-align-buttons>button{min-height:40px}.v68-distribute-buttons>button{min-height:40px}.v67-layer{grid-template-columns:minmax(0,1fr) 40px 40px}.v67-layer>button{min-height:40px}}
 @media(max-width:430px){.v67-canvas-toolbar{padding:0 8px;gap:4px}.v67-canvas-toolbar button{flex-shrink:0;width:34px;padding:7px;justify-content:center}.v67-canvas-toolbar [data-mark-mobile-library]>span{display:none}.v67-size-chip{padding:6px;font-size:9px;white-space:nowrap;flex-shrink:0}.v67-canvas-toolbar .spacer{min-width:0}}
+
+/* Focus mode changes available canvas space, never the document geometry. */
+body[data-v69-focus=true] .workspace,body[data-v69-focus=true] .workspace[data-v67-library=true],body[data-v69-focus=true] .v67-mark-workspace{grid-template-columns:minmax(0,1fr)!important}
+body[data-v69-focus=true] .workspace>.toolbar,body[data-v69-focus=true] .workspace>.rightpanel,body[data-v69-focus=true] .workspace>.v67-library,body[data-v69-focus=true] .v67-mark-workspace>.v67-library,body[data-v69-focus=true] .v67-mark-workspace>.v67-mark-inspector{display:none!important}
+body[data-v69-focus=true] .workspace>.main{grid-column:1!important;grid-row:1!important}
+.v69-focus-button{display:inline-flex;align-items:center;justify-content:center;min-width:30px;min-height:30px;border:0;border-radius:5px;padding:6px;background:transparent;color:var(--studio-muted)}
+.v69-focus-button:hover{background:var(--studio-inset)}
+.v69-focus-button[aria-pressed=true]{background:#edf1fc;color:var(--studio-blue)}
+.v69-resize-handle{touch-action:none}
+.v69-resize-handle[data-mark-resize=nw],.v69-resize-handle[data-mark-resize=se]{cursor:nwse-resize}
+.v69-resize-handle[data-mark-resize=ne],.v69-resize-handle[data-mark-resize=sw]{cursor:nesw-resize}
+@media(max-width:760px){body[data-v69-focus=true] .workspace>.main,body[data-v69-focus=true] .v67-mark-main{height:calc(100dvh - 112px);min-height:480px}.v67-mark-status .v69-focus-button{min-width:32px;min-height:32px}}
