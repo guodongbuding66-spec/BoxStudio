@@ -190,7 +190,8 @@ window.addEventListener('keydown',e=>{
  const input=e.target?.closest?.('input,textarea,select,[contenteditable="true"]'),key=e.key.toLowerCase(),mod=e.ctrlKey||e.metaKey;
  if(mod&&key==='s'){e.preventDefault();safely(()=>saveProject());return;}
  if(input)return;
- if(key==='escape'){e.preventDefault();if(drag)cancelDrag();else select('');return;}
+ // Focus mode owns Escape so cancellation and panel restoration run once.
+ if(key==='escape'){if(document.body.dataset.v69Focus==='true'||e.defaultPrevented)return;e.preventDefault();if(drag)cancelDrag();else select('');return;}
  if(mod&&key==='z'){e.preventDefault();historyStep(e.shiftKey?1:-1);return;}
  if(mod&&key==='y'){e.preventDefault();historyStep(1);return;}
  if(mod&&key==='a'){e.preventDefault();cancelDrag();normalizeSelection(visibleMarkElementsV67(doc).filter(x=>!x.locked).map(x=>x.id));inspectorTab='object';render();return;}

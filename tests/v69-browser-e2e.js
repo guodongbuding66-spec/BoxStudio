@@ -5,7 +5,7 @@ const wait=async(fn,label)=>{const end=Date.now()+25000;while(Date.now()<end){if
 const settle=()=>new Promise(r=>setTimeout(r,180));
 const click=s=>{if(!q(s))throw new Error('Missing '+s);q(s).click();};
 const state=()=>api().getMarkState(),el=id=>state().elements.find(e=>e.id===id),history=()=>api().getMarkHistory().index;
-const key=value=>window.dispatchEvent(new KeyboardEvent('keydown',{key:value,bubbles:true}));
+const key=value=>(document.activeElement||document.body).dispatchEvent(new KeyboardEvent('keydown',{key:value,bubbles:true}));
 function pointer(target,type,x,y,options={}){const r=q('[data-mark-board] svg').getBoundingClientRect(),s=state();target.dispatchEvent(new PointerEvent(type,{button:0,pointerId:69,bubbles:true,clientX:r.left+x/s.artboard.width*r.width,clientY:r.top+y/s.artboard.height*r.height,...options}));}
 function startResize(id,corner='se'){const e=el(id),x=e.x+(corner.includes('e')?e.w:0),y=e.y+(corner.includes('s')?e.h:0);pointer(q(`[data-mark-object="${id}"] [data-mark-resize="${corner}"]`),'pointerdown',x,y);return{x,y};}
 function resize(id,dx,dy,{corner='se',cancel='',shiftKey=false}={}){const p=startResize(id,corner),stage=q('[data-mark-stage]');pointer(stage,'pointermove',p.x+dx,p.y+dy,{shiftKey});if(cancel==='escape')key('Escape');if(cancel==='pointer')pointer(stage,'pointercancel',p.x+dx,p.y+dy);pointer(stage,'pointerup',p.x+dx,p.y+dy);}
