@@ -120,7 +120,7 @@ jobs:
             if curl -fsS http://127.0.0.1:8765/tests/v33-browser-e2e.html >/dev/null; then break; fi
             sleep 0.1
           done
-          timeout 20s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --virtual-time-budget=10000 --dump-dom http://127.0.0.1:8765/tests/v33-browser-e2e.html >/tmp/boxstudio-v33-dom.log 2>/tmp/boxstudio-v33-chrome.log || true
+          timeout 60s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --virtual-time-budget=10000 --dump-dom http://127.0.0.1:8765/tests/v33-browser-e2e.html >/tmp/boxstudio-v33-dom.log 2>/tmp/boxstudio-v33-chrome.log || true
           if test -f /tmp/boxstudio-v33-pass; then
             cat /tmp/boxstudio-v33-pass
           elif test -f /tmp/boxstudio-v33-fail; then

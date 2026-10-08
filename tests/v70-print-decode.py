@@ -13,6 +13,9 @@ for case in manifest:
     qr=[c.text for c in codes if c.format==zxingcpp.BarcodeFormat.QRCode]
     bars=[c.text for c in codes if c.format!=zxingcpp.BarcodeFormat.QRCode]
     assert case['qr'] in qr, (case,[(str(c.format),c.text) for c in codes])
-    assert case['barcode'] in bars, (case,bars)
+    # UPC-A and leading-zero EAN-13 have the same encoded symbol. ZXing may
+    # report the latter; preserve all 12 UPC digits when comparing that form.
+    equivalent_upc=Path(case['file']).name.startswith('UPCA-') and ('0'+case['barcode']) in bars
+    assert case['barcode'] in bars or equivalent_upc, (case,bars)
     print('PASS independent 300 DPI scan',case['file'],bars,qr)
 print('PASS',len(manifest),'production PDF pages; all barcode and QR contents match')
