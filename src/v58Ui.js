@@ -1,3 +1,4 @@
+import {iconV67} from './uiIconsV67.js';
 import { STORAGE_KEY, defaultState, cloneState } from './model.js';
 import { mountArtworkProof } from './threeArtworkProof.js';
 import { buildLinkedWorkspaceModelV49 } from './linkedWorkspaceV49.js';
@@ -47,13 +48,13 @@ function mountMiniPreview(){
   try{const s=readState(),model=buildLinkedWorkspaceModelV49(s);miniProof=mountArtworkProof(miniHost,s,model.review.geo,model.review.graph,{selectedPanelId:s.markEditorPanelId||model.selected?.panelId||null,materialStyle:model.review.material,onStatus:st=>{const e=card.querySelector('[data-v58-mini3d-status]');if(e){const text=`${st.panels} panels · ${st.texturedPanels} artwork`;if(e.textContent!==text)e.textContent=text}}});miniProof?.setProgress?.(100)}catch(error){miniHost.innerHTML=`<div class="v58-mini3d-error">3D preview unavailable<br><small>${esc(error?.message||error)}</small></div>`}
 }
 
-function markButton(id){const p=V58_MARK_PRESETS[id];return `<button data-v58-mark="${esc(id)}"><span>${p.kind==='icon'?(p.icon==='up'?'↑↑':p.icon==='fragile'?'♢':'☂'):p.kind==='barcode-qr-group'?'▥ ▦':'T'}</span><b>${esc(p.label)}</b></button>`}
+function markButton(id){const p=V58_MARK_PRESETS[id];return `<button data-v58-mark="${esc(id)}"><span>${iconV67(p.kind==='icon'?(p.icon==='up'?'mark':p.icon):p.kind==='barcode-qr-group'?'barcode':'text',20)}</span><b>${esc(p.label)}</b></button>`}
 function marksPalette(){
   const s=readState(),panels=markPanelOptionsV58(s),selected=s.markEditorPanelId||s.linkedV49?.selectedPanelId||panels[0]?.id||'';
   return `<section class="v58-marks-studio" data-v58-marks-studio><div class="v58-marks-head"><div><span>SHIPPING MARK STUDIO</span><b>唛头组件</b><small>选择面板后，一键插入运输信息、条码 / QR 与搬运标识</small></div><label>目标面<select data-v58-mark-panel>${panels.map(p=>`<option value="${esc(p.id)}" ${p.id===selected?'selected':''}>${esc(p.label)} · ${esc(p.role)}</option>`).join('')}</select></label></div><div class="v58-mark-groups">${V58_MARK_GROUPS.map(g=>`<div class="v58-mark-group"><strong>${esc(g.label)}</strong><div>${g.items.map(markButton).join('')}</div></div>`).join('')}</div><details class="v58-print-note"><summary>印前检查提示</summary>${V58_PRINT_ADVISORIES.map(x=>`<p>✓ ${esc(x.label)}</p>`).join('')}</details><button class="v58-batch-focus" data-v58-batch-focus>批量唛头 · Excel / CSV 字段映射 →</button></section>`
 }
 function enhanceMarks(){
-  const main=document.querySelector('.workspace .main');if(!main||currentTab()!=='Marks'||main.querySelector('[data-v58-marks-studio]'))return;const canvas=main.querySelector('.canvas-shell');if(!canvas)return;canvas.insertAdjacentHTML('beforebegin',marksPalette());const studio=main.querySelector('[data-v58-marks-studio]'),panel=studio.querySelector('[data-v58-mark-panel]');
+  const main=document.querySelector('.workspace .main');if(!main||currentTab()!=='Marks'||document.querySelector('[data-v58-marks-studio]'))return;const canvas=main.querySelector('.canvas-shell');if(!canvas)return;canvas.insertAdjacentHTML('beforebegin',marksPalette());const studio=main.querySelector('[data-v58-marks-studio]'),panel=studio.querySelector('[data-v58-mark-panel]');
   studio.querySelectorAll('[data-v58-mark]').forEach(b=>b.onclick=()=>{try{const result=addMarkPresetV66(readState(),b.dataset.v58Mark,{panelId:panel.value});saveState(result.state);if(window.BoxStudioEditor?.reloadFromStorage)window.BoxStudioEditor.reloadFromStorage();else location.reload()}catch(error){let message=studio.querySelector('[data-mark-error]');if(!message){message=document.createElement('p');message.dataset.markError='true';message.setAttribute('role','alert');studio.appendChild(message)}message.textContent=error?.message||String(error);studio.dataset.error=message.textContent}});
   studio.querySelector('[data-v58-batch-focus]').onclick=()=>{const file=document.querySelector('#batchFile')?.closest('.panel-section');file?.scrollIntoView({behavior:'smooth',block:'start'});document.querySelector('#batchFile')?.closest('.file-drop')?.classList.add('v58-pulse')};
 }

@@ -1,3 +1,4 @@
+import {iconV67} from './uiIconsV67.js';
 import { STORAGE_KEY, LEGACY_STORAGE_KEYS, defaultState, cloneState, stateForTemplate } from './model.js';
 import { renderTemplate, isPackageNoticeVisible, normalizeVariables } from './variables.js';
 import { generateGeometry, resolveElementRect, clampElementToPanel, reanchorElementByAbsolute, fitCssSize, defaultsForTemplate } from './geometry.js';
@@ -62,7 +63,7 @@ function applyTemplate(template){
 }
 
 function navButton(key,label){return `<button data-nav="${key}" class="${state.page===key?'active':''}">${label}</button>`}
-function toolButton(name,icon,title,{disabled=false}={}){return `<button class="tool ${activeTool===name?'active':''}" data-tool="${name}" title="${title}${disabled?' · Coming next':''}" ${disabled?'disabled aria-disabled="true"':''}>${icon}</button>`}
+function toolButton(name,icon,title,{disabled=false}={}){return `<button class="tool ${activeTool===name?'active':''}" data-tool="${name}" title="${title}${disabled?' · Coming next':''}" ${disabled?'disabled aria-disabled="true"':''}>${iconV67(name)}</button>`}
 
 function render(){
   disposeThreePreview();threeController=null;
@@ -72,7 +73,7 @@ function render(){
 }
 
 function renderShell(content){
-  app.innerHTML=`<div class="app"><header class="topbar"><div class="brand">BOXSTUDIO <small>V0.8</small></div><nav class="nav">${navButton('dashboard','Dashboard')}${navButton('templates','Templates')}${navButton('projects','Projects')}${navButton('editor','Editor')}${navButton('marks','Marks')}</nav><span class="save-state"></span><button class="primary" id="quickExport">Export</button></header>${content}</div>`;
+  app.innerHTML=`<div class="app"><header class="topbar"><div class="brand">BOXSTUDIO <small>V0.8</small></div><nav class="nav">${navButton('dashboard','Dashboard')}${navButton('templates','Templates')}${navButton('projects','Projects')}${navButton('editor','Editor')}${navButton('marks','Marks')}${navButton('mark-studio','独立唛头')}</nav><span class="save-state"></span><button class="primary" id="quickExport">Export</button></header>${content}</div>`;
 }
 function bindCommon(){
   document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{state.page=b.dataset.nav;persist();render()});
@@ -86,6 +87,7 @@ function bindPage(){
 }
 
 function pageContent(){
+  if(state.page==='mark-studio')return '<main data-v67-mark-page class="v67-mark-page"></main>';
   if(state.page==='dashboard')return `<main class="page"><div class="page-head"><div><h1>Dashboard</h1><p class="muted">参数化结构、导入刀版、真实条码、Hinge Pivot 3D、批量唛头与生产文件集中在一个项目内。</p></div><button class="primary" data-open-editor="Design">打开编辑器</button></div><div class="kpis"><div class="kpi"><b>1</b><span>Projects</span></div><div class="kpi"><b>2 + Import</b><span>Structure sources</span></div><div class="kpi"><b>${state.elements.length}</b><span>Mark elements</span></div><div class="kpi"><b>${state.batch.rows.length}</b><span>Batch rows</span></div></div><h2>最近项目</h2><div class="cards"><div class="card"><div class="eyebrow">${esc(templateLabel().toUpperCase())}</div><h3>${esc(state.projectName)}</h3><p class="muted">${state.structure.template==='imported'?`${Math.round(geo().width)}×${Math.round(geo().height)} mm imported artboard`:`${state.structure.layers} 层 ${esc(state.structure.flute)} 楞 · ${state.structure.length}×${state.structure.width}×${state.structure.height} mm`}</p><div class="card-actions"><button class="primary" data-open-editor="Design">继续设计</button><button class="mini" data-open-editor="3D">3D Fold</button><button class="mini" data-open-editor="Preflight">Preflight</button></div></div></div></main>`;
   if(state.page==='templates'){const std=STANDARD_TEMPLATE_CATALOG.map(t=>`<div class="card"><div class="eyebrow">${esc(t.standard)} · ${esc(t.code)}</div><h3>${esc(t.name)}</h3><p class="muted">Template schema v1 · ${t.parameters.map(esc).join(' / ')}</p><div class="badge">${esc(t.status)}</div>${t.engine?`<div class="card-actions"><button class="primary" data-use-template="${esc(t.engine)}">使用结构</button></div>`:'<div class="notice template-ref">仅建立标准模板数据结构；未生成未经验证的刀版几何。</div>'}</div>`).join('');return `<main class="page"><div class="page-head"><div><h1>Templates</h1><p class="muted">V0.8 保留标准模板 schema，并新增 PDF / PDF-compatible AI 矢量刀版导入。只有已验证引擎可直接生成；FEFCO/ECMA 未实现条目不会伪造几何。</p></div></div><div class="cards">${std}<div class="card"><div class="eyebrow">IMPORT · VECTOR</div><h3>SVG / DXF / PDF / AI Dieline</h3><p class="muted">PDF-compatible AI、Spot 语义、Bezier/Arc、Polygon Panel、Topology/Intersection 检查。</p><div class="card-actions"><button class="primary" data-open-editor="Structure">进入导入器</button></div></div></div></main>`;}
   if(state.page==='projects')return `<main class="page"><h1>Projects</h1><div class="cards"><div class="card"><h3>${esc(state.projectName)}</h3><p class="muted">自动保存在浏览器 localStorage。结构、导入刀线、变量、批量映射与位置都会保存。</p><div class="card-actions"><button class="primary" data-open-editor="Design">Open</button><button class="mini" id="resetDemo">Reset Demo Data</button></div></div></div></main>`;
@@ -440,7 +442,7 @@ function endDrag(){if(dielineDragging){const d=dielineDragging;dielineDragging=n
 const SVG_STYLE=`.svg-text{font-family:Arial,Helvetica,sans-serif;fill:#111;white-space:pre}.dieline-cut{fill:none;stroke:#111;stroke-width:2}.dieline-crease{stroke:#c93d3d;stroke-width:2;stroke-dasharray:14 9}.dieline-perf{stroke:#6b4fb3;stroke-width:2;stroke-dasharray:5 5}.dieline-glue{stroke:#2d8a61;stroke-width:2;stroke-dasharray:20 6}.panel-label{font-family:Arial,sans-serif;font-size:16px;fill:#9da4ae}.warning-label{fill:#b42318;font-family:Arial,sans-serif;font-size:10px}`;
 function buildHiddenSvg(){const g=geo(),holder=document.createElement('div');holder.innerHTML=`<svg viewBox="0 0 ${g.width} ${g.height}" xmlns="http://www.w3.org/2000/svg"><style>${SVG_STYLE}</style><rect width="100%" height="100%" fill="#fff"/>${dielineSvg(g)}${foldOverlaySvg(g)}${dielineEditSvg(g)}${curveEditSvg()}${elementsSvg(g)}</svg>`;return holder.querySelector('svg')}
 
-window.addEventListener('keydown',e=>{if(e.target?.closest?.('input,textarea,select,[contenteditable="true"]'))return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?redo():undo()}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo()}if(e.key==='Escape'){activeTool='select';render()}});
+window.addEventListener('keydown',e=>{if(state.page==='mark-studio'||document.querySelector('dialog[open]'))return;if(e.target?.closest?.('input,textarea,select,[contenteditable="true"]'))return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?redo():undo()}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo()}if(e.key==='Escape'){activeTool='select';render()}});
 render();
 
 // External Artwork modules commit through the same state/history as core tools.

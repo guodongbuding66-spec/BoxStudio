@@ -42,7 +42,7 @@ function header(){
     nav.querySelector('[data-v66-projects]').onclick=openProjects;
     nav.querySelector('[data-v66-resume]').onclick=()=>editor().navigate('editor','Design');
   }
-  const name=top.querySelector('[data-v66-project-title]'),s=state();if(name.textContent!==s.projectName)name.textContent=s.projectName;
+  const name=top.querySelector('[data-v66-project-title]'),s=state().page==='mark-studio'?window.BoxStudioV67?.getMarkState()||state():state();if(name.textContent!==s.projectName)name.textContent=s.projectName;
   top.querySelector('[data-v66-resume]').hidden=s.page==='editor';
   const feedbackNode=top.querySelector('[data-v66-feedback]');if(feedbackNode.textContent!==saveStatus)feedbackNode.textContent=saveStatus;
   let version=top.querySelector('[data-v66-version]');if(!version){version=document.createElement('span');version.dataset.v66Version='true';version.className='v66-version';version.textContent='V0.66';top.querySelector('.brand')?.append(version);}
@@ -81,5 +81,5 @@ function fit(){
 }
 function enhance(){if(!editor())return;document.body.dataset.v66='true';header();marks();fit();}
 window.BoxStudioUiRuntimeV64?.register('v66',enhance);
-window.addEventListener('keydown',e=>{if(e.defaultPrevented||document.querySelector('dialog[open],.v33-workspace,.v34-workspace'))return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();try{saveProject();}catch(error){feedback(`保存失败：${error.message}`);}}});
+window.addEventListener('keydown',e=>{if(state().page==='mark-studio'||e.defaultPrevented||document.querySelector('dialog[open],.v33-workspace,.v34-workspace'))return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();try{saveProject();}catch(error){feedback(`保存失败：${error.message}`);}}});
 window.BoxStudioV66={version:'V0.66',saveProject,openProjects};

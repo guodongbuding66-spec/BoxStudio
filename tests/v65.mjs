@@ -16,7 +16,7 @@ const index=await readFile(new URL('../index.html',import.meta.url),'utf8');
 const runtimePos=index.indexOf('uiRuntimeV64.js'),v55Pos=index.indexOf('v55Ui.js'),v65Pos=index.indexOf('v65Ui.js');
 assert.ok(runtimePos>0&&runtimePos<v55Pos,'Shared runtime must load before V55');
 assert.ok(v65Pos>index.indexOf('v64Ui.js'),'V65 shell must load after V64');
-assert.match(index,/BoxStudio V0\.(65|66)/);assert.ok(index.includes('v65Ui.css'));
+assert.match(index,/BoxStudio V0\.(65|66|67)/);assert.ok(index.includes('v65Ui.css'));
 const shell=await readFile(new URL('../src/v65Ui.js',import.meta.url),'utf8');for(const token of ['data-v65-version','runtimeAcceptanceV65','getRuntimeStats'])assert.ok(shell.includes(token),`V65 shell missing ${token}`);
 const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));assert.ok(Number(pkg.version.split('.')[1])>=65);assert.equal(pkg.scripts['test:v65'],'node tests/v65.mjs');
 console.log(`BoxStudio V0.65 manufacturing runtime consolidation passed: shared=${V65_SHARED_OBSERVER_MODULES.length} manufacturing=${V65_MANUFACTURING_CHAIN.length} visual=${V65_VISUAL_SURFACES.length} package=${pkg.version}`);
