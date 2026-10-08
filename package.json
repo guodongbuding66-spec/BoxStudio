@@ -1,6 +1,6 @@
 {
-  "name": "boxstudio-v0.70",
-  "version": "0.70.0",
+  "name": "boxstudio-v0.71",
+  "version": "0.71.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -38,9 +38,13 @@
     "test:v68": "node tests/v68.mjs",
     "build": "node scripts/build-site.mjs",
     "test:v69": "node tests/v69.mjs",
-    "test:v70": "node tests/v70.mjs"
+    "test:v70": "node tests/v70.mjs",
+    "test:v71": "node tests/v71.mjs"
   },
   "dependencies": {
     "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "gltf-validator": "^2.0.0-dev.3.10"
   }
 }

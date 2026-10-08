@@ -62,7 +62,7 @@ export function buildFoldDiagnosticsV35(graph={}){
     }
     active.delete(id);
   };
-  if(graph.root)visit(graph.root,0);
+  for(const root of graph.roots||[graph.root])if(root)visit(root,0);
   const unreached=(graph.nodes||[]).map(node=>node.id).filter(id=>!seen.has(id));
   if(unreached.length)issues.push({severity:'warning',code:'UNREACHED',detail:`Panels outside fold traversal: ${unreached.join(', ')}.`,panels:unreached});
   return{

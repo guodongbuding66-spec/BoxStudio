@@ -5,6 +5,12 @@ SIGNALS={'/__v65_started__':'/tmp/boxstudio-v65-started','/__v65_pass__':'/tmp/b
 class H(SimpleHTTPRequestHandler):
     def __init__(self,*a,**kw): super().__init__(*a,directory=str(ROOT),**kw)
     def do_POST(self):
+        if self.path in ['/__v71_glb__','/__v71_png__']:
+            output=ROOT/'artifacts/v71'/('browser.glb' if self.path.endswith('glb__') else 'browser.png')
+            output.parent.mkdir(parents=True,exist_ok=True)
+            n=int(self.headers.get('Content-Length','0') or 0)
+            if n>50*1024*1024: self.send_error(413); return
+            output.write_bytes(self.rfile.read(n)); self.send_response(204); self.end_headers(); return
         target=SIGNALS.get(self.path)
         if not target: self.send_error(404); return
         n=int(self.headers.get('Content-Length','0') or 0); Path(target).write_text(self.rfile.read(n).decode('utf-8','replace'),encoding='utf-8'); self.send_response(204); self.end_headers()

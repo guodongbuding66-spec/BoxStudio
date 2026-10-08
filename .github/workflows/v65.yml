@@ -1,4 +1,4 @@
-name: V0.70 Design Workspaces and Shipping Marks Acceptance
+name: V0.71 Design Workspaces and Shipping Marks Acceptance
 
 on:
   push:
@@ -201,6 +201,34 @@ jobs:
             timeout 150s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,950 --virtual-time-budget=90000 --dump-dom --screenshot="artifacts/v70/${VIEW}.png" "http://127.0.0.1:8795/tests/capture-frame.html?mode=v70&width=${WIDTH}&height=${HEIGHT}" >"artifacts/v70/${VIEW}.html" 2>/tmp/v70-chrome.log
             python3 tests/assert-browser-result.py "artifacts/v70/${VIEW}.html" v70
           done
+      - name: V0.71 structures, templates and 3D delivery acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/v71.mjs
+          node --check src/v71Ui.js
+          node --check tests/v71-browser-e2e.js
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          python3 tests/v65_e2e_server.py >/tmp/boxstudio-v71-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 80); do if curl -fsS http://127.0.0.1:8795/tests/v71-browser-e2e.html >/dev/null; then break; fi; sleep 0.1; done
+          for VIEW in desktop mobile; do
+            if [ "$VIEW" = desktop ]; then WIDTH=1280; HEIGHT=900; else WIDTH=390; HEIGHT=844; fi
+            timeout 150s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,950 --virtual-time-budget=90000 --dump-dom --screenshot="artifacts/v71/${VIEW}.png" "http://127.0.0.1:8795/tests/capture-frame.html?mode=v71&width=${WIDTH}&height=${HEIGHT}" >"artifacts/v71/${VIEW}.html" 2>/tmp/v71-chrome.log
+            python3 tests/assert-browser-result.py "artifacts/v71/${VIEW}.html" v71
+            node tests/v71-downloaded-glb.mjs
+            cp artifacts/v71/browser.glb "artifacts/v71/${VIEW}-scene.glb"
+            cp artifacts/v71/browser.png "artifacts/v71/${VIEW}-scene.png"
+          done
+      - name: Upload V0.71 delivery results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boxstudio-v0.71-structure-artwork-3d-results
+          path: artifacts/v71/
+          if-no-files-found: ignore
       - name: Upload V0.70 results
         if: always()
         uses: actions/upload-artifact@v4

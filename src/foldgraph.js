@@ -152,6 +152,12 @@ function semanticParametricGraph(geo){
   }
   return{template:geo.template,root,nodes,edges,unreached:nodes.filter(n=>!seen.has(n.id)).map(n=>n.id),semantic:true};
 }
+function componentGraphV71(geo){
+ const panels=geo.panels, roots=geo.components.map(c=>c.root), edges=[];
+ const nodes=panels.map(p=>node(p.id,p.label,p.w,p.h,flatPoseFromPanel(p,geo),flatPoseFromPanel(p,geo),{role:p.role,artPanel:p.id,kind:p.kind}));
+ for(const p of panels){if(!p.parent)continue;const parent=geo.panelMap[p.parent],hinge=exactSharedHinge(parent,p);if(!hinge)throw new Error('Missing physical hinge: '+p.id);edges.push({from:p.parent,to:p.id,label:p.parent+'/'+p.id,angle:foldAngle(parent,p,hinge),hinge,confirmed:true,source:'component-parent'});}
+ return{template:geo.template,root:roots[0],roots,nodes,edges,components:structuredClone(geo.components),unreached:[],semantic:true};
+}
 function attachHinges(graph,geo){
   const ids=new Set((graph.nodes||[]).map(n=>n.id));
   return {...graph,edges:(graph.edges||[]).filter(e=>ids.has(e.from)&&ids.has(e.to)).map(e=>({...e,hinge:e.hinge||sharedHinge(geo.panelMap[e.from],geo.panelMap[e.to])}))};
@@ -159,7 +165,8 @@ function attachHinges(graph,geo){
 
 export function buildFoldGraph(input) {
   const geo = input?.panelMap ? input : generateGeometry(input);
-  const graph = geo.template === 'imported' ? importedGraph(geo)
+  const graph = geo.components?.length ? componentGraphV71(geo)
+    : geo.template === 'imported' ? importedGraph(geo)
     : geo.template === 'mailer-150010' ? mailerGraph(geo)
     : geo.template === 'side-seal-rsc' ? rscGraph(geo)
     : semanticParametricGraph(geo);

@@ -20,6 +20,9 @@ const PRESETS=Object.freeze({
     {id:'carton-m',label:'中型彩盒',length:120,width:50,height:180},
     {id:'carton-l',label:'大型彩盒',length:180,width:70,height:240},
   ]),
+  tray:Object.freeze([{id:'tray-s',label:'小型托盘',length:160,width:110,height:35},{id:'tray-m',label:'中型托盘',length:240,width:160,height:50},{id:'tray-l',label:'大型托盘',length:360,width:240,height:80}]),
+  display:Object.freeze([{id:'display-m',label:'台面展示',length:240,width:160,height:60}]),
+  rigid:Object.freeze([{id:'lid-m',label:'礼盒尺寸',length:240,width:160,height:60}]),
   sleeve:Object.freeze([
     {id:'sleeve-s',label:'小型套筒',length:100,width:35,height:80},
     {id:'sleeve-m',label:'中型套筒',length:160,width:60,height:120},
