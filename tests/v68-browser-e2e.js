@@ -17,7 +17,8 @@ try{
  await wait(()=>window.BoxStudioV68&&q('[data-v67-mode="mark"]'),'runtime');await document.fonts.ready;
  const api=window.BoxStudioV68,editor=window.BoxStudioEditor,baseline=editor.getState(),cartonHistory=editor.getHistory(),carton=JSON.stringify({structure:baseline.structure,elements:baseline.elements,variables:baseline.variables});
  click('[data-v67-mode="mark"]');await wait(()=>q('[data-mark-board]'),'independent canvas');
- const sample=createMarkDocumentV67();sample.projectName='运输唛头 · 多选排版';sample.elements.find(e=>e.id==='label-fragile').y=124;sample.elements.find(e=>e.id==='label-dry').y=128;sample.elements.find(e=>e.id==='label-dry').x=286;api.commitMarkState(sample);await settle();
+ // Explicit horizontal icon fixture: its occupied area requires the approved smaller group.
+ const sample=createMarkDocumentV67();sample.projectName='运输唛头 · 多选排版';Object.assign(sample.elements.find(e=>e.id==='label-barcode'),{w:200,h:64,preset:'200x64'});Object.assign(sample.elements.find(e=>e.id==='label-up'),{x:230,y:120});Object.assign(sample.elements.find(e=>e.id==='label-fragile'),{x:256,y:124});Object.assign(sample.elements.find(e=>e.id==='label-dry'),{x:286,y:128});api.commitMarkState(sample);await settle();
  const startHistory=history();choose('label-up');choose('label-fragile',{shiftKey:true});choose('label-dry',{shiftKey:true});
  assert(selection().length===3,'Shift click selects multiple objects');
  assert(q('[data-mark-board]').querySelectorAll('.selection-box').length===3,'Every selected object has an outline');
