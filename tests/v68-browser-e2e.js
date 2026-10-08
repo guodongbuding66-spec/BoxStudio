@@ -70,11 +70,11 @@ try{
  const lockedJson=JSON.stringify(state());assert(JSON.parse(lockedJson).elements.find(e=>e.id==='label-up').locked,'JSON preserves layer locks');
  const pdf=new TextDecoder().decode(buildMarkPdfV67(state()));assert(pdf.includes('/MediaBox [0 0 907.087 623.622]'),'Locked objects remain in physical PDF export');
  assert(!buildMarkSvgV67(state()).match(/selection-box|v68-marquee|mark-grid/),'SVG export excludes selection and snap guides');
- const saved=JSON.stringify(state().elements);click('[data-v67-mode="box"]');await wait(()=>q('#designSvg'),'carton restored');
+ const saved=JSON.stringify(state().elements);click('[data-v67-mode="box"]');await wait(()=>q('#designSvg')&&q('[data-v67-mode="mark"]')?.getAttribute('aria-pressed')==='false','carton workspace and navigation restored');
  assert(JSON.stringify({structure:editor.getState().structure,elements:editor.getState().elements,variables:editor.getState().variables})===carton,'Layout operations preserve carton geometry and data');
  assert(editor.getHistory().index===cartonHistory.index,'Mark layout does not pollute carton undo history');
  if(innerWidth<=760){
-  click('[data-v63-stage="Marks"]');await wait(()=>q('[data-v67-library-open]'),'carton marks');click('[data-v67-library-open]');await settle();assert(q('dialog[open] [data-v58-marks-studio]'),'Carton mobile drawer opens current marks palette');click('dialog[open] [data-close]');assert(q('[data-v67-carton-library] [data-v58-marks-studio]'),'Carton palette restored immediately');
+  click('[data-v63-stage="Marks"]');await wait(()=>q('[data-v67-library-open]')&&q('[data-v67-carton-library] [data-v58-marks-studio]'),'carton marks palette and navigation');click('[data-v67-library-open]');await settle();assert(q('dialog[open] [data-v58-marks-studio]'),'Carton mobile drawer opens current marks palette');click('dialog[open] [data-close]');assert(q('[data-v67-carton-library] [data-v58-marks-studio]'),'Carton palette restored immediately');
  }
  click('[data-v67-mode="mark"]');await wait(()=>q('[data-mark-board]'),'return to label');assert(JSON.stringify(state().elements)===saved,'Mode switch preserves independent layout and locks');
  api.commitMarkState(createMarkDocumentV67());api.selectMarks(['label-up','label-fragile','label-dry']);if(innerWidth<=760)click('[data-mark-mobile-library]');click('[data-library-tab="components"]');if(innerWidth<=760)click('dialog[open] [data-close]');await settle();
