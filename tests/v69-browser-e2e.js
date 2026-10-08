@@ -31,7 +31,7 @@ try{
  api().selectMarks(['label-up']);click('[data-object="lock"]');await settle();assert(!q('[data-mark-resize]'),'Locked objects have no active resize handles');click('[data-object="lock"]');await settle();
  assert(q('[data-mark-board]').querySelectorAll('[data-mark-resize]').length===4,'Unlock restores corner controls');
  const beforeFocus=JSON.stringify(state()),focusHistory=history(),normalWidth=q('[data-mark-stage]').getBoundingClientRect().width;
- click('[data-v69-focus]');await settle();assert(api().getCanvasFocus()&&q('[data-v69-focus]').getAttribute('aria-pressed')==='true','Focus mode updates accessible button state');
+ click('[data-v69-focus-toggle]');await settle();assert(api().getCanvasFocus()&&q('[data-v69-focus-toggle]').getAttribute('aria-pressed')==='true','Focus mode updates accessible button state');
  assert(getComputedStyle(q('[data-mark-library]')).display==='none'&&getComputedStyle(q('[data-mark-inspector]')).display==='none','Focus mode hides both work panels');
  assert(q('[data-mark-stage]').getBoundingClientRect().width>=normalWidth,'Focus mode gives the canvas available width');
  assert(JSON.stringify(state())===beforeFocus&&history()===focusHistory,'Focus mode preserves document and undo history');
@@ -39,9 +39,9 @@ try{
  key('Escape');await settle();assert(!api().getCanvasFocus()&&api().getMarkSelection()[0]==='label-up','Second Escape restores panels without clearing selection');
  assert(getComputedStyle(q('[data-mark-library]')).display!=='none','Workspace panels return after focus exit');
  assert(!/data-mark-resize|selection-box/.test(buildMarkSvgV67(state())),'Print SVG contains no resize or selection controls');
- const saved=JSON.stringify(state().elements);click('[data-v67-mode="box"]');await wait(()=>q('#designSvg')&&q('[data-v69-focus]'),'carton workspace');
+ const saved=JSON.stringify(state().elements);click('[data-v67-mode="box"]');await wait(()=>q('#designSvg')&&q('[data-v69-focus-toggle]'),'carton workspace');
  assert(JSON.stringify(editor.getState().elements)===carton&&editor.getHistory().index===cartonHistory,'Mark resizing preserves carton objects and history');
- click('[data-v69-focus]');await settle();assert(api().getCanvasFocus()&&getComputedStyle(q('.workspace .rightpanel')).display==='none','Carton canvas supports the same focus interaction');
+ click('[data-v69-focus-toggle]');await settle();assert(api().getCanvasFocus()&&getComputedStyle(q('.workspace .rightpanel')).display==='none','Carton canvas supports the same focus interaction');
  key('Escape');await settle();assert(!api().getCanvasFocus()&&getComputedStyle(q('.workspace .rightpanel')).display!=='none','Carton focus restores inspector');
  click('[data-v67-mode="mark"]');await wait(()=>q('[data-mark-board]'),'return to mark');assert(JSON.stringify(state().elements)===saved,'Workspace switching preserves resized document');
  api().commitMarkState(sample);api().selectMarks(['label-up']);await settle();

@@ -6,15 +6,15 @@ function entryRoute(page){if(['','/marks','/box'].includes(location.pathname.rep
 function openMarkStudio(){entryRoute('mark-studio');editor().navigate('mark-studio');}
 function setCanvasFocus(value){
  focusMode=value;document.body.dataset.v69Focus=String(value);
- document.querySelectorAll('[data-v69-focus]').forEach(b=>{b.setAttribute('aria-pressed',String(value));b.setAttribute('aria-label',value?'恢复工作区面板':'专注画布');b.title=value?'恢复工作区面板 · Escape':'专注画布';});
+ document.querySelectorAll('[data-v69-focus-toggle]').forEach(b=>{b.setAttribute('aria-pressed',String(value));b.setAttribute('aria-label',value?'恢复工作区面板':'专注画布');b.title=value?'恢复工作区面板 · Escape':'专注画布';});
  requestAnimationFrame(()=>{if(editor().getState().page==='mark-studio')marks.fit();else editor().fitCanvas();});
 }
 function canvasFocus(){
  const s=editor().getState(),eligible=s.page==='mark-studio'||s.page==='editor'&&['Design','Marks','Structure','3D'].includes(s.editorTab);
  if(lastPage!==s.page||!eligible){if(focusMode)setCanvasFocus(false);lastPage=s.page;}
  const bar=document.querySelector(s.page==='mark-studio'?'.v67-mark-status':'.workspace .tabbar');
- if(!eligible||!bar||bar.querySelector('[data-v69-focus]'))return;
- const b=document.createElement('button');b.dataset.v69Focus='true';b.className='v69-focus-button';b.innerHTML=iconV67('focus',18);b.setAttribute('aria-label',focusMode?'恢复工作区面板':'专注画布');b.title=focusMode?'恢复工作区面板 · Escape':'专注画布';b.setAttribute('aria-pressed',String(focusMode));b.onclick=()=>setCanvasFocus(!focusMode);const spacer=bar.querySelector('.spacer');if(spacer)spacer.before(b);else bar.prepend(b);
+ if(!eligible||!bar||bar.querySelector('[data-v69-focus-toggle]'))return;
+ const b=document.createElement('button');b.dataset.v69FocusToggle='true';b.className='v69-focus-button';b.innerHTML=iconV67('focus',18);b.setAttribute('aria-label',focusMode?'恢复工作区面板':'专注画布');b.title=focusMode?'恢复工作区面板 · Escape':'专注画布';b.setAttribute('aria-pressed',String(focusMode));b.onclick=()=>setCanvasFocus(!focusMode);const spacer=bar.querySelector('.spacer');if(spacer)spacer.before(b);else bar.prepend(b);
 }
 function header(){
  const top=document.querySelector('.topbar');if(!top)return;const state=editor().getState(),independent=state.page==='mark-studio';
