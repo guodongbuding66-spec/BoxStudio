@@ -12,7 +12,7 @@ const clone=v=>structuredClone(v);
 const ids=['fefco-0203','straight-tuck-end','sleeve-carton'];
 assert.deepEqual(V48_TEMPLATE_CATALOG.map(x=>x.id),ids);
 assert.ok(ids.every(id=>STANDARD_TEMPLATE_CATALOG.some(t=>t.id===id&&t.engine)));
-assert.equal(actionableTemplatesV47().length,8,'V0.48 should expose exactly eight verified/actionable engines.');
+assert.ok(actionableTemplatesV47().length>=8,'The original eight engines must remain available as the catalog grows.');
 
 const kraftB=sanitizeQuickSizeV47({length:400,width:300,height:250,materialId:'corrugated-kraft',flute:'B'});
 assert.equal(kraftB.thickness,3,'B flute quick-start must resolve to 3.0 mm instead of the old fixed 1.5 mm.');

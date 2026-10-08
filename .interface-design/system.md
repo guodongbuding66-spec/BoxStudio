@@ -14,3 +14,8 @@ Motion: repeat actions use 120ms color/opacity feedback; button press scale .96;
 Component intent checkpoint: every new component serves the canvas, uses these tokens, native controls, named transitions and visible focus. Data editing is grouped by shipment / trade / dimensions; properties focus on the selected object; export dialog exposes actual available formats.
 
 Selection: Shift click or the explicit multi-select tool adds/removes objects; empty artboard drag selects fully enclosed editable objects. Six alignment icons use shared stroke geometry; safe-area alignment targets an 8 mm margin. Distribution keeps endpoints and rejects negative gaps. Locked layout stays visible and still updates bound variables. Selection and gesture guides are UI-only; a group operation is one history transaction. Escape interrupts drag. Touch uses the same multi-select button and native component dialog.
+
+
+## V0.71 模板与场景
+
+设计模板使用可筛选的 4 列卡片，手机 2 列；预览由可编辑图文生成，创建前保存原项目。3D 场景用单画布和 244px 参数栏，手机改为画布加双列控件。对比、折叠、缩放实时反馈；真实文件完成后才显示成功。背景透明保留 PNG alpha；GLB 嵌入实际贴图。高频拖动直接更新画布，不提交历史；导出完成后保存场景参数。控件使用 120ms 反馈并尊重 reduced motion。

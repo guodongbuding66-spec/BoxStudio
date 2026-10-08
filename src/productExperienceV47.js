@@ -1,6 +1,9 @@
 import { STANDARD_TEMPLATE_CATALOG } from './templates.js';
 import { MATERIAL_PRESETS_V32, FLUTE_PRESETS_V32, resolveMaterialV32 } from './materialsV32.js';
 import { stateForTemplate, cloneState } from './model.js';
+import {isV71EngineTemplate} from './parametricTemplatesV71.js';
+
+export function artworkProfileV71(structure){return{customerProfileId:'artwork',packagingRuleProfileId:'artwork',markTemplateId:null,lockedVariables:[],variables:{dimensionUnit:'MM',weightUnit:'KGS',packageIndex:'1',packageCount:'1',sku:'',nw:'',gw:'',crn:'',contractNo:'',originCountry:'',destinationCountry:'',qrValue:'',length:String(structure.length),width:String(structure.width),height:String(structure.height)}};}
 
 export const V47_PRODUCT_VERSION='V0.47';
 export const V47_FREE_POLICY=Object.freeze({freeForEveryone:true,loginRequired:false,paywall:false,trial:false});
@@ -35,8 +38,10 @@ export function prepareTemplateStateV47(currentState,templateId,quickSize={}){
   const quickOwnsThickness=Object.prototype.hasOwnProperty.call(quickSize,'thickness')&&quickSize.thickness!==undefined&&quickSize.thickness!==null&&String(quickSize.thickness).trim()!=='';
   if(!quickOwnsThickness&&(Object.prototype.hasOwnProperty.call(quickSize,'flute')||Object.prototype.hasOwnProperty.call(quickSize,'materialId')))delete sizeInput.thickness;
   const size=sanitizeQuickSizeV47(sizeInput);
+  for(const key of ['reviewV35','linkedV49','foldAuthoringV50','foldSequenceV51'])delete next[key];
   next.structure={...preset.structure,...size,template:templateId};next.elements=preset.elements;next.variables={...preset.variables};next.selectedId=preset.selectedId;next.projectName=`${found.nameZh||found.name} / Free Project`;next.page='editor';next.editorTab='Structure';next.foldProgress=100;next.savedAt=new Date().toISOString();next.projectId='';next.projectRemoteRevision=0;
   if(next.syncDimensions){const unit=String(next.variables.dimensionUnit||'MM').toUpperCase(),factor=unit==='INCH'?1/25.4:unit==='CM'?1/10:1;for(const key of ['length','width','height'])next.variables[key]=(next.structure[key]*factor).toFixed(unit==='INCH'?2:unit==='CM'?1:0);}
+  if(isV71EngineTemplate(templateId))Object.assign(next,artworkProfileV71(next.structure));
   return next;
 }
 

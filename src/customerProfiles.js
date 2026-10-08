@@ -1,4 +1,5 @@
 export const CUSTOMER_PROFILES = Object.freeze({
+  artwork: Object.freeze({id:'artwork',label:'包装图文项目',packagingRuleProfileId:'artwork',defaultVariables:Object.freeze({}),lockedVariables:Object.freeze([]),preferredMarkTemplateId:null}),
   generic: Object.freeze({
     id: 'generic',
     label: 'Generic Customer',

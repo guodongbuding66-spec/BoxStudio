@@ -6,7 +6,7 @@ const click=el=>el?.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelabl
 const change=el=>el?.dispatchEvent(new Event('change',{bubbles:true}));
 try{
   await waitFor(()=>window.BoxStudioV47&&window.BoxStudioV48,'V0.48 APIs');
-  if(window.BoxStudioV48.verifiedTemplates!==8)throw new Error(`Expected 8 verified templates, got ${window.BoxStudioV48.verifiedTemplates}.`);
+  if(window.BoxStudioV48.verifiedTemplates<8)throw new Error(`Expected at least the original 8 verified templates, got ${window.BoxStudioV48.verifiedTemplates}.`);
   const continuation=sessionStorage.getItem('boxstudio-v48-continuation')==='1';
   if(continuation){
     const state=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');

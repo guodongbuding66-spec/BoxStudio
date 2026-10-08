@@ -1,4 +1,7 @@
 export const PACKAGING_RULE_PROFILES = Object.freeze({
+  artwork: Object.freeze({
+    id:'artwork',label:'包装图文设计',requiredVariables:[],requireOrigin:false,requireDestination:false,requireCrnBindings:0,packageNoticeWhenMultiple:false,fixedVariables:Object.freeze({}),barcodeQr:Object.freeze({required:false,allowedPresets:['250x80','200x64'],ratio:3.125,ratioTolerance:0.03,requireLockAspect:false}),
+  }),
   generic: Object.freeze({
     id:'generic',label:'Generic Packaging',requiredVariables:['sku'],requireOrigin:false,requireDestination:false,requireCrnBindings:0,packageNoticeWhenMultiple:true,fixedVariables:Object.freeze({}),barcodeQr:Object.freeze({required:false,allowedPresets:['250x80','200x64'],ratio:3.125,ratioTolerance:0.03,requireLockAspect:false}),
   }),

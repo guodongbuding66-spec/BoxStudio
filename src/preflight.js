@@ -9,7 +9,7 @@ import { analyzeImportedGeometry } from './repair.js';
 import { userTtfInfo } from './fontRegistry.js';
 import { outputIccInfo } from './iccRegistry.js';
 import { spotNameFor } from './printProfiles.js';
-import { validatePackagingRuleState } from './rules.js';
+import { validatePackagingRuleState, getPackagingRuleProfile } from './rules.js';
 import { validateCustomerProfile } from './customerProfiles.js';
 import { validateMarkTemplate } from './markTemplates.js';
 
@@ -17,6 +17,8 @@ export function runPreflight(state) {
   const r = [...barcodeChecksV70(state)];
   const v = state.variables || {};
   const geo = generateGeometry(state.structure);
+  const rule = getPackagingRuleProfile(state.packagingRuleProfileId,state);
+  const artworkOnly = rule.id==='artwork';
 
   r.push(...validatePackagingRuleState(state));
   const customerValidation = validateCustomerProfile(state);
@@ -25,14 +27,14 @@ export function runPreflight(state) {
     title: 'Customer Profile',
     detail: customerValidation.ok ? customerValidation.profile.label : customerValidation.issues.join(' '),
   });
-  const markValidation = validateMarkTemplate(state);
+  const markValidation = artworkOnly&&!state.markTemplateId ? {ok:true,template:{label:'未指定唛头模板'},missing:[],presetOk:true} : validateMarkTemplate(state);
   r.push({
     severity: markValidation.ok ? 'pass' : 'warning',
     title: 'Mark Template',
     detail: markValidation.ok ? markValidation.template.label : `Missing: ${markValidation.missing.join(', ') || 'none'} · preset ${markValidation.presetOk ? 'ok' : 'mismatch'}`,
   });
 
-  const required = [
+  const required = artworkOnly ? [] : [
     ['sku','SKU'],['nw','N.W.'],['gw','G.W.'],['crn','CRN'],['contractNo','Contract No.']
   ];
   for (const [key,label] of required) {
@@ -41,11 +43,11 @@ export function runPreflight(state) {
   }
 
   const notice = state.elements.find(e=>e.id==='packageNotice');
-  const needsNotice = Number(v.packageCount) > 1;
+  const needsNotice = rule.packageNoticeWhenMultiple && Number(v.packageCount) > 1;
   r.push({
     severity: (!needsNotice || (notice && isPackageNoticeVisible(v))) ? 'pass' : 'error',
     title: '多包裹提示规则',
-    detail: needsNotice ? 'packageCount > 1，Package Notice 将自动显示' : 'packageCount = 1，Package Notice 自动隐藏'
+    detail: needsNotice ? 'packageCount > 1，Package Notice 将自动显示' : artworkOnly?'图文项目无需运输包裹提示':'packageCount = 1，Package Notice 自动隐藏'
   });
 
   const pkgIndex = Number(v.packageIndex);
@@ -55,7 +57,7 @@ export function runPreflight(state) {
 
   const group = state.elements.find(e=>e.type==='barcode-qr-group');
   if (!group) {
-    r.push({ severity:'error', title:'Barcode + QR Group', detail:'缺少组合组件' });
+    r.push({ severity:artworkOnly?'pass':'error', title:'Barcode + QR Group', detail:artworkOnly?'图文项目未添加条码组件；添加后执行完整检查':'缺少组合组件' });
   } else {
     const ratio = group.w / group.h;
     const ratioOk = Math.abs(ratio - 3.125) < 0.03;
@@ -86,8 +88,8 @@ export function runPreflight(state) {
     title: '对象边界检查',
     detail: out.length ? `${out.length} 个对象超出绑定面板：${out.map(x=>x.id).join(', ')}` : '所有可见对象均位于各自绑定面板内'
   });
-  const unsafe=visibleElements.filter(e=>elementInsidePanel(e,geo)&&!elementInsideSafeArea(e,geo));
-  r.push({severity:unsafe.length?'warning':'pass',title:'Safe Area 检查',detail:unsafe.length?`${unsafe.length} 个对象进入 ${geo.structure.safe} mm 安全边距：${unsafe.map(x=>x.id).join(', ')}`:`所有对象均位于 ${geo.structure.safe} mm Safe Area 内`});
+  const unsafe=visibleElements.filter(e=>!(e.group==='artwork'&&['production-polygon','shape'].includes(e.type))&&elementInsidePanel(e,geo)&&!elementInsideSafeArea(e,geo));
+  r.push({severity:unsafe.length?'warning':'pass',title:'Safe Area 检查',detail:unsafe.length?`${unsafe.length} 个关键对象进入 ${geo.structure.safe} mm 安全边距：${unsafe.map(x=>x.id).join(', ')}`:`关键对象均位于 ${geo.structure.safe} mm Safe Area 内`});
   r.push({severity:'pass',title:'Bleed / Safe 几何',detail:`Bleed ${geo.structure.bleed} mm · Safe ${geo.structure.safe} mm · ${(geo.bleedRects?.length||0)+(geo.bleedPolygons?.length||0)} panels`});
 
   const s=geo.structure;
@@ -101,7 +103,7 @@ export function runPreflight(state) {
     r.push({severity:confirmed.length?'pass':'warning',title:'Imported Fold Confirmation',detail:`推断 ${candidates.length} 条 crease adjacency · 已确认 ${confirmed.length} 条 · graph ${graph.edges.length} hinges`});
     r.push({severity:'pass',title:'Native Curve Preservation',detail:`${curves.length} 条 Bezier / Arc 以原生控制点保存；DXF/PDF 输出会按生产兼容方式离散。`});
   }
-  r.push({ severity:'warning', title:'结构补偿状态', detail:s.template==='imported'?`当前为导入 ${geo.structure?.importedGeometry?.source||'Vector'} 刀版。支持 SVG/DXF/PDF/PDF-compatible AI、原生曲线、Fold 人工确认、自由 Polygon Panel 和拓扑检查；仍须核对折叠方向和工厂补偿。`:s.template==='mailer-150010'?'Mailer 150010 当前按公开参考尺寸校准设计区与基础几何；不同纸板/设备的压线与锁扣补偿仍需包装工程师确认。':'当前为基础参数化侧封箱/RSC 补偿模型。源 PDF 未提供完整压线补偿表，正式刀模需由包装工程师确认。' });
+  r.push({ severity:'warning', title:'结构补偿状态', detail:s.template==='imported'?`当前为导入 ${geo.structure?.importedGeometry?.source||'Vector'} 刀版。支持 SVG/DXF/PDF/PDF-compatible AI、原生曲线、Fold 人工确认、自由 Polygon Panel 和拓扑检查；仍须核对折叠方向和工厂补偿。`:s.template==='mailer-150010'?'Mailer 150010 当前按公开参考尺寸校准设计区与基础几何；不同纸板/设备的压线与锁扣补偿仍需包装工程师确认。':s.template==='side-seal-rsc'?'当前为基础参数化侧封箱/RSC 补偿模型。源 PDF 未提供完整压线补偿表，正式刀模需由包装工程师确认。':'当前为参数化工程模型。独立部件、纸厚和装配间隙需经纸板与刀模实物打样确认。' });
 
   const rotated = visibleElements.filter(e=>Math.abs(Number(e.r)||0) > 0.001);
   r.push({ severity:rotated.length?'warning':'pass', title:'PDF 旋转兼容', detail:rotated.length?`Production PDF 暂不应用对象旋转：${rotated.map(x=>x.id).join(', ')}；SVG/PNG 会保留旋转。`:'当前无旋转对象，PDF 与 SVG 几何一致' });

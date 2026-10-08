@@ -1,3 +1,4 @@
+import {V71_TEMPLATE_CATALOG,searchTemplateCatalogV71,templateCatalogByIdV71} from './parametricTemplatesV71.js';
 import { V32_TEMPLATE_CATALOG, searchTemplateCatalogV32, templateCatalogByIdV32 } from './parametricTemplatesV32.js';
 import { V48_TEMPLATE_CATALOG, searchTemplateCatalogV48, templateCatalogByIdV48 } from './parametricTemplatesV48.js';
 
@@ -12,6 +13,7 @@ const SCHEMA_NAMESPACES=[
 export const STANDARD_TEMPLATE_CATALOG = [
   ...V32_TEMPLATE_CATALOG.map(t=>({...t,engine:t.id,parameters:[...t.parameters]})),
   ...V48_TEMPLATE_CATALOG.map(t=>({...t,engine:t.id,parameters:[...t.parameters]})),
+  ...V71_TEMPLATE_CATALOG,
   ...SCHEMA_NAMESPACES,
 ];
 
@@ -29,9 +31,9 @@ export const TEMPLATE_RECORD_EXAMPLE = {
   metadata:{source:'user/admin/core',approved:false,realSampleAccepted:false},
 };
 
-export function templateCatalogById(id){return templateCatalogByIdV32(id)||templateCatalogByIdV48(id)||SCHEMA_NAMESPACES.find(t=>t.id===id)||null;}
+export function templateCatalogById(id){return templateCatalogByIdV32(id)||templateCatalogByIdV48(id)||templateCatalogByIdV71(id)||SCHEMA_NAMESPACES.find(t=>t.id===id)||null;}
 export function searchTemplateCatalog(filters={}){
-  const core=[...searchTemplateCatalogV32(filters),...searchTemplateCatalogV48(filters)],q=String(filters.query||'').trim().toLowerCase(),category=filters.category||'all',standard=filters.standard||'all';
+  const core=[...searchTemplateCatalogV32(filters),...searchTemplateCatalogV48(filters),...searchTemplateCatalogV71(filters)],q=String(filters.query||'').trim().toLowerCase(),category=filters.category||'all',standard=filters.standard||'all';
   const namespaces=SCHEMA_NAMESPACES.filter(t=>(category==='all'||t.category===category)&&(standard==='all'||t.standard===standard)&&(!q||[t.id,t.code,t.name,t.nameZh,...t.tags].join(' ').toLowerCase().includes(q)));
   return [...core,...namespaces];
 }

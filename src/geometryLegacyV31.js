@@ -343,6 +343,10 @@ export function clampElementToPanel(el, geo) {
 
 export function elementInsidePanel(el, geo) {
   const p = geo.panelMap[el.panelId];if (!p) return false;const x=Number(el.x),y=Number(el.y),w=Number(el.w),h=Number(el.h);
+  if(el.type==='production-polygon'){
+    const points=el.points||[];if(points.length<3||points.some(q=>q.length<2||!q.every(Number.isFinite)))return false;
+    return points.every(q=>p.points?.length>=3?pointInPolygon(p.x+q[0],p.y+q[1],p.points):q[0]>=-1e-6&&q[1]>=-1e-6&&q[0]<=p.w+1e-6&&q[1]<=p.h+1e-6);
+  }
   if(p.points?.length>=3){const corners=[[p.x+x,p.y+y],[p.x+x+w,p.y+y],[p.x+x+w,p.y+y+h],[p.x+x,p.y+y+h]];return corners.every(q=>pointInPolygon(q[0],q[1],p.points))}
   return x >= 0 && y >= 0 && x+w <= p.w && y+h <= p.h;
 }

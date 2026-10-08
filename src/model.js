@@ -1,4 +1,5 @@
 import { defaultStructure, defaultsForTemplate } from './geometry.js';
+import {isV71EngineTemplate} from './parametricTemplatesV71.js';
 
 export const STORAGE_KEY = 'boxstudio-mvp-v32';
 export const LEGACY_STORAGE_KEYS = ['boxstudio-mvp-v31','boxstudio-mvp-v30','boxstudio-mvp-v29','boxstudio-mvp-v28','boxstudio-mvp-v27','boxstudio-mvp-v26','boxstudio-mvp-v25','boxstudio-mvp-v24','boxstudio-mvp-v23','boxstudio-mvp-v22','boxstudio-mvp-v21','boxstudio-mvp-v20','boxstudio-mvp-v19','boxstudio-mvp-v18','boxstudio-mvp-v17','boxstudio-mvp-v16','boxstudio-mvp-v15','boxstudio-mvp-v14','boxstudio-mvp-v13','boxstudio-mvp-v12','boxstudio-mvp-v11','boxstudio-mvp-v10','boxstudio-mvp-v9','boxstudio-mvp-v8','boxstudio-mvp-v7','boxstudio-mvp-v6','boxstudio-mvp-v5','boxstudio-mvp-v4','boxstudio-mvp-v3','boxstudio-mvp-v2','boxstudio-mvp'];
@@ -43,6 +44,7 @@ export const foldingCartonElements = [
 
 export const defaultElements=rscElements;
 export function elementsForTemplate(template='side-seal-rsc'){
+  if(isV71EngineTemplate(template))return [];
   if(template==='mailer-150010'||template==='fefco-0427')return structuredClone(mailerElements);
   if(template==='reverse-tuck-end'||template==='auto-lock-bottom')return structuredClone(foldingCartonElements);
   return structuredClone(rscElements);
