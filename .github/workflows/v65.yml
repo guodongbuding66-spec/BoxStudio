@@ -216,7 +216,7 @@ jobs:
           for i in $(seq 1 80); do if curl -fsS http://127.0.0.1:8795/tests/v71-browser-e2e.html >/dev/null; then break; fi; sleep 0.1; done
           for VIEW in desktop mobile; do
             if [ "$VIEW" = desktop ]; then WIDTH=1280; HEIGHT=900; else WIDTH=390; HEIGHT=844; fi
-            timeout 150s "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --no-first-run --window-size=1280,950 --virtual-time-budget=90000 --dump-dom --screenshot="artifacts/v71/${VIEW}.png" "http://127.0.0.1:8795/tests/capture-frame.html?mode=v71&width=${WIDTH}&height=${HEIGHT}" >"artifacts/v71/${VIEW}.html" 2>/tmp/v71-chrome.log
+            timeout 150s node tests/v71-chrome-runner.mjs "$VIEW" "$CHROME"
             python3 tests/assert-browser-result.py "artifacts/v71/${VIEW}.html" v71
             node tests/v71-downloaded-glb.mjs
             cp artifacts/v71/browser.glb "artifacts/v71/${VIEW}-scene.glb"

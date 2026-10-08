@@ -1,6 +1,6 @@
 import {generateGeometry} from '../src/geometry.js';
 import {createMarkDocumentV67} from '../src/standaloneMarksV67.js';
-const checks=[],q=s=>document.querySelector(s),editor=()=>window.BoxStudioEditor,check=(v,label)=>{if(!v)throw new Error(label);checks.push(label);},wait=async(fn,label)=>{const end=Date.now()+24000;while(Date.now()<end){if(fn())return;await new Promise(r=>setTimeout(r,50));}throw new Error('Timed out: '+label);},settle=()=>new Promise(r=>setTimeout(r,180)),click=s=>{check(q(s),'Button exists '+s);q(s).click();},change=(s,v,type='change')=>{q(s).value=v;q(s).dispatchEvent(new Event(type,{bubbles:true}));};
+const checks=[],q=s=>document.querySelector(s),editor=()=>window.BoxStudioEditor,check=(v,label)=>{if(!v)throw new Error(label);checks.push(label);document.body.dataset.v71Progress=JSON.stringify(checks);},wait=async(fn,label)=>{const end=Date.now()+24000;while(Date.now()<end){if(fn())return;await new Promise(r=>setTimeout(r,50));}throw new Error('Timed out: '+label);},settle=()=>new Promise(r=>setTimeout(r,180)),click=s=>{check(q(s),'Button exists '+s);q(s).click();},change=(s,v,type='change')=>{q(s).value=v;q(s).dispatchEvent(new Event(type,{bubbles:true}));};
 const blobs=[],nativeUrl=URL.createObjectURL.bind(URL);URL.createObjectURL=blob=>{blobs.push(blob);return nativeUrl(blob);};
 try{
  await wait(()=>window.BoxStudioV71&&window.BoxStudioV66,'production runtime');await document.fonts.ready;
