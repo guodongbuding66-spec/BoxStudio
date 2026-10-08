@@ -54,7 +54,7 @@ try{
  const editor=window.BoxStudioEditor,original=editor.getState(),bad=structuredClone(original),code=bad.elements.find(e=>e.type==='barcode-qr-group');
  Object.assign(code,{w:100,h:32});bad.editorTab='Export';editor.commitState(bad);await wait(()=>q('#exportPdf'),'carton export');
  const alerts=[],originalAlert=window.alert;window.alert=m=>alerts.push(String(m));const beforeCarton=blobs.length;click('#exportPdf');await settle();
- assert(alerts.some(m=>m.includes('250 × 80'))&&blobs.length===beforeCarton,'Carton export uses the same fixed-size rule as standalone marks');window.alert=originalAlert;editor.commitState(original);
+ assert(alerts.some(m=>m.includes('250 × 80'))&&blobs.length===beforeCarton,'Carton export uses the same fixed-size rule as standalone marks');window.alert=originalAlert;editor.commitState(original);await wait(()=>q('[data-v67-mode="mark"]'),'carton navigation restored after state commit');
  click('[data-v67-mode="mark"]');await wait(()=>q('[data-mark-board]'),'return');
  assert(group().w===250&&group().h===80,'Mode switching preserves the approved standalone group');
  assert(document.documentElement.scrollWidth<=innerWidth+1,'The redesigned workspace does not overflow horizontally');
