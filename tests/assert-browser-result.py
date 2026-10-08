@@ -8,8 +8,9 @@ class BodyParser(html.parser.HTMLParser):
         if tag == 'body': self.attrs = dict(attrs)
 parser = BodyParser()
 parser.feed(open(sys.argv[1], encoding='utf8').read())
-if sys.argv[2] in ['live','v66','v67']:
-    report = json.loads(parser.attrs.get('data-v67-result' if sys.argv[2]=='v67' else 'data-v66-result' if sys.argv[2]=='v66' else 'data-live-artwork-result', '{}'))
+if sys.argv[2] in ['live','v66','v67','v68']:
+    key = 'data-live-artwork-result' if sys.argv[2]=='live' else f'data-{sys.argv[2]}-result'
+    report = json.loads(parser.attrs.get(key, '{}'))
     assert report.get('status') == 'PASS', report
     print(json.dumps(report, ensure_ascii=False))
 else:
