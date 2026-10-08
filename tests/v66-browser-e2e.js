@@ -10,7 +10,7 @@ const q=s=>document.querySelector(s),click=s=>{const el=q(s);if(!el)throw new Er
 const change=(s,v)=>{const el=q(s);if(!el)throw new Error('Missing '+s);el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))};
 const submit=s=>q(s).requestSubmit();
 async function stage(name){click(`[data-v63-stage="${name}"]`);await settle()}
-async function importFile(text){const data=new DataTransfer();data.items.add(new File([text],'acceptance.boxstudio.json',{type:'application/json'}));q('[data-file]').files=data.files;q('[data-file]').dispatchEvent(new Event('change',{bubbles:true}));await settle()}
+async function importFile(text){const previous=q('[data-project-status]').textContent,data=new DataTransfer();data.items.add(new File([text],'acceptance.boxstudio.json',{type:'application/json'}));q('[data-file]').files=data.files;q('[data-file]').dispatchEvent(new Event('change',{bubbles:true}));await wait(()=>!q('[data-v66-project-dialog]')||q('[data-project-status]').textContent!==previous,'JSON import result')}
 try{
  await wait(()=>window.BoxStudioV66&&q('[data-v66-library]'),'full V66 runtime');
  await document.fonts.ready;
