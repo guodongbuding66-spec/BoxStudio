@@ -1,4 +1,4 @@
-name: V0.72 Design Workspaces and Shipping Marks Acceptance
+name: V0.73 Design Workspaces and Shipping Marks Acceptance
 
 on:
   push:
@@ -246,6 +246,31 @@ jobs:
             python3 tests/assert-browser-result.py "artifacts/v72/${VIEW}.html" v72
             python3 tests/v72-native-files.py "$VIEW"
           done
+      - name: V0.73 downloaded symbols and shared library acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/v73.mjs
+          node --check tests/v73-browser-e2e.js
+          python3 -m pip install --disable-pip-version-check cairosvg numpy pillow pymupdf
+          python3 tests/v73-raster.py
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          python3 tests/v65_e2e_server.py >/tmp/boxstudio-v73-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 80); do if curl -fsS http://127.0.0.1:8795/tests/v73-browser-e2e.html >/dev/null; then break; fi; sleep 0.1; done
+          for VIEW in desktop mobile; do
+            timeout 90s node tests/v73-chrome-runner.mjs "$VIEW" "$CHROME"
+            python3 tests/assert-browser-result.py "artifacts/v73/${VIEW}.html" v73
+          done
+      - name: Upload V0.73 free-symbol delivery results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boxstudio-v73-free-symbol-library
+          path: artifacts/v73/
+          if-no-files-found: error
       - name: Upload V0.72 native delivery and independent scan results
         if: always()
         uses: actions/upload-artifact@v4
