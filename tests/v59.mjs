@@ -10,7 +10,7 @@ assert.deepEqual(V59_SIZE_MODES.map(x=>x.id),['internal','manufacturing','extern
 assert.deepEqual(V59_OUTPUT_FORMATS.map(x=>x.id),['pdf','svg','dxf','png']);
 assert.equal(V59_OUTPUT_FORMATS.some(x=>x.id==='ai'),false,'Do not advertise a fake AI exporter.');
 assert.ok(V59_REFERENCE_PRINCIPLES.filter(x=>x.source==='Pacdora').length>=3);assert.ok(V59_REFERENCE_PRINCIPLES.filter(x=>x.source==='Packform').length>=3);
-const acceptance=productAcceptanceV59();assert.equal(acceptance.ok,true,JSON.stringify(acceptance));assert.equal(acceptance.templates,20);
+const acceptance=productAcceptanceV59();assert.equal(acceptance.ok,true,JSON.stringify(acceptance));assert.equal(acceptance.templates,24);
 
 const ids=['side-seal-rsc','mailer-150010','fefco-0427','reverse-tuck-end','auto-lock-bottom','fefco-0203','straight-tuck-end','sleeve-carton'];
 for(const id of ids){const data=templateStudioDataV59(id,{});assert.equal(data.template.id,id);assert.ok(data.presets.length>=2,`${id}: missing quick-size presets`);assert.ok(data.summary.inside.L>0&&data.summary.manufacturing.W>0&&data.summary.external.H>0,`${id}: invalid three-mode dimensions`);assert.equal(data.outputs.length,4)}
