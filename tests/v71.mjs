@@ -16,7 +16,7 @@ import {sceneSettingsV71,scenePointV71} from '../src/scene3dV71.js';
 import {buildProductionPdf} from '../src/export.js';
 let checks=0;const check=(condition,label)=>{assert.ok(condition,label);checks++;};
 mkdirSync('artifacts/v71',{recursive:true});
-check(actionableTemplatesV47().length===20,'Twenty distinct executable structures');
+check(actionableTemplatesV47().length===24,'Twenty-four distinct executable structures');
 const signatures=new Set();
 for(const t of V71_TEMPLATE_CATALOG){
  const s=prepareTemplateStateV47(defaultState,t.id),g=generateGeometry(s.structure),f=buildFoldGraph(g);check(s.elements.length===0,t.id+' starts with an editable clean artboard');check(runPreflight(s).every(c=>c.severity!=='error'),t.id+' clean structural projects do not require shipping marks');
@@ -31,7 +31,7 @@ for(const t of V71_TEMPLATE_CATALOG){
  const pdf=buildProductionPdf(s);check(pdf.length>1000,t.id+' native production PDF');writeFileSync('artifacts/v71/'+t.id+'.pdf',pdf);
  for(const mode of ['internal','external','manufacturing'])for(const size of [{length:25,width:20,height:15},{length:520,width:320,height:85},{length:90,width:45,height:160}]){const p=generateGeometry({...defaultsForTemplate(t.id),...size,sizeType:mode,thickness:1.2}),graph=buildFoldGraph(p);check(p.dimensionSet.mode===mode,t.id+' dimensional mode');check(p.panels.every(q=>q.w>0&&q.h>0),t.id+' positive geometry');check(graph.edges.every(e=>e.hinge&&!e.hinge.fallback),t.id+' parameterized physical hinges');}
 }
-check(signatures.size===12,'Twelve new structures have distinct actual geometry');
+check(signatures.size===16,'Sixteen tray/mailer structures have distinct actual geometry');
 // Validate a texture-bearing file with the independent Khronos validator.
 const sample=prepareTemplateStateV47(defaultState,'drawer-box'),geo=generateGeometry(sample.structure),graph=buildFoldGraph(geo),mesh=foldedMeshesV71(sample,geo,graph),png=Uint8Array.from(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLttAAAAABJRU5ErkJggg==','base64')),textures=new Map(mesh.panels.map(p=>[p.nodeId,png])),glb=encodeGlbV71(mesh,{textures,thicknessMm:.5}),validation=await validator.validateBytes(glb);check(validation.issues.numErrors===0,'Embedded PNG texture GLB validates '+JSON.stringify(validation.issues.messages));writeFileSync('artifacts/v71/textured.glb',glb);writeFileSync('artifacts/v71/khronos-report.json',JSON.stringify(validation,null,2));
 const dv=new DataView(glb.buffer),json=JSON.parse(new TextDecoder().decode(glb.slice(20,20+dv.getUint32(12,true))));check(dv.getUint32(8,true)===glb.length,'GLB length header matches bytes');check(json.images.length===geo.panels.length,'Every panel has an embedded image');check(json.nodes.length===geo.panels.length,'Every component is exported');check(!json.buffers[0].uri,'GLB has no external file dependencies');
@@ -52,4 +52,4 @@ check(JSON.stringify(defaultState)===original,'Creating a template does not muta
 const upright=foldedMeshesV71(sample,geo,graph),uprightBytes=encodeGlbV71(upright),udv=new DataView(uprightBytes.buffer),ujlen=udv.getUint32(12,true),uj=JSON.parse(new TextDecoder().decode(uprightBytes.slice(20,20+ujlen))),ua=uj.accessors[uj.meshes[0].primitives[0].attributes.POSITION],ub=uj.bufferViews[ua.bufferView],up=new Float32Array(uprightBytes.buffer,28+ujlen+ub.byteOffset,3),sp=scenePointV71(upright,upright.panels[0].points[upright.panels[0].uvMap.triangles[0][0]]);
 check(sp.every((v,i)=>Math.abs(v/1000-up[i])<1e-6),'Scene coordinates match the actual GLB Y-up vertices');
 const scene=sceneSettingsV71({preset:'transparent',zoom:999,pitch:9,contrast:-1});check(scene.background===null&&scene.zoom===3&&scene.pitch===1.5&&scene.contrast===.5,'Scene controls clamp invalid values');
-writeFileSync('artifacts/v71/model-results.json',JSON.stringify({status:'PASS',checks,engines:20,designPresets:8,khronosErrors:validation.issues.numErrors}));console.log(`PASS V0.71: ${checks} geometry, topology, assembly, artwork and independent GLB assertions`);
+writeFileSync('artifacts/v71/model-results.json',JSON.stringify({status:'PASS',checks,engines:24,designPresets:16,khronosErrors:validation.issues.numErrors}));console.log(`PASS V0.71: ${checks} geometry, topology, assembly, artwork and independent GLB assertions`);

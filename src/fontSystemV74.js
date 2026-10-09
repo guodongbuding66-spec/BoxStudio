@@ -1,0 +1,36 @@
+import {parseTrueTypeFont,textOutlineCommands,commandsToSvgPath} from './ttfOutline.js';
+export const FONTS_V74=Object.freeze([
+ {id:'sans-sc',label:'纸工黑体',name:'BoxStudio Sans SC',kind:'中英 · GB2312',source:'https://github.com/google/fonts/tree/main/ofl/notosanssc'},
+ {id:'serif-sc',label:'纸工宋体',name:'BoxStudio Serif SC',kind:'中英 · GB2312',source:'https://github.com/google/fonts/tree/main/ofl/notoserifsc'},
+ {id:'lato',label:'Lato 人文无衬线',name:'BoxStudio Lato',kind:'拉丁字母',source:'https://github.com/google/fonts/tree/main/ofl/lato'},
+ {id:'mono',label:'Roboto Mono 等宽',name:'BoxStudio Mono',kind:'编码与数字',source:'https://github.com/google/fonts/tree/main/ofl/robotomono'}
+]);
+const fonts=new Map(),pending=new Map();
+export function getFontV74(id,bold=false){return fonts.get(id+'-'+(bold?700:400))||null;}
+export function registerFontV74(id,weight,bytes){if(!FONTS_V74.some(f=>f.id===id))throw new Error('字体不存在。');const font=parseTrueTypeFont(bytes,id+'-'+weight);fonts.set(id+'-'+weight,font);return font;}
+export async function loadFontV74(id,bold=false){
+ if(!id||id==='system')return null;
+ if(!FONTS_V74.some(f=>f.id===id))throw new Error('字体不存在。');
+ const key=id+'-'+(bold?700:400);if(fonts.has(key))return fonts.get(key);
+ if(!pending.has(key))pending.set(key,(async()=>{const res=await fetch(new URL('../assets/fonts-v74/'+key+'.ttf',import.meta.url));if(!res.ok)throw new Error('字体下载失败，请重试。');return registerFontV74(id,bold?700:400,await res.arrayBuffer());})().catch(e=>{pending.delete(key);throw e;}));
+ return pending.get(key);
+}
+export function fontGlyphIssuesV74(el,text){
+ if(!el.fontIdV74)return [];
+ const font=getFontV74(el.fontIdV74,el.bold);if(!font)return ['所选字体尚未加载，请等待或重新选择字体。'];
+ const missing=[...new Set([...String(text)].filter(c=>c.codePointAt(0)>32&&!font.cmap(c.codePointAt(0))))];
+ return missing.length?['所选字体缺少字符：'+missing.slice(0,12).join('')+'。请选择中英字体或导入完整字体。']:[];
+}
+export async function prepareFontsV74(state){await Promise.all((state.elements||[]).filter(e=>e.fontIdV74).map(e=>loadFontV74(e.fontIdV74,e.bold)));}
+export function fontTextSvgV74(el,text,x=3,y=0){
+ const font=getFontV74(el.fontIdV74,el.bold);if(!font)return null;
+ const issues=fontGlyphIssuesV74(el,text);if(issues.length)return null;
+ const commands=textOutlineCommands(font,text,x,y,el.fontSize||5);
+ return '<path data-font-v74="'+el.fontIdV74+'" d="'+commandsToSvgPath(commands)+'" fill="#111"/>';
+}
+export function paintFontV74(ctx,el,text,x,y,scale=1){
+ const font=getFontV74(el.fontIdV74,el.bold);if(!font)return false;
+ const path=new Path2D(commandsToSvgPath(textOutlineCommands(font,text,x,y,el.fontSize||5)));
+ ctx.save();ctx.scale(scale,scale);ctx.fillStyle='#111';ctx.fill(path);ctx.restore();return true;
+}
+export function fontOptionsV74(id=''){return '<option value="">系统字体</option>'+FONTS_V74.map(f=>'<option value="'+f.id+'" '+(id===f.id?'selected':'')+'>'+f.label+' · '+f.kind+'</option>').join('');}

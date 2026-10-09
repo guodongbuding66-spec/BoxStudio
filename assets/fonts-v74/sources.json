@@ -1,0 +1,82 @@
+[
+  {
+    "id": "sans-sc",
+    "weight": 400,
+    "name": "BoxStudio Sans SC",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosanssc/NotoSansSC%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "sans-sc-400.ttf",
+    "sha256": "77af9c54a0b16a2ff147cf454d3892a7306ba7316499e7b4f5b026fcc599e1f6",
+    "coverage": "GB2312 + Latin"
+  },
+  {
+    "id": "sans-sc",
+    "weight": 700,
+    "name": "BoxStudio Sans SC",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosanssc/NotoSansSC%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "sans-sc-700.ttf",
+    "sha256": "57ff5717cb78dde9f5019d6c692e2d15fac521fa00f486e510f9c9d73ecb3784",
+    "coverage": "GB2312 + Latin"
+  },
+  {
+    "id": "serif-sc",
+    "weight": 400,
+    "name": "BoxStudio Serif SC",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/notoserifsc/NotoSerifSC%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "serif-sc-400.ttf",
+    "sha256": "cdccc890568ea84dadaec238a5b74369e41ca50e2bff350ae7787b516119b270",
+    "coverage": "GB2312 + Latin"
+  },
+  {
+    "id": "serif-sc",
+    "weight": 700,
+    "name": "BoxStudio Serif SC",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/notoserifsc/NotoSerifSC%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "serif-sc-700.ttf",
+    "sha256": "f58671dfbc223e7d0cdb7422c965e076becfe319c0aecbf2ab8f94827fb45877",
+    "coverage": "GB2312 + Latin"
+  },
+  {
+    "id": "lato",
+    "weight": 400,
+    "name": "BoxStudio Lato",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/lato/Lato-Regular.ttf",
+    "license": "OFL-1.1",
+    "file": "lato-400.ttf",
+    "sha256": "0d03fef7d97953ce7085220d7f12a0482040a5947e575a1007b4948212999e74",
+    "coverage": "Latin"
+  },
+  {
+    "id": "lato",
+    "weight": 700,
+    "name": "BoxStudio Lato",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/lato/Lato-Bold.ttf",
+    "license": "OFL-1.1",
+    "file": "lato-700.ttf",
+    "sha256": "5742f18974c716ded11361e228ee75b5fdb77750528a6f67d5f3c9a06ce9dd87",
+    "coverage": "Latin"
+  },
+  {
+    "id": "mono",
+    "weight": 400,
+    "name": "BoxStudio Mono",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/robotomono/RobotoMono%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "mono-400.ttf",
+    "sha256": "1f4c8939327c99b6d807ace7957e643054ec7f6ff074178daebf6ed9b68261e3",
+    "coverage": "Latin"
+  },
+  {
+    "id": "mono",
+    "weight": 700,
+    "name": "BoxStudio Mono",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/robotomono/RobotoMono%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "mono-700.ttf",
+    "sha256": "e8e8e539008c825cf012e116f7675ff983b322ed21b723910fe75711bb91ef07",
+    "coverage": "Latin"
+  }
+]

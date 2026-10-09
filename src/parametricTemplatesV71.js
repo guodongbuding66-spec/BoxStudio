@@ -1,6 +1,10 @@
 import {resolveBoxDimensionsV32} from './parametricTemplatesV32.js';
 
 const records=[
+ ['hinged-roll-end-box','mailer','双卷边翻盖盒','Hinged roll end box'],
+ ['full-depth-lid-box','rigid','全深天地盖盒','Full depth folding lid and base'],
+ ['three-cell-tray','tray','三格分隔托盘','Three compartment tray with two dividers'],
+ ['double-wall-display-tray','display','双壁展示托盘','Double wall display tray'],
  ['glued-tray','tray','粘角托盘','Glued corner tray'],
  ['double-wall-tray','tray','四边双壁托盘','Four sided double wall tray'],
  ['roll-end-tray','tray','双边卷折托盘','Two sided roll end tray'],
@@ -52,9 +56,9 @@ function sleeve({prefix,x,y,L,W,H,glue=18}){
 export function generateAdditionalTemplateV71(input={}){
  if(!isV71EngineTemplate(input.template))return null;
  const s={...V71_TEMPLATE_DEFAULTS[input.template],...input},dims=resolveBoxDimensionsV32(s,{L:1,W:1,H:1}),{L,W,H}=dims.manufacturing,T=dims.T,id=s.template,pad=18;
- const t=tray({x:pad+3*H,y:pad+3*H+W,L,W,H,glue:s.glue,tabs:!['double-wall-tray','roll-end-tray','wrap-mailer','four-flap-folder'].includes(id),frontH:id==='display-tray'?H*.6:H,backH:id==='display-tray'?H*2:H,returns:id==='double-wall-tray'?['front','back','left','right']:id==='roll-end-tray'?['left','right']:[]});
+ const t=tray({x:pad+3*H,y:pad+3*H+W,L,W,H,glue:s.glue,tabs:!['double-wall-tray','roll-end-tray','wrap-mailer','four-flap-folder','hinged-roll-end-box','double-wall-display-tray'].includes(id),frontH:['display-tray','double-wall-display-tray'].includes(id)?H*.6:H,backH:['display-tray','double-wall-display-tray'].includes(id)?H*2:H,returns:id==='double-wall-tray'?['front','back','left','right']:['roll-end-tray','hinged-roll-end-box'].includes(id)?['left','right']:id==='double-wall-display-tray'?['front','left','right']:[]});
  const panels=[...t.panels],components=[{root:'base'}];let perfLines=[],glueLines=[];
- if(id==='hinged-tray'||id==='wrap-mailer'){
+ if(['hinged-tray','wrap-mailer','hinged-roll-end-box'].includes(id)){
   const back=panels.find(p=>p.id==='back'),lid=rect('lid','LID',back.x,back.y-W,L,W,'back'),tuck=rect('lid-tuck','LID TUCK',lid.x,lid.y-Math.min(H,W*.35),L,Math.min(H,W*.35),'lid','flap');panels.push(lid,tuck);
   if(id==='wrap-mailer'){for(const name of ['left','right']){const p=panels.find(p=>p.id===name),d=Math.min(L*.55,W);panels.push(rect(name+'-wrap','WRAP WING',name==='left'?p.x-d:p.x+p.w,p.y,d,W,p.id,'flap'));}}
  }
@@ -63,14 +67,15 @@ export function generateAdditionalTemplateV71(input={}){
  }
  const currentRight=()=>Math.max(...panels.map(p=>p.x+p.w));
  const pose=(base,z=0,rotationX=0,dy=0)=>({target:[t.base.x+t.base.w/2,t.base.y+t.base.h/2+dy,z],rotationX,flatCenter:[base.x+base.w/2,base.y+base.h/2]});
- if(id==='lid-base-box'){
-  const gap=4*T+1,lid=tray({prefix:'lid-',x:currentRight()+pad*2+H,y:t.base.y,L:L+gap,W:W+gap,H:Math.min(H*.6,Math.min(L,W)*.25),tabs:true});panels.push(...lid.panels);components.push({root:lid.base.id,assembly:pose(lid.base,H+2*T,180)});
+ if(['lid-base-box','full-depth-lid-box'].includes(id)){
+  const gap=4*T+1,lid=tray({prefix:'lid-',x:currentRight()+pad*2+H,y:t.base.y,L:L+gap,W:W+gap,H:id==='full-depth-lid-box'?H+T:Math.min(H*.6,Math.min(L,W)*.25),tabs:true});panels.push(...lid.panels);components.push({root:lid.base.id,assembly:pose(lid.base,H+2*T,180)});
  }
  if(id==='shoulder-tray'){const inner=tray({prefix:'inner-',x:currentRight()+pad*2+H,y:t.base.y,L:Math.max(25,L-4*T-1),W:Math.max(20,W-4*T-1),H:Math.max(15,H*.6),glue:s.glue});panels.push(...inner.panels);components.push({root:inner.base.id,assembly:pose(inner.base,T)});}
  if(id==='drawer-box'){
   const clearance=2*T+1,collar=sleeve({prefix:'sleeve-',x:currentRight()+pad*2,y:t.base.y,L:L+clearance,W:id==='drawer-box'?W+clearance:Math.max(15,H*.6),H:id==='drawer-box'?H+clearance:W+clearance,glue:Math.max(10,s.glue)});panels.push(...collar.panels);
   components.push({root:collar.base.id,assembly:pose(collar.base,id==='drawer-box'?-T:Math.min(H*.2,5),id==='drawer-box'?0:90,id==='drawer-box'?0:-W/2)});
  }
+ if(id==='three-cell-tray'){for(let i=0;i<2;i++){const p=rect('divider-'+i,'REMOVABLE DIVIDER '+(i+1),currentRight()+pad*2,t.base.y,Math.max(10,L-2*T),Math.max(5,H-T));panels.push(p);components.push({root:p.id,assembly:pose(p,H/2,90,(i===0?-1:1)*W/6)});}}
  if(id==='partition-tray'){
   const p=rect('divider','REMOVABLE DIVIDER',currentRight()+pad*2,t.base.y,L,Math.max(15,H-T));panels.push(p);components.push({root:p.id,assembly:pose(p,H/2,90)});
  }

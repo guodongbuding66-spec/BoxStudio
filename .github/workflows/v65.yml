@@ -1,4 +1,4 @@
-name: V0.73 Design Workspaces and Shipping Marks Acceptance
+name: V0.74 Design Workspaces and Shipping Marks Acceptance
 
 on:
   push:
@@ -264,6 +264,25 @@ jobs:
             timeout 90s node tests/v73-chrome-runner.mjs "$VIEW" "$CHROME"
             python3 tests/assert-browser-result.py "artifacts/v73/${VIEW}.html" v73
           done
+      - name: V0.74 dual marks, fonts, assets, layout and physical studio acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/v74.mjs
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          python3 tests/v65_e2e_server.py >/tmp/boxstudio-v74-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          timeout 240s node tests/v74-chrome-runner.mjs "$CHROME"
+          python3 tests/v74-raster.py
+      - name: Upload V0.74 end-to-end results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boxstudio-v74-dual-marks-and-physical-studio
+          path: artifacts/v74/
+          if-no-files-found: error
       - name: Upload V0.73 free-symbol delivery results
         if: always()
         uses: actions/upload-artifact@v4

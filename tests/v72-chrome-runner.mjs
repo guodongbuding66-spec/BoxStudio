@@ -5,7 +5,7 @@ import {resolve} from 'node:path';
 import puppeteer from 'puppeteer-core';
 const [view='desktop',chrome]=process.argv.slice(2);assert.ok(chrome);assert.ok(['desktop','mobile'].includes(view));
 const width=view==='desktop'?1280:390,height=view==='desktop'?900:844,downloads=resolve(`artifacts/v72/native-${view}`);await mkdir(downloads,{recursive:true});
-const browser=await puppeteer.launch({executablePath:chrome,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--disable-background-networking'],defaultViewport:{width,height}}),context=await browser.createBrowserContext({downloadBehavior:{policy:'allow',downloadPath:downloads}}),page=await context.newPage(),errors=[];
+const browser=await puppeteer.launch({executablePath:chrome,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--use-gl=angle','--use-angle=swiftshader'],defaultViewport:{width,height}}),context=await browser.createBrowserContext({downloadBehavior:{policy:'allow',downloadPath:downloads}}),page=await context.newPage(),errors=[];
 page.on('pageerror',e=>errors.push(e.stack||e.message));
 try{
  await page.goto('http://127.0.0.1:8795/tests/v72-browser-e2e.html',{waitUntil:'load',timeout:30000});await page.waitForFunction(()=>Boolean(document.body.dataset.v72Result),{timeout:120000,polling:100});

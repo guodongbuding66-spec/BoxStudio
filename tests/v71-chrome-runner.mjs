@@ -10,7 +10,7 @@ assert.ok(['desktop','mobile'].includes(view),'Unknown viewport.');
 const width=view==='desktop'?1280:390,height=view==='desktop'?900:844;
 const downloads=resolve(`artifacts/v71/native-${view}`);
 await mkdir(downloads,{recursive:true});
-const browser=await puppeteer.launch({executablePath:chrome,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--disable-background-networking'],defaultViewport:{width,height}});
+const browser=await puppeteer.launch({executablePath:chrome,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--use-gl=angle','--use-angle=swiftshader'],defaultViewport:{width,height}});
 const context=await browser.createBrowserContext({downloadBehavior:{policy:'allow',downloadPath:downloads}});
 const page=await context.newPage(),messages=[];
 page.on('pageerror',error=>messages.push(error.stack||error.message));
