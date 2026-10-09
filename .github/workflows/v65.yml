@@ -18,6 +18,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Install locked runtime and browser-test dependencies
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run prepare
       - name: Install Chinese screenshot fonts
         timeout-minutes: 3
         run: |
@@ -168,7 +172,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm ci --ignore-scripts
           node tests/v69.mjs
           node --check tests/v69-browser-e2e.js
           CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
