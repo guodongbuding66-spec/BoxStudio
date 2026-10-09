@@ -21,8 +21,9 @@ const line=(x,y,a,b)=>[M(x,y),L(a,b)],box=(x,y,w,h)=>[M(x,y),L(x+w,y),L(x+w,y+h)
 const circle=(x,y,r)=>[M(x+r,y),C(x+r,y+r*.552,x+r*.552,y+r,x,y+r),C(x-r*.552,y+r,x-r,y+r*.552,x-r,y),C(x-r,y-r*.552,x-r*.552,y-r,x,y-r),C(x+r*.552,y-r,x+r,y-r*.552,x+r,y)];
 const slash=()=>line(.17,.83,.83,.17);
 const segments={a:[0,0,1,0],b:[1,0,1,.5],c:[1,.5,1,1],d:[0,1,1,1],e:[0,.5,0,1],f:[0,0,0,.5],g:[0,.5,1,.5]};
-const digits={'0':'abcdef','1':'bc','2':'abdeg','3':'abcdg','4':'bcfg','5':'acdfg','6':'acdefg','7':'abc','8':'abcdefg','9':'abcdfg','-':'g','C':'adef','m':'efbg','k':'efg','g':'abcdfg'};
-function number(text,x,y,w,h){const chars=String(text),step=w/chars.length,ops=[];for(let i=0;i<chars.length;i++){if(chars[i]==='.'){ops.push(...line(x+i*step+.2*step,y+h,x+i*step+.4*step,y+h));continue;}for(const key of digits[chars[i]]||''){const[a,b,c,d]=segments[key];ops.push(...line(x+i*step+a*step*.65,y+b*h,x+i*step+c*step*.65,y+d*h));}}return ops;}
+const digits={'0':'abcdef','1':'bc','2':'abdeg','3':'abcdg','4':'bcfg','5':'acdfg','6':'acdefg','7':'abc','8':'abcdefg','9':'abcdfg','-':'g','C':'adef'};
+const units={m:[M(0,1),L(0,.4),L(.5,.4),L(.5,1),M(.5,.4),L(1,.4),L(1,1)],k:[M(0,0),L(0,1),M(0,.65),L(1,.25),M(.4,.5),L(1,1)],g:[M(1,.4),L(.1,.4),L(0,.5),L(0,.7),L(.1,.8),L(1,.8),M(1,.4),L(1,1),L(0,1)]};
+function number(text,x,y,w,h){const chars=String(text),step=w/chars.length,ops=[];for(let i=0;i<chars.length;i++){if(chars[i]==='.'){ops.push(...line(x+i*step+.2*step,y+h,x+i*step+.4*step,y+h));continue;}if(units[chars[i]]){ops.push(...units[chars[i]].map(([op,a,b])=>[op,x+i*step+a*step*.65,y+b*h]));continue;}for(const key of digits[chars[i]]||''){const[a,b,c,d]=segments[key];ops.push(...line(x+i*step+a*step*.65,y+b*h,x+i*step+c*step*.65,y+d*h));}}return ops;}
 export function handlingPathsV72(el){
  const p=handlingParamsV72(el),up=[...line(.32,.72,.32,.27),...line(.22,.42,.32,.27),...line(.32,.27,.42,.42),...line(.68,.72,.68,.27),...line(.58,.42,.68,.27),...line(.68,.27,.78,.42)];
  const glass=[M(.28,.18),L(.72,.18),L(.61,.48),L(.39,.48),Z(),...line(.5,.48,.5,.78),...line(.34,.78,.66,.78)];
