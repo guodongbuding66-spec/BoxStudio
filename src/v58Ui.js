@@ -1,3 +1,4 @@
+import {handlingSvgV72} from './handlingSymbolsV72.js';
 import {iconV67} from './uiIconsV67.js';
 import { STORAGE_KEY, defaultState, cloneState } from './model.js';
 import { mountArtworkProof } from './threeArtworkProof.js';
@@ -48,7 +49,7 @@ function mountMiniPreview(){
   try{const s=readState(),model=buildLinkedWorkspaceModelV49(s);miniProof=mountArtworkProof(miniHost,s,model.review.geo,model.review.graph,{selectedPanelId:s.markEditorPanelId||model.selected?.panelId||null,materialStyle:model.review.material,onStatus:st=>{const e=card.querySelector('[data-v58-mini3d-status]');if(e){const text=`${st.panels} panels · ${st.texturedPanels} artwork`;if(e.textContent!==text)e.textContent=text}}});miniProof?.setProgress?.(100)}catch(error){miniHost.innerHTML=`<div class="v58-mini3d-error">3D preview unavailable<br><small>${esc(error?.message||error)}</small></div>`}
 }
 
-function markButton(id){const p=V58_MARK_PRESETS[id];return `<button data-v58-mark="${esc(id)}"><span>${iconV67(p.kind==='icon'?(p.icon==='up'?'mark':p.icon):p.kind==='barcode-qr-group'?'barcode':'text',20)}</span><b>${esc(p.label)}</b></button>`}
+function markButton(id){const p=V58_MARK_PRESETS[id];return `<button data-v58-mark="${esc(id)}"><span>${p.kind==='icon'?`<svg viewBox="0 0 40 40" width="28" height="28" aria-hidden="true">${handlingSvgV72({icon:p.icon,w:40,h:40})}</svg>`:iconV67(p.kind==='barcode-qr-group'?'barcode':'text',20)}</span><b>${esc(p.label)}</b></button>`}
 function marksPalette(){
   const s=readState(),panels=markPanelOptionsV58(s),selected=s.markEditorPanelId||s.linkedV49?.selectedPanelId||panels[0]?.id||'';
   return `<section class="v58-marks-studio" data-v58-marks-studio><div class="v58-marks-head"><div><span>SHIPPING MARK STUDIO</span><b>唛头组件</b><small>选择面板后，一键插入运输信息、条码 / QR 与搬运标识</small></div><label>目标面<select data-v58-mark-panel>${panels.map(p=>`<option value="${esc(p.id)}" ${p.id===selected?'selected':''}>${esc(p.label)} · ${esc(p.role)}</option>`).join('')}</select></label></div><div class="v58-mark-groups">${V58_MARK_GROUPS.map(g=>`<div class="v58-mark-group"><strong>${esc(g.label)}</strong><div>${g.items.map(markButton).join('')}</div></div>`).join('')}</div><details class="v58-print-note"><summary>印前检查提示</summary>${V58_PRINT_ADVISORIES.map(x=>`<p>✓ ${esc(x.label)}</p>`).join('')}</details><button class="v58-batch-focus" data-v58-batch-focus>批量唛头 · Excel / CSV 字段映射 →</button></section>`

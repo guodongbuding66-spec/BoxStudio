@@ -13,7 +13,7 @@ export function resizeStandaloneMarkV69(state,id,corner,dx,dy,{preserveAspect=fa
  const minW=source.type==='barcode-qr-group'?200:4,minH=source.type==='barcode-qr-group'?64:4;
  if(source.x<0||source.y<0||source.x+source.w>width+.001||source.y+source.h>height+.001)throw new Error('请先把对象移回画布，再使用角点缩放。');
  const desiredW=source.w+(west?-dx:dx),desiredH=source.h+(north?-dy:dy);
- const proportional=preserveAspect||['barcode-qr-group','image','icon'].includes(source.type);
+ const proportional=preserveAspect||['barcode-qr-group','image','icon','generated-code'].includes(source.type);
  let w,h;
  if(source.type==='barcode-qr-group'){
   const desired=(desiredW*source.w+desiredH*source.h)/(source.w**2+source.h**2)*source.w;

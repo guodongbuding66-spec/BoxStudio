@@ -1,3 +1,4 @@
+import './prepare-codes.mjs';
 import {cp,mkdir,readFile,writeFile,rm,stat} from 'node:fs/promises';
 import {resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';

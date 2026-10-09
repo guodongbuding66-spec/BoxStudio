@@ -1,3 +1,4 @@
+import {HANDLING_SYMBOLS_V72} from './handlingSymbolsV72.js';
 import {BARCODE_SIZES_V70,BARCODE_SIZE_MESSAGE_V70} from './barcodeGroupV70.js';
 import { generateGeometry } from './geometry.js';
 import { cloneState, defaultState } from './model.js';
@@ -25,7 +26,7 @@ export const V58_REFERENCE_PATTERNS=[
 export const V58_MARK_GROUPS=[
   {id:'shipping',label:'运输信息',items:['sku','weights','dimensions','package','contract','crn','origin','destination']},
   {id:'trace',label:'识别与追溯',items:['barcodeQr','variable']},
-  {id:'handling',label:'搬运标识',items:['up','fragile','dry']},
+  {id:'handling',label:'搬运标识',items:HANDLING_SYMBOLS_V72.map(s=>s.id)},
 ];
 
 export const V58_MARK_PRESETS={
@@ -43,6 +44,8 @@ export const V58_MARK_PRESETS={
   fragile:{id:'fragile',label:'Fragile',kind:'icon',icon:'fragile',w:40,h:40},
   dry:{id:'dry',label:'Keep Dry',kind:'icon',icon:'dry',w:40,h:40},
 };
+
+for(const symbol of HANDLING_SYMBOLS_V72)V58_MARK_PRESETS[symbol.id]={id:symbol.id,label:symbol.label,kind:'icon',icon:symbol.id,w:40,h:40};
 
 export const V58_PRINT_ADVISORIES=[
   {id:'safe-area',label:'重要文字 / 条码保持在 Safe Area 内'},
