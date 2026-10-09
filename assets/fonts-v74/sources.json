@@ -78,5 +78,165 @@
     "file": "mono-700.ttf",
     "sha256": "e8e8e539008c825cf012e116f7675ff983b322ed21b723910fe75711bb91ef07",
     "coverage": "Latin"
+  },
+  {
+    "id": "manrope",
+    "weight": 400,
+    "name": "BoxStudio Manrope",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/Manrope%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "manrope-400.ttf",
+    "sha256": "5e9b6233979f638f77d4a157f44034860401bfd09211296634abdd54add05262",
+    "coverage": "Latin + punctuation"
+  },
+  {
+    "id": "manrope",
+    "weight": 700,
+    "name": "BoxStudio Manrope",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/Manrope%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "manrope-700.ttf",
+    "sha256": "fae984ae1073410be1e56e67ba544c524ad8a55b7b8ac19e2569867abf5a1c84",
+    "coverage": "Latin + punctuation"
+  },
+  {
+    "id": "lexend",
+    "weight": 400,
+    "name": "BoxStudio Lexend",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/lexend/Lexend%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "lexend-400.ttf",
+    "sha256": "887669a9e8816b1bbf1f3c1ed064460224d1a0c452b3fbb4b80293414739f3e6",
+    "coverage": "Latin + punctuation"
+  },
+  {
+    "id": "lexend",
+    "weight": 700,
+    "name": "BoxStudio Lexend",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/lexend/Lexend%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "lexend-700.ttf",
+    "sha256": "093e538c6a3cb5c0ec9e7d5966b957a47f19749ed3e4f51eec821a39e9277d2f",
+    "coverage": "Latin + punctuation"
+  },
+  {
+    "id": "oswald",
+    "weight": 400,
+    "name": "BoxStudio Oswald",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/oswald/Oswald%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "oswald-400.ttf",
+    "sha256": "d4a91b9aa7a98aa741c39da30cb00d255486e9d9effaf75c162507cfb0f7052b",
+    "coverage": "Latin + punctuation"
+  },
+  {
+    "id": "oswald",
+    "weight": 700,
+    "name": "BoxStudio Oswald",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/oswald/Oswald%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "oswald-700.ttf",
+    "sha256": "a5800f7060be6fa46d8b71b4292961e3746b791094fe5c23bd80f1461bd71830",
+    "coverage": "Latin + punctuation"
+  },
+  {
+    "id": "playfair",
+    "weight": 400,
+    "name": "BoxStudio Playfair",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/playfairdisplay/PlayfairDisplay%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "playfair-400.ttf",
+    "sha256": "23627f20bb8ff267b9bf3feb89caaf5ccd237ef27bd2217038d6d34a513bb653",
+    "coverage": "Latin + punctuation"
+  },
+  {
+    "id": "playfair",
+    "weight": 700,
+    "name": "BoxStudio Playfair",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/playfairdisplay/PlayfairDisplay%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "playfair-700.ttf",
+    "sha256": "286e7cad10365ebb5ccc4f13aa761114360e8ce891b30441533b10299c275590",
+    "coverage": "Latin + punctuation"
+  },
+  {
+    "id": "slab",
+    "weight": 400,
+    "name": "BoxStudio Serif4",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/sourceserif4/SourceSerif4%5Bopsz%2Cwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "slab-400.ttf",
+    "sha256": "792dd139c6a37ca6f9871fefae675288d5f6a9f86f56c26422bbed3f4d44f5ab",
+    "coverage": "Latin + punctuation"
+  },
+  {
+    "id": "slab",
+    "weight": 700,
+    "name": "BoxStudio Serif4",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/sourceserif4/SourceSerif4%5Bopsz%2Cwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "slab-700.ttf",
+    "sha256": "5e853e0620708c5a6cbe51e2823f5067b831ae8753c8db9d8c32e57ddcea1c56",
+    "coverage": "Latin + punctuation"
+  },
+  {
+    "id": "barlow",
+    "weight": 400,
+    "name": "BoxStudio Barlow",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/barlowcondensed/BarlowCondensed-Regular.ttf",
+    "license": "OFL-1.1",
+    "file": "barlow-400.ttf",
+    "sha256": "bc0651e9cdf4586f93b9d2f6dd42d9c033d07d2ccccf9e27e3c244c0a0ee45ec",
+    "coverage": "Latin + punctuation"
+  },
+  {
+    "id": "barlow",
+    "weight": 700,
+    "name": "BoxStudio Barlow",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/barlowcondensed/BarlowCondensed-Bold.ttf",
+    "license": "OFL-1.1",
+    "file": "barlow-700.ttf",
+    "sha256": "994e870d0e982f1a0609b11ca9f0151d21ea008459c46062eb07d6f986aca389",
+    "coverage": "Latin + punctuation"
+  },
+  {
+    "id": "josefin",
+    "weight": 400,
+    "name": "BoxStudio Josefin",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/josefinsans/JosefinSans%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "josefin-400.ttf",
+    "sha256": "5ad0f35f20e17d4e943ab9e65df9e8b9f548004a22154f574d2620354f44354a",
+    "coverage": "Latin + punctuation"
+  },
+  {
+    "id": "josefin",
+    "weight": 700,
+    "name": "BoxStudio Josefin",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/josefinsans/JosefinSans%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "josefin-700.ttf",
+    "sha256": "5989f0c817583058f45c92d9aedfbcdcd573eed560b2f63bd07ec8d67e6a400f",
+    "coverage": "Latin + punctuation"
+  },
+  {
+    "id": "bitter",
+    "weight": 400,
+    "name": "BoxStudio Bitter",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/bitter/Bitter%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "bitter-400.ttf",
+    "sha256": "b8a65aed4ee47d69e329d4e63fc06e7f6a285efd564bf7ed2e97227f170332aa",
+    "coverage": "Latin + punctuation"
+  },
+  {
+    "id": "bitter",
+    "weight": 700,
+    "name": "BoxStudio Bitter",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/bitter/Bitter%5Bwght%5D.ttf",
+    "license": "OFL-1.1",
+    "file": "bitter-700.ttf",
+    "sha256": "8822a389c2b9f8dfefa6439717d1715f4e8323b76f0aa85840db31b966dcf97d",
+    "coverage": "Latin + punctuation"
   }
 ]

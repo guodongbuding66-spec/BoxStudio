@@ -1,4 +1,4 @@
-name: V0.74 Design Workspaces and Shipping Marks Acceptance
+name: V0.75 Resource Libraries and Studio Acceptance
 
 on:
   push:
@@ -284,6 +284,25 @@ jobs:
         with:
           name: boxstudio-v74-dual-marks-and-physical-studio
           path: artifacts/v74/
+          if-no-files-found: error
+      - name: V0.75 complete resources, library, fonts and photography acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/v75.mjs
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          python3 tests/v65_e2e_server.py >/tmp/boxstudio-v75-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          timeout 300s node tests/v75-chrome-runner.mjs "$CHROME"
+          python3 tests/v75-files.py
+      - name: Upload V0.75 reference upgrade acceptance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boxstudio-v75-resources-and-photography
+          path: artifacts/v75/
           if-no-files-found: error
       - name: Upload V0.73 free-symbol delivery results
         if: always()

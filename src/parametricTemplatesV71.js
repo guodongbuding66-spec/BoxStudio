@@ -1,6 +1,12 @@
 import {resolveBoxDimensionsV32} from './parametricTemplatesV32.js';
 
 const records=[
+ ['split-lid-box','rigid','双开盖粘角盒','Split hinged lid glued corner box'],
+ ['hinged-three-wall-box','mailer','三壁卷折翻盖盒','Three wall roll over hinged box'],
+ ['sleeved-double-wall-tray','sleeve','双壁托盘抽屉套盒','Double wall tray with sliding sleeve'],
+ ['roll-end-lid-base-box','rigid','卷边天地盖盒','Roll end base with separate folding lid'],
+ ['double-wall-partition-tray','tray','双壁分隔托盘','Double wall tray with removable divider'],
+ ['four-panel-sleeve','sleeve','四面粘口封套','Four panel glued open ended sleeve'],
  ['hinged-roll-end-box','mailer','双卷边翻盖盒','Hinged roll end box'],
  ['full-depth-lid-box','rigid','全深天地盖盒','Full depth folding lid and base'],
  ['three-cell-tray','tray','三格分隔托盘','Three compartment tray with two dividers'],
@@ -56,27 +62,30 @@ function sleeve({prefix,x,y,L,W,H,glue=18}){
 export function generateAdditionalTemplateV71(input={}){
  if(!isV71EngineTemplate(input.template))return null;
  const s={...V71_TEMPLATE_DEFAULTS[input.template],...input},dims=resolveBoxDimensionsV32(s,{L:1,W:1,H:1}),{L,W,H}=dims.manufacturing,T=dims.T,id=s.template,pad=18;
- const t=tray({x:pad+3*H,y:pad+3*H+W,L,W,H,glue:s.glue,tabs:!['double-wall-tray','roll-end-tray','wrap-mailer','four-flap-folder','hinged-roll-end-box','double-wall-display-tray'].includes(id),frontH:['display-tray','double-wall-display-tray'].includes(id)?H*.6:H,backH:['display-tray','double-wall-display-tray'].includes(id)?H*2:H,returns:id==='double-wall-tray'?['front','back','left','right']:['roll-end-tray','hinged-roll-end-box'].includes(id)?['left','right']:id==='double-wall-display-tray'?['front','left','right']:[]});
+ const t=id==='four-panel-sleeve'?sleeve({prefix:'',x:pad,y:pad,L,W,H,glue:s.glue}):tray({x:pad+3*H,y:pad+3*H+W,L,W,H,glue:s.glue,tabs:!['double-wall-tray','roll-end-tray','wrap-mailer','four-flap-folder','hinged-roll-end-box','double-wall-display-tray','hinged-three-wall-box','sleeved-double-wall-tray','roll-end-lid-base-box','double-wall-partition-tray'].includes(id),frontH:['display-tray','double-wall-display-tray','hinged-three-wall-box','sleeved-double-wall-tray','roll-end-lid-base-box','double-wall-partition-tray'].includes(id)?H*.6:H,backH:['display-tray','double-wall-display-tray','hinged-three-wall-box','sleeved-double-wall-tray','roll-end-lid-base-box','double-wall-partition-tray'].includes(id)?H*2:H,returns:['double-wall-tray','sleeved-double-wall-tray','double-wall-partition-tray'].includes(id)?['front','back','left','right']:id==='hinged-three-wall-box'?['front','left','right']:['roll-end-tray','hinged-roll-end-box','roll-end-lid-base-box'].includes(id)?['left','right']:id==='double-wall-display-tray'?['front','left','right']:[]});
  const panels=[...t.panels],components=[{root:'base'}];let perfLines=[],glueLines=[];
- if(['hinged-tray','wrap-mailer','hinged-roll-end-box'].includes(id)){
+ if(['hinged-tray','wrap-mailer','hinged-roll-end-box','hinged-three-wall-box'].includes(id)){
   const back=panels.find(p=>p.id==='back'),lid=rect('lid','LID',back.x,back.y-W,L,W,'back'),tuck=rect('lid-tuck','LID TUCK',lid.x,lid.y-Math.min(H,W*.35),L,Math.min(H,W*.35),'lid','flap');panels.push(lid,tuck);
   if(id==='wrap-mailer'){for(const name of ['left','right']){const p=panels.find(p=>p.id===name),d=Math.min(L*.55,W);panels.push(rect(name+'-wrap','WRAP WING',name==='left'?p.x-d:p.x+p.w,p.y,d,W,p.id,'flap'));}}
+ }
+ if(id==='split-lid-box'){
+  for(const name of ['front','back']){const wall=panels.find(p=>p.id===name),lid=rect(name+'-cover','HALF LID',wall.x,name==='back'?wall.y-W/2:wall.y+wall.h,L,W/2,wall.id,'flap'),depth=Math.min(H*.45,W*.18);panels.push(lid,rect(name+'-cover-tuck','CENTRE TUCK',lid.x,name==='back'?lid.y-depth:lid.y+lid.h,L,depth,lid.id,'flap'));}
  }
  if(id==='four-flap-folder'){
   for(const name of ['front','back','left','right']){const p=panels.find(p=>p.id===name),horizontal=['front','back'].includes(name),d=(horizontal?W:L)*.55;panels.push(rect(name+'-cover','COVER FLAP',name==='left'?p.x-d:name==='right'?p.x+p.w:p.x,name==='back'?p.y-d:name==='front'?p.y+p.h:p.y,horizontal?L:d,horizontal?d:W,p.id,'flap'));}
  }
  const currentRight=()=>Math.max(...panels.map(p=>p.x+p.w));
  const pose=(base,z=0,rotationX=0,dy=0)=>({target:[t.base.x+t.base.w/2,t.base.y+t.base.h/2+dy,z],rotationX,flatCenter:[base.x+base.w/2,base.y+base.h/2]});
- if(['lid-base-box','full-depth-lid-box'].includes(id)){
+ if(['lid-base-box','full-depth-lid-box','roll-end-lid-base-box'].includes(id)){
   const gap=4*T+1,lid=tray({prefix:'lid-',x:currentRight()+pad*2+H,y:t.base.y,L:L+gap,W:W+gap,H:id==='full-depth-lid-box'?H+T:Math.min(H*.6,Math.min(L,W)*.25),tabs:true});panels.push(...lid.panels);components.push({root:lid.base.id,assembly:pose(lid.base,H+2*T,180)});
  }
  if(id==='shoulder-tray'){const inner=tray({prefix:'inner-',x:currentRight()+pad*2+H,y:t.base.y,L:Math.max(25,L-4*T-1),W:Math.max(20,W-4*T-1),H:Math.max(15,H*.6),glue:s.glue});panels.push(...inner.panels);components.push({root:inner.base.id,assembly:pose(inner.base,T)});}
- if(id==='drawer-box'){
-  const clearance=2*T+1,collar=sleeve({prefix:'sleeve-',x:currentRight()+pad*2,y:t.base.y,L:L+clearance,W:id==='drawer-box'?W+clearance:Math.max(15,H*.6),H:id==='drawer-box'?H+clearance:W+clearance,glue:Math.max(10,s.glue)});panels.push(...collar.panels);
-  components.push({root:collar.base.id,assembly:pose(collar.base,id==='drawer-box'?-T:Math.min(H*.2,5),id==='drawer-box'?0:90,id==='drawer-box'?0:-W/2)});
+ if(['drawer-box','sleeved-double-wall-tray'].includes(id)){
+  const clearance=2*T+1,collar=sleeve({prefix:'sleeve-',x:currentRight()+pad*2,y:t.base.y,L:L+clearance,W:W+clearance,H:H+clearance,glue:Math.max(10,s.glue)});panels.push(...collar.panels);
+  components.push({root:collar.base.id,assembly:pose(collar.base,-T,0,0)});
  }
  if(id==='three-cell-tray'){for(let i=0;i<2;i++){const p=rect('divider-'+i,'REMOVABLE DIVIDER '+(i+1),currentRight()+pad*2,t.base.y,Math.max(10,L-2*T),Math.max(5,H-T));panels.push(p);components.push({root:p.id,assembly:pose(p,H/2,90,(i===0?-1:1)*W/6)});}}
- if(id==='partition-tray'){
+ if(['partition-tray','double-wall-partition-tray'].includes(id)){
   const p=rect('divider','REMOVABLE DIVIDER',currentRight()+pad*2,t.base.y,L,Math.max(15,H-T));panels.push(p);components.push({root:p.id,assembly:pose(p,H/2,90)});
  }
  if(id==='self-lock-tray'){
