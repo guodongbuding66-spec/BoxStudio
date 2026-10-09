@@ -9,3 +9,6 @@ dist/
 /vendor/bwip-js-generic.mjs
 
 /vendor/bwip-js/
+
+vendor/three/
+vendor/mediabunny/

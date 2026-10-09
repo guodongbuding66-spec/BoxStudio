@@ -1,3 +1,5 @@
+import {artworkSvgV74,artworkPrimitivesV74} from './artworkLibraryV74.js';
+import {fontTextSvgV74} from './fontSystemV74.js';
 import {handlingSvgV72,handlingSymbolV72,handlingParamsV72} from './handlingSymbolsV72.js';
 import {barcodeGroupLayoutV70,barcodeSizeV70,assertBarcodeProductionV70,BARCODE_SIZE_MESSAGE_V70} from './barcodeGroupV70.js';
 import {addMarkPresetV66} from './shippingMarkLayoutV66.js';
@@ -184,7 +186,7 @@ function iconSvg(el,g){
 }
 function textBlock(el,text,g){
   const rr=resolveElementRect(el,g),lines=String(text).split('\n');
-  return `<g transform="translate(${rr.absX} ${rr.absY}) rotate(${el.r||0} ${el.w/2} ${el.h/2})" data-element-id="${el.id}" class="element-hit"><rect width="${el.w}" height="${el.h}" fill="rgba(255,255,255,.01)" stroke="none"/>${lines.map((line,i)=>`<text x="4" y="${Math.min(el.h-4,(i+1)*(el.fontSize||14)+2)}" class="svg-text" font-size="${el.fontSize||14}" ${el.bold?'font-weight="700"':''}>${esc(line)}</text>`).join('')}</g>`;
+  return `<g transform="translate(${rr.absX} ${rr.absY}) rotate(${el.r||0} ${el.w/2} ${el.h/2})" data-element-id="${el.id}" class="element-hit"><rect width="${el.w}" height="${el.h}" fill="rgba(255,255,255,.01)" stroke="none"/>${fontTextSvgV74(el,lines.join('\n'),4,1)||lines.map((line,i)=>`<text x="4" y="${Math.min(el.h-4,(i+1)*(el.fontSize||14)+2)}" class="svg-text" font-size="${el.fontSize||14}" ${el.bold?'font-weight="700"':''}>${esc(line)}</text>`).join('')}</g>`;
 }
 function barcodeQrSvg(el,g){
   const rr=resolveElementRect(el,g), barcodeValue=renderTemplate(el.barcodeValue,state.variables), qrValue=renderTemplate(el.qrValue,state.variables);
@@ -194,7 +196,7 @@ function barcodeQrSvg(el,g){
   const qx=el.w-pad-qrSide,qy=pad;
   return `<g transform="translate(${rr.absX} ${rr.absY}) rotate(${el.r||0} ${el.w/2} ${el.h/2})" data-element-id="${el.id}" class="element-hit"><rect width="${el.w}" height="${el.h}" fill="#fff" stroke="#111" stroke-width="${stroke}"/>${bars.bearer?`<rect x="${pad}" y="${pad}" width="${bw}" height="${bh}" fill="none" stroke="#111" stroke-width="${2*el.w/250}"/>`:''}<g transform="translate(${pad} ${pad})" fill="#111">${bars.rects}</g><text x="${pad+bw/2}" y="${labelBaseline}" text-anchor="middle" class="svg-text" font-size="${fontSize}">${esc(bars.label)}</text><g transform="translate(${qx} ${qy})"><rect width="${qrSide}" height="${qrSide}" fill="#fff"/><g fill="#111">${qr.rects}</g></g><line x1="${qx-gap/2}" y1="${pad}" x2="${qx-gap/2}" y2="${el.h-pad}" stroke="#d1d5db" stroke-width="${el.w/250}"/></g>`;
 }
-function shapeSvg(el,g){const rr=resolveElementRect(el,g);return `<g transform="translate(${rr.absX} ${rr.absY}) rotate(${el.r||0} ${el.w/2} ${el.h/2})" data-element-id="${el.id}" class="element-hit"><rect width="${el.w}" height="${el.h}" fill="${el.fill||'none'}" stroke="#111" stroke-width="2"/></g>`}
+function shapeSvg(el,g){const rr=resolveElementRect(el,g);return `<g transform="translate(${rr.absX} ${rr.absY}) rotate(${el.r||0} ${el.w/2} ${el.h/2})" data-element-id="${el.id}" class="element-hit">${el.assetIdV74?artworkSvgV74(el):`<rect width="${el.w}" height="${el.h}" fill="${el.fill||'none'}" stroke="#111" stroke-width="2"/>`}</g>`}
 function lineSvg(el,g){const rr=resolveElementRect(el,g);return `<g transform="translate(${rr.absX} ${rr.absY}) rotate(${el.r||0} ${el.w/2} ${el.h/2})" data-element-id="${el.id}" class="element-hit"><line x1="0" y1="0" x2="${el.w}" y2="${el.h}" stroke="#111" stroke-width="2"/><rect width="${Math.max(6,el.w)}" height="${Math.max(6,el.h)}" fill="transparent"/></g>`}
 function selectionSvg(el,g){const rr=resolveElementRect(el,g);return `<rect class="selection-box ui-only" x="${rr.absX-5}" y="${rr.absY-5}" width="${el.w+10}" height="${el.h+10}"/>`}
 function elementsSvg(g){

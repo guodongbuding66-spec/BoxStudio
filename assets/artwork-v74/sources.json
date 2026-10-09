@@ -1,0 +1,290 @@
+[
+  {
+    "id": "leaf",
+    "label": "叶片",
+    "category": "自然",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/leaf.svg",
+    "sha256": "f4f71bf38cef3b33ae5be20bed7557075601f1aaa44159d150895221c83175b8"
+  },
+  {
+    "id": "sprout",
+    "label": "幼苗",
+    "category": "自然",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/sprout.svg",
+    "sha256": "79e4e4f8569bbd0700f6408ec269532344243f267f46c741b5a51e511f97648f"
+  },
+  {
+    "id": "flower-2",
+    "label": "花朵",
+    "category": "自然",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/flower-2.svg",
+    "sha256": "577fa795213b63b2cf30523d0580bbd9bdca2b16ac0bacc9de200d5cb0c0b72c"
+  },
+  {
+    "id": "wheat",
+    "label": "麦穗",
+    "category": "食品",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/wheat.svg",
+    "sha256": "138e36376fb656908c8ac7bda11ea529064f0a68bd454180a4c4e1303611418c"
+  },
+  {
+    "id": "coffee",
+    "label": "咖啡",
+    "category": "食品",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/coffee.svg",
+    "sha256": "e920d9dbbaaaf46de5375ba0a4519906b99ff9ae36d0537c5d260dc19e98c42a"
+  },
+  {
+    "id": "wine",
+    "label": "酒杯",
+    "category": "食品",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/wine.svg",
+    "sha256": "be9bb467fa2398a614d3d487c31ac702c1656be63a76f7dd6f78b482e306ad90"
+  },
+  {
+    "id": "cherry",
+    "label": "樱桃",
+    "category": "食品",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/cherry.svg",
+    "sha256": "cb9a41b1f363fd3eb3487ed36b393ab4c99aa0a2ecf387163f86edf8b66318bc"
+  },
+  {
+    "id": "apple",
+    "label": "苹果",
+    "category": "食品",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/apple.svg",
+    "sha256": "df5d01ea7f247f64e319714641757dd9d1c6e824cfb7ff717804833e90703af8"
+  },
+  {
+    "id": "carrot",
+    "label": "胡萝卜",
+    "category": "食品",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/carrot.svg",
+    "sha256": "4c68933ea03ee0a765aa7c756f3fb2b54fb2c797879a5e064d255b48039dd834"
+  },
+  {
+    "id": "candy",
+    "label": "糖果",
+    "category": "食品",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/candy.svg",
+    "sha256": "5375940e7f4e16b6e78ace343ee0eada5982c126455f1e6f4ef2dbb159f047a2"
+  },
+  {
+    "id": "fish",
+    "label": "鱼",
+    "category": "食品",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/fish.svg",
+    "sha256": "9e597178975979f56e1e09ff8823639e9bf24f2eec1f804693b7c265a28932cf"
+  },
+  {
+    "id": "beef",
+    "label": "肉类",
+    "category": "食品",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/beef.svg",
+    "sha256": "c7ebc6df21a26ec305f75036da12171e58d730cbc4065d276822dd8d61e9fb23"
+  },
+  {
+    "id": "cookie",
+    "label": "饼干",
+    "category": "食品",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/cookie.svg",
+    "sha256": "e452026a4175871ff5d2b3c5a99d6bbb1c6457988f0963335366d68ba04dd107"
+  },
+  {
+    "id": "croissant",
+    "label": "可颂",
+    "category": "食品",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/croissant.svg",
+    "sha256": "3dcd2cee01b0cc08b9071b9f51e1a93360d473da8bbe6270f51df48f0ab02f3c"
+  },
+  {
+    "id": "gift",
+    "label": "礼物",
+    "category": "装饰",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/gift.svg",
+    "sha256": "fdf9245646ea6b715c0a738d2e79bf9578495d07604015a3b5f826ac85aa882c"
+  },
+  {
+    "id": "heart",
+    "label": "爱心",
+    "category": "装饰",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/heart.svg",
+    "sha256": "3e0ea938f896725eb5d9f1440bec881671761a6864f8d0eb1948065f3de99aae"
+  },
+  {
+    "id": "star",
+    "label": "星形",
+    "category": "装饰",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/star.svg",
+    "sha256": "8169933b68b55d52313fd768386a435038f77dcc49acd198fb5afa965b26ce8b"
+  },
+  {
+    "id": "sun",
+    "label": "太阳",
+    "category": "自然",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/sun.svg",
+    "sha256": "f067e7494a29d825168ef4285d1eb66ef3cd57c33778fd67528247e377a5ff89"
+  },
+  {
+    "id": "moon",
+    "label": "月亮",
+    "category": "自然",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/moon.svg",
+    "sha256": "5e5c866dd82fbea5c03e00c778fa283c6efc8c37db3b7937824fe0b8ad5382f7"
+  },
+  {
+    "id": "snowflake",
+    "label": "雪花",
+    "category": "自然",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/snowflake.svg",
+    "sha256": "3a6d758e3302a0f706660bbd9d9ada7c6bbb364e57aca7311797fce9536f02ee"
+  },
+  {
+    "id": "flask-conical",
+    "label": "实验瓶",
+    "category": "护理",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/flask-conical.svg",
+    "sha256": "44c3730146060926637ed68c081d8cf84c918736cee49803fd2d54ffa79a6d9b"
+  },
+  {
+    "id": "droplet",
+    "label": "水滴",
+    "category": "护理",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/droplet.svg",
+    "sha256": "7afc772f788680739e7e26a0924fabebc5fa316dc090f6eeaedba5d748159e8d"
+  },
+  {
+    "id": "sparkles",
+    "label": "闪光",
+    "category": "装饰",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/sparkles.svg",
+    "sha256": "40a7c96d3ad44a83803c7dc2f449653b972602763cda2adfea7f72f3925c375e"
+  },
+  {
+    "id": "gem",
+    "label": "宝石",
+    "category": "装饰",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/gem.svg",
+    "sha256": "95681f25cec993922735b97a20813ced8480a8e340fd85c41efc1374d4898c86"
+  },
+  {
+    "id": "package",
+    "label": "包装盒",
+    "category": "行业",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/package.svg",
+    "sha256": "d2bb2edb3e9acc1d00535af3596837558b761b24d8933070d5565b71eeaac74f"
+  },
+  {
+    "id": "recycle",
+    "label": "回收",
+    "category": "行业",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/recycle.svg",
+    "sha256": "89a8e23a58d644b6ddfbc606f23fc965806b363ad3c7b104d25db0f459ecaa5c"
+  },
+  {
+    "id": "shopping-bag",
+    "label": "购物袋",
+    "category": "行业",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/shopping-bag.svg",
+    "sha256": "65c8153cf4b231dcc9b03187c87fa27cc811c049c6dba5db7b88b7e2cd33f1c2"
+  },
+  {
+    "id": "battery",
+    "label": "电池",
+    "category": "行业",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/battery.svg",
+    "sha256": "2181f60641e5f6a0fea0f4e4a83244379a688d134c13cf2bb50a768aec35dfe1"
+  },
+  {
+    "id": "shield-check",
+    "label": "盾牌",
+    "category": "行业",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/shield-check.svg",
+    "sha256": "0e9116845c6053cd3bfa09a3e4c232f5fb28c3abab75792287d2aed31c24ebe7"
+  },
+  {
+    "id": "flame",
+    "label": "火焰",
+    "category": "自然",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/flame.svg",
+    "sha256": "144ec9d994ffee707781b8be67bd7bbb0f87d85010b37956d7bd86909053590b"
+  },
+  {
+    "id": "truck",
+    "label": "卡车",
+    "category": "行业",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/truck.svg",
+    "sha256": "66dce104470503111bd1e883022b343233831b4a3dfbcc1327e0908e813c40a7"
+  },
+  {
+    "id": "globe",
+    "label": "地球",
+    "category": "行业",
+    "license": "ISC",
+    "author": "Lucide Contributors",
+    "source": "https://github.com/lucide-icons/lucide/blob/0.468.0/icons/globe.svg",
+    "sha256": "c3543ac3883a0841aa5d37ff974708fbc37d9c6afe64e14b03d56ed798b0b788"
+  }
+]
