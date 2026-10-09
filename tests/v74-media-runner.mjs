@@ -3,9 +3,10 @@ import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import puppeteer from 'puppeteer-core';
 const chrome=process.argv[2];assert.ok(chrome);
+const only=process.argv[3];assert.ok(!only||['compatible','fixed-10s'].includes(only));
 const browser=await puppeteer.launch({executablePath:chrome,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--use-gl=angle','--use-angle=swiftshader']});
 const results=[];
-try{for(const fallback of [false,true]){
+try{for(const fallback of [false,true].filter(f=>!only||(f?'compatible':'fixed-10s')===only)){
  const name=fallback?'compatible':'fixed-10s',folder=resolve('artifacts/v74/media-'+name);await mkdir(folder,{recursive:true});
  const context=await browser.createBrowserContext({downloadBehavior:{policy:'allow',downloadPath:folder}}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  if(fallback)await page.evaluateOnNewDocument(()=>{const native=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){return type==='webgl2'?null:native.call(this,type,...args);};Object.defineProperty(window,'VideoEncoder',{value:undefined,configurable:true});});

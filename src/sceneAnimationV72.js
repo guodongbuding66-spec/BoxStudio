@@ -34,14 +34,19 @@ export async function recordSceneAnimationV72({state,geo,graph,textures,settings
  const frame=(t)=>{const f=sceneAnimationFrameV72(t,{mode,settings:base,progress}),meshes=foldedMeshesV71(snapshot,geo,graph,{progress:f.progress,authoring});renderSceneV71(meshes,textures,f.settings,width,height,canvas);};
  const timed=await encodeTimedFrames(canvas,frame,{seconds,width,height,signal,onProgress});if(timed)return timed;
  if(typeof canvas.captureStream!=='function')throw new Error('当前浏览器不能录制画布。');
- frame(0);const stream=canvas.captureStream(12),track=stream.getVideoTracks()[0],chunks=[],recorder=new MediaRecorder(stream,{mimeType,videoBitsPerSecond:5_000_000});let timer=null,done=false,start=null;
+ // A slow renderer must still visit every animation pose. Manual capture
+ // records one requested pose at a time; the final mux assigns fixed
+ // presentation timestamps independently of the encoder's wall clock.
+ frame(0);let stream=canvas.captureStream(0),track=stream.getVideoTracks()[0];if(typeof track.requestFrame!=='function'){stream.getTracks().forEach(t=>t.stop());stream=canvas.captureStream(12);track=stream.getVideoTracks()[0];}
+ const chunks=[],recorder=new MediaRecorder(stream,{mimeType,videoBitsPerSecond:5_000_000});let timer=null,done=false,ready=false,index=0;
  try{const recorded=await new Promise((resolve,reject)=>{
   const cleanup=()=>{clearTimeout(timer);signal?.removeEventListener('abort',abort);};
   const fail=e=>{if(done)return;done=true;cleanup();if(recorder.state!=='inactive')recorder.stop();reject(e);};
   const abort=()=>fail(new DOMException('已取消动画导出。','AbortError'));if(signal?.aborted){abort();return;}signal?.addEventListener('abort',abort,{once:true});
-  recorder.ondataavailable=e=>{if(e.data.size){chunks.push(e.data);if(start===null)start=performance.now();}};recorder.onerror=e=>fail(e.error||new Error('动画编码失败。'));
+  recorder.ondataavailable=e=>{if(e.data.size){chunks.push(e.data);ready=true;}};recorder.onerror=e=>fail(e.error||new Error('动画编码失败。'));
   recorder.onstop=()=>{if(done)return;done=true;cleanup();const blob=new Blob(chunks,{type:'video/webm'});if(blob.size<1024)reject(new Error('动画文件没有有效视频内容。'));else resolve(blob);};
   recorder.start(250);const waitingSince=performance.now();
-  const tick=()=>{if(done)return;try{if(start===null&&performance.now()-waitingSince>10000)throw new Error('动画编码器未输出有效视频帧。');const t=start===null?0:Math.min(1,(performance.now()-start)/(seconds*1000));frame(t);track.requestFrame?.();onProgress(Math.round(t*100));if(t>=1){timer=setTimeout(()=>recorder.stop(),250);}else timer=setTimeout(tick,1000/12);}catch(e){fail(e);}};tick();
+  const count=seconds*12;
+  const tick=()=>{if(done)return;try{if(!ready&&performance.now()-waitingSince>10000)throw new Error('动画编码器未输出有效视频帧。');const t=ready?index/(count-1):0;frame(t);track.requestFrame?.();onProgress(Math.round(t*100));if(ready&&++index===count){timer=setTimeout(()=>recorder.stop(),500);}else timer=setTimeout(tick,250);}catch(e){fail(e);}};tick();
  });return await finalizeRecordedWebm(recorded,seconds,signal);}finally{clearTimeout(timer);stream.getTracks().forEach(track=>track.stop());}
 }
