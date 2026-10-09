@@ -17,7 +17,8 @@ for name,values in expect.items():
 video=root/'boxstudio-animation.webm'
 probe=json.loads(subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-count_frames','-show_entries','stream=codec_name,width,height,nb_read_frames:format=duration','-of','json',str(video)]));stream=probe['streams'][0]
 assert stream['codec_name'] in ['vp8','vp9'] and stream['width']==1280 and stream['height']==960,stream
-assert int(stream['nb_read_frames'])>=24,stream
+assert int(stream['nb_read_frames'])==72,stream
+assert abs(float(probe['format']['duration'])-6)<.01,probe
 hashes=[]
 for t in [0,3,5.5]:
     data=subprocess.check_output(['ffmpeg','-v','error','-ss',str(t),'-i',str(video),'-frames:v','1','-f','image2pipe','-vcodec','png','-threads','1','-'])

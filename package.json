@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "@bwip-js/generic": "4.11.4",
+    "mediabunny": "1.61.3",
     "pg": "^8.13.1",
     "three": "0.180.0"
   },

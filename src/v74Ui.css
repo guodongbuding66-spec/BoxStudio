@@ -40,3 +40,5 @@ body[data-v67=true] .v67-mark-status{font-size:10px}
 @media(max-width:760px){.v74-resource-toolbar{grid-template-columns:minmax(0,1fr) 64px}.v74-resource-toolbar>label:first-child{grid-column:1/-1}.v74-resource-filter button{min-height:44px}.v74-asset-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.v71-scene-controls{max-height:none}}
 /* The batch action previously forced an unbreakable line wider than the palette. */
 body[data-v67=true] .v67-carton-library .v58-batch-focus{white-space:normal;overflow-wrap:anywhere;line-height:1.6;text-align:left;padding:10px;display:block}
+
+.v74-light-status{font-size:11px;line-height:1.6;color:var(--studio-muted,#64748b);margin:0 0 12px}
