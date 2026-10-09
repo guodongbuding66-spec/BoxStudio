@@ -2,7 +2,7 @@ const wait=async(fn)=>{const end=Date.now()+60000;while(Date.now()<end){if(fn())
 try{
  const shot=new URLSearchParams(location.search).get('shot')||'artwork';
  // The central artboard remains visible when the contextual library is collapsed on mobile.
- const targets={templates:'.v58-library-head',structure:'#designSvg',artwork:'#designSvg',marks:'[data-v58-marks-studio]','3d':'#threeCanvas',preflight:'.preflight',export:'#exportPdf',manufacturing:'section[data-v55-manufacturing]',factory:'section[data-v56-factory]',routing:'section[data-v57-routing]',mobile:'#designSvg'};
+ const targets={templates:'[data-v75-library] .v47-hero',structure:'#designSvg',artwork:'#designSvg',marks:'[data-v58-marks-studio]','3d':'#threeCanvas',preflight:'.preflight',export:'#exportPdf',manufacturing:'section[data-v55-manufacturing]',factory:'section[data-v56-factory]',routing:'section[data-v57-routing]',mobile:'#designSvg'};
  await wait(()=>window.BoxStudioV65&&document.querySelector(targets[shot]));
  await wait(()=>document.querySelector(targets[shot])?.getBoundingClientRect().height>0);
  await document.fonts.load('14px "BoxStudio UI SC"','纸盒设计唛头出血安全区');await document.fonts.ready;

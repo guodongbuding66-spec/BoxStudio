@@ -3,6 +3,14 @@ export const FONTS_V74=Object.freeze([
  {id:'sans-sc',label:'纸工黑体',name:'BoxStudio Sans SC',kind:'中英 · GB2312',source:'https://github.com/google/fonts/tree/main/ofl/notosanssc'},
  {id:'serif-sc',label:'纸工宋体',name:'BoxStudio Serif SC',kind:'中英 · GB2312',source:'https://github.com/google/fonts/tree/main/ofl/notoserifsc'},
  {id:'lato',label:'Lato 人文无衬线',name:'BoxStudio Lato',kind:'拉丁字母',source:'https://github.com/google/fonts/tree/main/ofl/lato'},
+ {id:'manrope',label:'Manrope 几何无衬线',name:'BoxStudio Manrope',kind:'拉丁 · 无衬线',source:'https://github.com/google/fonts/tree/main/ofl/manrope'},
+ {id:'lexend',label:'Lexend 阅读字体',name:'BoxStudio Lexend',kind:'拉丁 · 无衬线',source:'https://github.com/google/fonts/tree/main/ofl/lexend'},
+ {id:'oswald',label:'Oswald 紧凑标题',name:'BoxStudio Oswald',kind:'拉丁 · 展示',source:'https://github.com/google/fonts/tree/main/ofl/oswald'},
+ {id:'playfair',label:'Playfair 编辑衬线',name:'BoxStudio Playfair',kind:'拉丁 · 衬线',source:'https://github.com/google/fonts/tree/main/ofl/playfairdisplay'},
+ {id:'slab',label:'Source Serif 4 书籍衬线',name:'BoxStudio Serif4',kind:'拉丁 · 衬线',source:'https://github.com/google/fonts/tree/main/ofl/sourceserif4'},
+ {id:'barlow',label:'Barlow Condensed 窄体',name:'BoxStudio Barlow',kind:'拉丁 · 展示',source:'https://github.com/google/fonts/tree/main/ofl/barlowcondensed'},
+ {id:'josefin',label:'Josefin Sans 品牌字',name:'BoxStudio Josefin',kind:'拉丁 · 无衬线',source:'https://github.com/google/fonts/tree/main/ofl/josefinsans'},
+ {id:'bitter',label:'Bitter 人文衬线',name:'BoxStudio Bitter',kind:'拉丁 · 衬线',source:'https://github.com/google/fonts/tree/main/ofl/bitter'},
  {id:'mono',label:'Roboto Mono 等宽',name:'BoxStudio Mono',kind:'编码与数字',source:'https://github.com/google/fonts/tree/main/ofl/robotomono'}
 ]);
 const fonts=new Map(),pending=new Map();
@@ -11,8 +19,8 @@ export function registerFontV74(id,weight,bytes){if(!FONTS_V74.some(f=>f.id===id
 export async function loadFontV74(id,bold=false){
  if(!id||id==='system')return null;
  if(!FONTS_V74.some(f=>f.id===id))throw new Error('字体不存在。');
- const key=id+'-'+(bold?700:400);if(fonts.has(key))return fonts.get(key);
- if(!pending.has(key))pending.set(key,(async()=>{const res=await fetch(new URL('../assets/fonts-v74/'+key+'.ttf',import.meta.url));if(!res.ok)throw new Error('字体下载失败，请重试。');return registerFontV74(id,bold?700:400,await res.arrayBuffer());})().catch(e=>{pending.delete(key);throw e;}));
+ const key=id+'-'+(bold?700:400);if(pending.has(key))return pending.get(key);if(fonts.has(key))return fonts.get(key);
+ if(!pending.has(key))pending.set(key,(async()=>{const res=await fetch(new URL('../assets/fonts-v74/'+key+'.ttf',import.meta.url));if(!res.ok)throw new Error('字体下载失败，请重试。');const bytes=await res.arrayBuffer(),font=registerFontV74(id,bold?700:400,bytes);if(typeof FontFace!=='undefined'&&typeof document!=='undefined'){const family=FONTS_V74.find(f=>f.id===id).name,face=new FontFace(family,bytes,{weight:String(bold?700:400)});await face.load();document.fonts.add(face);}return font;})().catch(e=>{pending.delete(key);throw e;}));
  return pending.get(key);
 }
 export function fontGlyphIssuesV74(el,text){
