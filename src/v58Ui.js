@@ -1,3 +1,4 @@
+import {mountSymbolLibraryV73} from './symbolLibraryV73.js';
 import {handlingSvgV72} from './handlingSymbolsV72.js';
 import {iconV67} from './uiIconsV67.js';
 import { STORAGE_KEY, defaultState, cloneState } from './model.js';
@@ -5,6 +6,7 @@ import { mountArtworkProof } from './threeArtworkProof.js';
 import { buildLinkedWorkspaceModelV49 } from './linkedWorkspaceV49.js';
 import { V58_PRODUCT_VERSION, V58_FREE_POLICY, V58_STUDIO_FLOW, V58_MARK_GROUPS, V58_MARK_PRESETS, V58_PRINT_ADVISORIES, addMarkPresetV58, markPanelOptionsV58, studioSummaryV58, productAcceptanceV58 } from './productExperienceV58.js';
 import { addMarkPresetV66 } from './shippingMarkLayoutV66.js';
+import {dropBoxSymbolV73} from './symbolPlacementV73.js';
 
 const esc=(s='')=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let queued=false,miniProof=null,miniHost=null;
@@ -52,11 +54,14 @@ function mountMiniPreview(){
 function markButton(id){const p=V58_MARK_PRESETS[id];return `<button data-v58-mark="${esc(id)}"><span>${p.kind==='icon'?`<svg viewBox="0 0 40 40" width="28" height="28" aria-hidden="true">${handlingSvgV72({icon:p.icon,w:40,h:40})}</svg>`:iconV67(p.kind==='barcode-qr-group'?'barcode':'text',20)}</span><b>${esc(p.label)}</b></button>`}
 function marksPalette(){
   const s=readState(),panels=markPanelOptionsV58(s),selected=s.markEditorPanelId||s.linkedV49?.selectedPanelId||panels[0]?.id||'';
-  return `<section class="v58-marks-studio" data-v58-marks-studio><div class="v58-marks-head"><div><span>SHIPPING MARK STUDIO</span><b>唛头组件</b><small>选择面板后，一键插入运输信息、条码 / QR 与搬运标识</small></div><label>目标面<select data-v58-mark-panel>${panels.map(p=>`<option value="${esc(p.id)}" ${p.id===selected?'selected':''}>${esc(p.label)} · ${esc(p.role)}</option>`).join('')}</select></label></div><div class="v58-mark-groups">${V58_MARK_GROUPS.map(g=>`<div class="v58-mark-group"><strong>${esc(g.label)}</strong><div>${g.items.map(markButton).join('')}</div></div>`).join('')}</div><details class="v58-print-note"><summary>印前检查提示</summary>${V58_PRINT_ADVISORIES.map(x=>`<p>✓ ${esc(x.label)}</p>`).join('')}</details><button class="v58-batch-focus" data-v58-batch-focus>批量唛头 · Excel / CSV 字段映射 →</button></section>`
+  return `<section class="v58-marks-studio" data-v58-marks-studio><div class="v58-marks-head"><div><span>SHIPPING MARK STUDIO</span><b>唛头组件</b><small>选择面板后，一键插入运输信息、条码 / QR 与搬运标识</small></div><label>目标面<select data-v58-mark-panel>${panels.map(p=>`<option value="${esc(p.id)}" ${p.id===selected?'selected':''}>${esc(p.label)} · ${esc(p.role)}</option>`).join('')}</select></label></div><div class="v58-mark-groups">${V58_MARK_GROUPS.map(g=>g.id==='handling'?'<div data-v73-box-symbols></div>':`<div class="v58-mark-group"><strong>${esc(g.label)}</strong><div>${g.items.map(markButton).join('')}</div></div>`).join('')}</div><details class="v58-print-note"><summary>印前检查提示</summary>${V58_PRINT_ADVISORIES.map(x=>`<p>✓ ${esc(x.label)}</p>`).join('')}</details><button class="v58-batch-focus" data-v58-batch-focus>批量唛头 · Excel / CSV 字段映射 →</button></section>`
 }
 function enhanceMarks(){
   const main=document.querySelector('.workspace .main');if(!main||currentTab()!=='Marks'||document.querySelector('[data-v58-marks-studio]'))return;const canvas=main.querySelector('.canvas-shell');if(!canvas)return;canvas.insertAdjacentHTML('beforebegin',marksPalette());const studio=main.querySelector('[data-v58-marks-studio]'),panel=studio.querySelector('[data-v58-mark-panel]');
   studio.querySelectorAll('[data-v58-mark]').forEach(b=>b.onclick=()=>{try{const result=addMarkPresetV66(readState(),b.dataset.v58Mark,{panelId:panel.value});saveState(result.state);if(window.BoxStudioEditor?.reloadFromStorage)window.BoxStudioEditor.reloadFromStorage();else location.reload()}catch(error){let message=studio.querySelector('[data-mark-error]');if(!message){message=document.createElement('p');message.dataset.markError='true';message.setAttribute('role','alert');studio.appendChild(message)}message.textContent=error?.message||String(error);studio.dataset.error=message.textContent}});
+  mountSymbolLibraryV73(studio.querySelector('[data-v73-box-symbols]'),{onInsert:(id,params)=>{const result=addMarkPresetV66(readState(),id,{panelId:panel.value});if(params)Object.assign(result.element,params);saveState(result.state);window.BoxStudioEditor.reloadFromStorage();}});
+  const svg=main.querySelector('#designSvg');
+  if(svg){svg.addEventListener('dragover',e=>{if(e.dataTransfer.types.includes('application/boxstudio-mark')){e.preventDefault();e.dataTransfer.dropEffect='copy';}});svg.addEventListener('drop',e=>{const id=e.dataTransfer.getData('application/boxstudio-mark');if(!id)return;e.preventDefault();try{const point=svg.createSVGPoint();point.x=e.clientX;point.y=e.clientY;const local=point.matrixTransform(svg.getScreenCTM().inverse());window.BoxStudioEditor.commitState(dropBoxSymbolV73(readState(),id,local));}catch(error){studio.querySelector('[data-symbol-error]').textContent=error.message;}});}
   studio.querySelector('[data-v58-batch-focus]').onclick=()=>{const file=document.querySelector('#batchFile')?.closest('.panel-section');file?.scrollIntoView({behavior:'smooth',block:'start'});document.querySelector('#batchFile')?.closest('.file-drop')?.classList.add('v58-pulse')};
 }
 

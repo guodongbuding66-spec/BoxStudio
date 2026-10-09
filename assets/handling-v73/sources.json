@@ -1,0 +1,139 @@
+[
+  {
+    "id": "up",
+    "file": "0623.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:ISO_7000_-_Ref-No_0623.svg",
+    "author": "Clemenspool",
+    "license": "CC0-1.0",
+    "sha256": "9dabbed70da482bf6f8ec7a878d0ca42890fe86a8f8a23720b9f854e47f41270"
+  },
+  {
+    "id": "fragile",
+    "file": "0621.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:ISO_7000_-_Ref-No_0621.svg",
+    "author": "Vectorization:  Mrmw",
+    "license": "CC0-1.0",
+    "sha256": "3d23f054c63c39c77bf936d9f804ab597c4d8482ce728993d937bd4ec82bad41"
+  },
+  {
+    "id": "dry",
+    "file": "0626.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:ISO_7000_-_Ref-No_0626.svg",
+    "author": "Vectorization:  Mrmw",
+    "license": "CC0-1.0",
+    "sha256": "6e663955a7b8851597d557b8141c16d6d60c109bbc027641014d2e041174608f"
+  },
+  {
+    "id": "noHooks",
+    "file": "0622.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:ISO_7000_-_Ref-No_0622.svg",
+    "author": "Clemenspool",
+    "license": "CC0-1.0",
+    "sha256": "0b7e683864408d5ee5324b7b5f65539e598b906be31b33a27eca070bd0e92206"
+  },
+  {
+    "id": "slingHere",
+    "file": "0625.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:ISO_7000_-_Ref-No_0625.svg",
+    "author": "Vectorization:  Mrmw",
+    "license": "CC0-1.0",
+    "sha256": "b9b2646d147981f9389ad07696f8ef835909b1a6418de401d06d913d2a97f137"
+  },
+  {
+    "id": "centerGravity",
+    "file": "0627.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:ISO_7000_-_Ref-No_0627.svg",
+    "author": "Clemenspool",
+    "license": "CC0-1.0",
+    "sha256": "6b20cfdf997d900b15cd41ca2a7255d2ab347d215e5450798eedccdbaa92f496"
+  },
+  {
+    "id": "protectHeat",
+    "file": "0624.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:ISO_7000_-_Ref-No_0624.svg",
+    "author": "Vectorization:  Mrmw",
+    "license": "CC0-1.0",
+    "sha256": "933fa863ff291972c4f9a6c05577b5e801834afaacd86fdfe7eb1388a01b1acc"
+  },
+  {
+    "id": "temperature",
+    "file": "0632.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:ISO_7000_-_Ref-No_0632.svg",
+    "author": "Vectorization:  IngenieroLoco",
+    "license": "CC0-1.0",
+    "sha256": "278ee7d4ef02492802f8222e511df1bf66f74e1fcf9ec4f5788cba9777d0bc4e"
+  },
+  {
+    "id": "noRoll",
+    "file": "0628.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:ISO_7000_-_Ref-No_0628.svg",
+    "author": "Clemenspool",
+    "license": "CC0-1.0",
+    "sha256": "99359aa0cea2435621bb60fa62e3322ed3470022321896cd5030254f7dbb7cd6"
+  },
+  {
+    "id": "noHandTruck",
+    "file": "0629.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:ISO_7000_-_Ref-No_0629.svg",
+    "author": "Clemenspool",
+    "license": "CC0-1.0",
+    "sha256": "23e96c42b2f6ef4dc9651423c558c61d1a74bf7cc9c1457b5aa53b12e6bfebe8"
+  },
+  {
+    "id": "stackWeight",
+    "file": "0630.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:ISO_7000_-_Ref-No_0630.svg",
+    "author": "Clemenspool",
+    "license": "CC0-1.0",
+    "sha256": "3bfec560619223fcbac613a3cbbf13f538739cf4362333422ceb0a472360f09b"
+  },
+  {
+    "id": "clampHere",
+    "file": "0631.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:ISO_7000_-_Ref-No_0631.svg",
+    "author": "Clemenspool",
+    "license": "CC0-1.0",
+    "sha256": "05fe6870b90d9d294fc2775a3ccfdd3a995cb8f816f77f73d24d53920c6e464f"
+  },
+  {
+    "id": "noClamp",
+    "file": "no-clamp.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:DoNotClampAsIndicated.svg",
+    "author": "Sigmavarialia at English Wikipedia",
+    "license": "Public domain",
+    "sha256": "0814bd429739cf4ea085acdd29f357980f27b8e8077fbce25849050937c9a88e"
+  },
+  {
+    "id": "recycle",
+    "file": "recycle.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Recycling_symbol.svg",
+    "author": "Krdan / Horcrux",
+    "license": "Public domain",
+    "sha256": "79227f964c8ded56d19a0dad4b4b26741e809bb9813fc53c7e6c632e043493b1"
+  },
+  {
+    "id": "stackLimit",
+    "derivedFrom": [
+      "stackWeight"
+    ],
+    "license": "CC0-1.0 / Public domain",
+    "adaptation": "Recomposition of imported package silhouettes; parameter label; not an ISO certification."
+  },
+  {
+    "id": "stackHeight",
+    "derivedFrom": [
+      "stackWeight"
+    ],
+    "license": "CC0-1.0 / Public domain",
+    "adaptation": "Recomposition of imported package silhouettes; parameter label; not an ISO certification."
+  },
+  {
+    "id": "noStack",
+    "derivedFrom": [
+      "stackWeight",
+      "noClamp"
+    ],
+    "license": "CC0-1.0 / Public domain",
+    "adaptation": "Recomposition of imported package silhouettes; parameter label; not an ISO certification."
+  }
+]
