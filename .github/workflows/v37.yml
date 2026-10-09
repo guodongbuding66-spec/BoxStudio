@@ -35,9 +35,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Install PostgreSQL client dependency
-        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Install locked runtime and browser-test dependencies
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run prepare
 
       - name: V0.37 syntax checks
         run: |

@@ -5,3 +5,7 @@ __pycache__/
 *.pyc
 dist/
 .vercel/
+
+/vendor/bwip-js-generic.mjs
+
+/vendor/bwip-js/
