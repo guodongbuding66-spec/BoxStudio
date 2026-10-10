@@ -12,7 +12,7 @@ export function generateAdditionalTemplateV78(input){
  const x=pad+2*H+20,y=pad+H+W+Math.min(H,W*.3),panels=[];
  const add=(id,label,x,y,w,h,parent=null,kind='panel',angle)=>{const p={id,label,x,y,w,h,parent,kind,role:id,foldAngleV78:angle};panels.push(p);return p;};
  const base=add('base','盒底',x,y,L,W);
- add('front','前壁',x,y+W,L,H,'base');const back=add('back','后壁',x,y-H,L,H,'base');
+ add('front','前壁',x+T/2,y+W,L-T,H,'base');const back=add('back','后壁',x+T/2,y-H,L-T,H,'base');
  for(const side of ['left','right']){
   const left=side==='left',wall=add(side,left?'左外壁':'右外壁',left?x-H:x+L,y,H,W,'base'),outer=left?wall.x:wall.x+wall.w;
   const spine=add(side+'-spine','纸厚桥',left?outer-T:outer,y,T,W,wall.id,'flap');
@@ -20,10 +20,10 @@ export function generateAdditionalTemplateV78(input){
   const foot=Math.min(10,(L-2*T)*.08);add(side+'-floor-lock','内壁锁脚',left?inner.x-foot:inner.x+inner.w,y,foot,W,inner.id,'flap',left?90:-90);
  }
  // Corner ears are trapped between the outer and inner side walls.
- const ear=Math.min(H*.7,L*.1);for(const wall of ['front','back']){const p=panels.find(p=>p.id===wall);add(wall+'-left-tab','左角耳',x-ear,p.y,ear,H,p.id,'flap');add(wall+'-right-tab','右角耳',x+L,p.y,ear,H,p.id,'flap');}
+ const ear=Math.min(H*.7,L*.1);for(const wall of ['front','back']){const p=panels.find(p=>p.id===wall);add(wall+'-left-tab','左角耳',p.x-ear,p.y,ear,H,p.id,'flap');add(wall+'-right-tab','右角耳',p.x+p.w,p.y,ear,H,p.id,'flap');}
  if(s.template==='roll-lock-mailer'){
-  const lid=add('lid','盖板',x,back.y-W,L,W,'back');const tuck=Math.min(H*.8,W*.3);add('lid-tuck','插舌',x,lid.y-tuck,L,tuck,'lid','flap');
-  const wing=Math.min(H*.8,L*.18);add('lid-left','左盖翼',x-wing,lid.y,wing,W,'lid','flap');add('lid-right','右盖翼',x+L,lid.y,wing,W,'lid','flap');
+  const lid=add('lid','盖板',x+T,back.y-W,L-2*T,W,'back');const tuck=Math.min(H*.8,W*.3);add('lid-tuck','插舌',lid.x,lid.y-tuck,lid.w,tuck,'lid','flap');
+  const wing=Math.min(H*.8,L*.18);add('lid-left','左盖翼',lid.x-wing,lid.y,wing,W,'lid','flap');add('lid-right','右盖翼',lid.x+lid.w,lid.y,wing,W,'lid','flap');
  }
  const dx=pad-Math.min(...panels.map(p=>p.x)),dy=pad-Math.min(...panels.map(p=>p.y));for(const p of panels){p.x+=dx;p.y+=dy;}
  const boundary=panelBoundaryLinesV71(panels);
