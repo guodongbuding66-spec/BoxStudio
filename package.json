@@ -1,6 +1,6 @@
 {
-  "name": "boxstudio-v0.75",
-  "version": "0.75.0",
+  "name": "boxstudio-v0.76",
+  "version": "0.76.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -43,7 +43,8 @@
     "prepare": "node scripts/prepare-codes.mjs",
     "test:v72": "node tests/v72.mjs",
     "test:v73": "node tests/v73.mjs",
-    "test:v74": "node tests/v74.mjs"
+    "test:v74": "node tests/v74.mjs",
+    "test:v76": "node tests/v76.mjs"
   },
   "dependencies": {
     "@bwip-js/generic": "4.11.4",

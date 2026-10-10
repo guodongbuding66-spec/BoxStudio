@@ -1,3 +1,4 @@
+import {layoutTextV76,moveTextCommandsV76} from './textLayoutV76.js';
 import {parseTrueTypeFont,textOutlineCommands,commandsToSvgPath} from './ttfOutline.js';
 export const FONTS_V74=Object.freeze([
  {id:'sans-sc',label:'纸工黑体',name:'BoxStudio Sans SC',kind:'中英 · GB2312',source:'https://github.com/google/fonts/tree/main/ofl/notosanssc'},
@@ -24,21 +25,22 @@ export async function loadFontV74(id,bold=false){
  return pending.get(key);
 }
 export function fontGlyphIssuesV74(el,text){
- if(!el.fontIdV74)return [];
+ if(!el.fontIdV74)return el.textStyleV76?['请为排版文字选择已加载的字体。']:[];
  const font=getFontV74(el.fontIdV74,el.bold);if(!font)return ['所选字体尚未加载，请等待或重新选择字体。'];
  const missing=[...new Set([...String(text)].filter(c=>c.codePointAt(0)>32&&!font.cmap(c.codePointAt(0))))];
+ if(el.textStyleV76&&!missing.length){try{if(layoutTextV76(font,text,el).overflow)return ['文字超出文字框，请增大框宽高或缩小字号。'];}catch(e){return [e.message];}}
  return missing.length?['所选字体缺少字符：'+missing.slice(0,12).join('')+'。请选择中英字体或导入完整字体。']:[];
 }
 export async function prepareFontsV74(state){await Promise.all((state.elements||[]).filter(e=>e.fontIdV74).map(e=>loadFontV74(e.fontIdV74,e.bold)));}
 export function fontTextSvgV74(el,text,x=3,y=0){
  const font=getFontV74(el.fontIdV74,el.bold);if(!font)return null;
- const issues=fontGlyphIssuesV74(el,text);if(issues.length)return null;
- const commands=textOutlineCommands(font,text,x,y,el.fontSize||5);
- return '<path data-font-v74="'+el.fontIdV74+'" d="'+commandsToSvgPath(commands)+'" fill="#111"/>';
+ const issues=fontGlyphIssuesV74(el,text);if(issues.length&&!el.textStyleV76)return null;
+ const commands=el.textStyleV76?layoutTextV76(font,text,el).commands:textOutlineCommands(font,text,x,y,el.fontSize||5);
+ return '<path data-font-v74="'+el.fontIdV74+'" d="'+commandsToSvgPath(commands)+'" fill="'+(el.textStyleV76?layoutTextV76(font,text,el).color:'#111')+'"/>';
 }
 export function paintFontV74(ctx,el,text,x,y,scale=1){
  const font=getFontV74(el.fontIdV74,el.bold);if(!font)return false;
- const path=new Path2D(commandsToSvgPath(textOutlineCommands(font,text,x,y,el.fontSize||5)));
- ctx.save();ctx.scale(scale,scale);ctx.fillStyle='#111';ctx.fill(path);ctx.restore();return true;
+ const path=new Path2D(commandsToSvgPath(el.textStyleV76?moveTextCommandsV76(layoutTextV76(font,text,el).commands,el.x,el.y):textOutlineCommands(font,text,x,y,el.fontSize||5)));
+ ctx.save();ctx.scale(scale,scale);ctx.fillStyle=el.textStyleV76?layoutTextV76(font,text,el).color:'#111';ctx.fill(path);ctx.restore();return true;
 }
 export function fontOptionsV74(id=''){return '<option value="">系统字体</option>'+FONTS_V74.map(f=>'<option value="'+f.id+'" '+(id===f.id?'selected':'')+'>'+f.label+' · '+f.kind+'</option>').join('');}

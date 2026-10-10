@@ -1,0 +1,8 @@
+Hero Patterns by Steve Schoger
+https://heropatterns.com/
+License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/
+https://creativecommons.org/licenses/by/4.0/legalcode
+Original source SVG files preserved. BoxStudio adapts colors, repetitions and converts curves for print. Keep attribution and license when sharing exported designs.
+Pinned source revision: 6a2ed74a6910a8b1095d15dd31f7f3f0188517ad
+Source SHA256: 74163aa77c7f8be88129334d3484d1d6457b097e097922422f8981472ae57b5b

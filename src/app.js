@@ -1,3 +1,4 @@
+import {patternSvgV76} from './patternLibraryV76.js';
 import {artworkSvgV74,artworkPrimitivesV74} from './artworkLibraryV74.js';
 import {fontTextSvgV74} from './fontSystemV74.js';
 import {handlingSvgV72,handlingSymbolV72,handlingParamsV72} from './handlingSymbolsV72.js';
@@ -196,7 +197,7 @@ function barcodeQrSvg(el,g){
   const qx=el.w-pad-qrSide,qy=pad;
   return `<g transform="translate(${rr.absX} ${rr.absY}) rotate(${el.r||0} ${el.w/2} ${el.h/2})" data-element-id="${el.id}" class="element-hit"><rect width="${el.w}" height="${el.h}" fill="#fff" stroke="#111" stroke-width="${stroke}"/>${bars.bearer?`<rect x="${pad}" y="${pad}" width="${bw}" height="${bh}" fill="none" stroke="#111" stroke-width="${2*el.w/250}"/>`:''}<g transform="translate(${pad} ${pad})" fill="#111">${bars.rects}</g><text x="${pad+bw/2}" y="${labelBaseline}" text-anchor="middle" class="svg-text" font-size="${fontSize}">${esc(bars.label)}</text><g transform="translate(${qx} ${qy})"><rect width="${qrSide}" height="${qrSide}" fill="#fff"/><g fill="#111">${qr.rects}</g></g><line x1="${qx-gap/2}" y1="${pad}" x2="${qx-gap/2}" y2="${el.h-pad}" stroke="#d1d5db" stroke-width="${el.w/250}"/></g>`;
 }
-function shapeSvg(el,g){const rr=resolveElementRect(el,g);return `<g transform="translate(${rr.absX} ${rr.absY}) rotate(${el.r||0} ${el.w/2} ${el.h/2})" data-element-id="${el.id}" class="element-hit">${el.assetIdV74?artworkSvgV74(el):`<rect width="${el.w}" height="${el.h}" fill="${el.fill||'none'}" stroke="#111" stroke-width="2"/>`}</g>`}
+function shapeSvg(el,g){const rr=resolveElementRect(el,g);return `<g transform="translate(${rr.absX} ${rr.absY}) rotate(${el.r||0} ${el.w/2} ${el.h/2})" data-element-id="${el.id}" class="element-hit">${el.patternIdV76?patternSvgV76(el):el.assetIdV74?artworkSvgV74(el):`<rect width="${el.w}" height="${el.h}" fill="${el.fill||'none'}" stroke="#111" stroke-width="2"/>`}</g>`}
 function lineSvg(el,g){const rr=resolveElementRect(el,g);return `<g transform="translate(${rr.absX} ${rr.absY}) rotate(${el.r||0} ${el.w/2} ${el.h/2})" data-element-id="${el.id}" class="element-hit"><line x1="0" y1="0" x2="${el.w}" y2="${el.h}" stroke="#111" stroke-width="2"/><rect width="${Math.max(6,el.w)}" height="${Math.max(6,el.h)}" fill="transparent"/></g>`}
 function selectionSvg(el,g){const rr=resolveElementRect(el,g);return `<rect class="selection-box ui-only" x="${rr.absX-5}" y="${rr.absY-5}" width="${el.w+10}" height="${el.h+10}"/>`}
 function elementsSvg(g){
