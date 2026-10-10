@@ -1,4 +1,5 @@
 import {foldedMeshesV71} from './threeExportV71.js';
+import {paperAppearanceV77} from './paperMaterialsV77.js';
 import {renderSceneV71,sceneSettingsV71} from './scene3dV71.js';
 
 export function sceneAnimationFrameV72(t,{mode='assembly',settings={},progress=100}={}){t=Math.max(0,Math.min(1,Number(t)||0));const s=sceneSettingsV71(settings);return{progress:mode==='assembly'?100*(.5-Math.cos(Math.PI*t)/2):progress,settings:{...s,yaw:mode==='turntable'?s.yaw+Math.PI*2*t:s.yaw}};}
@@ -31,7 +32,8 @@ export async function recordSceneAnimationV72({state,geo,graph,textures,settings
  if(!['assembly','turntable'].includes(mode)||![6,10].includes(seconds))throw new Error('动画参数无效。');
  const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
  const snapshot=structuredClone(state),base=sceneSettingsV71(settings);if(!base.background){base.preset='paper';base.background='#ffffff';}
- const frame=(t)=>{const f=sceneAnimationFrameV72(t,{mode,settings:base,progress}),meshes=foldedMeshesV71(snapshot,geo,graph,{progress:f.progress,authoring});renderSceneV71(meshes,textures,f.settings,width,height,canvas);};
+ const samples=mode==='assembly'?Array.from({length:11},(_,i)=>foldedMeshesV71(snapshot,geo,graph,{progress:i*10,authoring})):[];const min=[0,1,2].map(i=>Math.min(...samples.map(m=>m.min[i]))),max=[0,1,2].map(i=>Math.max(...samples.map(m=>m.max[i]))),center=min.map((v,i)=>(v+max[i])/2),span=Math.max(1,...max.map((v,i)=>v-min[i])),paper=paperAppearanceV77(snapshot.structure);
+ const frame=(t)=>{const f=sceneAnimationFrameV72(t,{mode,settings:base,progress}),meshes=foldedMeshesV71(snapshot,geo,graph,{progress:f.progress,authoring});if(mode==='assembly'){meshes.center=center;meshes.span=span;meshes.floorY=meshes.upAxis==='Z'?-center[2]/span:meshes.min[1]/span-center[1]/span;}meshes.innerColor=paper.inner;meshes.thicknessMm=snapshot.structure.thickness||.5;renderSceneV71(meshes,textures,f.settings,width,height,canvas);};
  const timed=await encodeTimedFrames(canvas,frame,{seconds,width,height,signal,onProgress});if(timed)return timed;
  if(typeof canvas.captureStream!=='function')throw new Error('当前浏览器不能录制画布。');
  // A slow renderer must still visit every animation pose. Manual capture

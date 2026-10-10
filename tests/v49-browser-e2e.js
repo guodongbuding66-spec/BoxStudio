@@ -17,7 +17,7 @@ try{
   await waitFor(()=>api.getState().linkedV49?.lastSelectionSource==='3d','real canvas 3D selection');
   state=api.getState();if(state.reviewV35?.selectedPanelId!==state.linkedV49?.selectedPanelId)throw new Error('3D selection and 2D review selection drifted.');
   const half=document.querySelector('[data-v49-fold-preset="50"]');click(half);await waitFor(()=>api.getState().foldProgress===50,'50 percent fold preset');
-  const play=document.querySelector('[data-v49-play]');click(play);await waitFor(()=>api.getState().foldProgress===0,'fold animation to flat',4000);
+  const play=document.querySelector('[data-v49-play]');click(document.querySelector('[data-v78-direction]'));click(play);await waitFor(()=>api.getState().foldProgress===0,'reverse fold animation to flat',10000);
   if(document.querySelector('[data-v49-fold-label]')?.textContent!=='0%')throw new Error('Fold label did not track animation.');
   if(!document.querySelector('.v49-map-svg .panel-hit.selected'))throw new Error('2D selected panel highlight missing.');
   if(!document.querySelector('[data-v49-selected-badge]')?.textContent?.trim())throw new Error('Selected panel badge missing.');

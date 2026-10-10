@@ -23,3 +23,46 @@ body[data-v77] .workspace[data-v67-tab="Structure"] .dieline-cut{stroke:#b66c63;
 body[data-v77][data-v58-advanced="false"] [data-v77-fold-details]{display:none}
 
 body[data-v77][data-v58-advanced="false"] .workspace[data-v67-tab="Structure"] .v42-panel-labels,body[data-v77] .workspace[data-v67-tab="Structure"] #boxstudio-v26-guide-overlay > line[stroke="#8b5cf6"]{display:none}
+
+/* V0.78: paper assembly is the focal view; controls stay in normal flow. */
+.v78-fold-player{--fold-ink:#202733;--fold-muted:#657080;--fold-paper:#fff;--fold-inset:#f5f6f8;--fold-line:rgba(32,39,51,.12);--fold-accent:#315cda;display:grid;gap:12px;padding:12px 0;color:var(--fold-ink);font-size:12px;min-width:0}
+.v78-fold-heading{display:flex;align-items:center;gap:12px;min-width:0}.v78-fold-heading b{font-size:14px;font-weight:600}.v78-fold-heading span{color:var(--fold-muted);flex:1}.v78-fold-heading output{font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
+.v78-fold-transport{display:flex;align-items:center;gap:8px}.v78-fold-player button{height:40px;min-width:40px;border:1px solid var(--fold-line);border-radius:8px;color:var(--fold-ink);background:var(--fold-paper);cursor:pointer;font:inherit;transition:background-color 120ms,transform 120ms}
+.v78-fold-player button:hover{background:var(--fold-inset)}.v78-fold-player button:active{transform:scale(.97)}.v78-fold-player button:focus-visible,.v78-fold-player select:focus-visible{outline:2px solid var(--fold-accent);outline-offset:2px}.v78-fold-player button[aria-pressed=true]{background:#edf2ff;border-color:var(--fold-accent);color:var(--fold-accent)}
+.v78-fold-transport input{flex:1;min-width:0;accent-color:var(--fold-accent);height:32px}.v78-fold-settings{display:flex;align-items:center;flex-wrap:wrap;gap:8px}.v78-fold-settings label{display:flex;align-items:center;gap:6px;color:var(--fold-muted)}.v78-fold-settings select{height:36px;min-width:64px;border:1px solid var(--fold-line);border-radius:8px;background:var(--fold-inset);color:var(--fold-ink);font:inherit;padding:4px 8px}.v78-fold-settings button{padding:4px 12px;height:36px}
+.v78-fold-phases{display:flex;gap:6px;overflow-x:auto;max-width:100%;padding-bottom:4px;scrollbar-width:thin}.v78-fold-phases button{flex:none;padding:4px 12px;height:32px;white-space:nowrap;font-size:12px}
+body[data-v77] .v49-foldbar{display:block;padding:12px 16px}.v49-foldbar>.v49-fold-presets{display:flex;gap:6px;flex-wrap:wrap}.v49-foldbar>label,.v49-foldbar>button{display:none!important}.v49-foldbar .v78-fold-player{width:100%;margin-top:8px}
+body[data-v77] .v49-linked-grid{grid-template-columns:minmax(0,1fr)}body[data-v77] .v49-linked-grid>.v49-map-pane{display:none}body[data-v77] .v49-linked-grid.v78-show-map{grid-template-columns:224px minmax(0,1fr)}body[data-v77] .v49-linked-grid.v78-show-map>.v49-map-pane{display:block}.v49-proof-pane{min-width:0}
+.v58-mini3d-card>.v78-fold-player{margin:0 12px;padding:12px 0}.v78-fold-player.compact{gap:8px}.compact .v78-fold-heading b{font-size:12px}.compact .v78-fold-heading span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:12px}.compact .v78-fold-transport{gap:4px}.compact .v78-fold-transport button{min-width:32px;height:36px}.compact .v78-fold-settings{gap:6px}.compact .v78-fold-settings label{gap:4px}.compact .v78-fold-settings select{min-width:48px;padding:4px}.compact .v78-fold-settings button{padding:4px 6px}
+@media(max-width:760px){body[data-v77] .v49-linked-grid.v78-show-map{grid-template-columns:minmax(0,1fr)}.v78-fold-player{gap:8px}.v78-fold-settings{gap:6px}.v78-fold-settings button{padding:4px 8px}.v78-fold-phases{display:none}body[data-v77] .v49-foldbar{padding:12px}.v78-fold-transport button{height:44px;min-width:44px}}
+@media(prefers-reduced-motion:reduce){.v78-fold-player button{transition:none}.v78-fold-player button:active{transform:none}}
+/* The model owns the stage; playback stays in a compact bottom dock. */
+body[data-v77] .v49-proof-pane .v49-proof-head{order:0}
+body[data-v77] .v49-proof-pane #threeCanvas{order:1;min-height:340px;height:calc(100dvh - 340px);flex:1}
+body[data-v77] .v49-proof-pane .v49-foldbar{order:2;border-top:1px solid #e1e3e6;border-bottom:0;padding:12px 16px}
+body[data-v77] .v49-fold-presets{display:none}
+.v78-fold-player{margin:0!important;gap:8px!important}
+.v78-fold-settings label{flex:0 0 auto!important;min-width:0!important;white-space:nowrap;gap:6px!important}
+.v78-fold-settings select{width:auto;min-width:72px;max-width:100%;height:34px}
+.v78-fold-settings label span{color:inherit}
+.v78-fold-phases{gap:6px!important}.v78-fold-phases button{min-height:28px!important;font-size:11px!important;padding:4px 8px!important}
+.v78-artwork-style{display:flex;align-items:center;gap:8px;padding:8px 24px;font-size:12px}.v78-artwork-style select{min-height:36px;border:1px solid #dce0e6;border-radius:6px;padding:4px 8px}
+@media(max-width:760px){body[data-v77] .v49-proof-pane #threeCanvas{height:360px;min-height:360px}body[data-v77] .v49-proof-pane .v49-foldbar{padding:10px}.v78-fold-settings select{min-width:62px}.v78-fold-settings{flex-wrap:wrap}}
+.v75-asset-tile .v78-original{width:100%;min-height:28px;font-size:10px;color:#657080;border:0;border-top:1px solid #eef0f3;background:white;border-radius:0}.v75-asset-tile .v78-original:hover{color:#315cda;background:#f5f7fb}
+@media(max-width:760px){
+ body[data-v77]:has(.v49-linked-page){overflow-y:auto}
+ body[data-v77] .workspace>.main:has(.v49-linked-page){height:740px;min-height:740px}
+ body[data-v77] .v49-linked-page{height:100%;min-height:0}
+ body[data-v77] .v49-proof-pane #threeCanvas{height:300px;min-height:300px;flex:none}
+ body[data-v77] .v49-proof-pane #threeCanvas canvas{height:100%!important}
+ body[data-v77] .v49-proof-head{flex:none}
+ body[data-v77] .v49-foldbar{flex:none}
+ body[data-v77] .three-help{display:none}
+}
+@media(max-width:760px){
+ body[data-v77] .v49-proof-pane{min-height:540px}
+ body[data-v77] .v49-proof-pane #threeCanvas{height:250px;min-height:250px}
+ .v78-fold-player:not(.compact) .v78-fold-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ .v78-fold-player:not(.compact) .v78-fold-settings label{order:0!important;display:flex;min-width:0!important}
+ .v78-fold-player:not(.compact) .v78-fold-settings select{flex:1;width:100%;min-width:0}
+}

@@ -1,3 +1,4 @@
+import {motionAuthoringV78} from './foldMotionV78.js';
 import {boardSurfacesV77} from './boardSurfaceV77.js';
 import {paperAppearanceV77} from './paperMaterialsV77.js';
 import {buildTextureProofModel} from './threeArtworkProof.js';
@@ -10,7 +11,7 @@ const sub=(a,b)=>a.map((v,i)=>v-b[i]);
 const normal=(a,b,c)=>{const n=cross(sub(b,a),sub(c,a)),l=Math.hypot(...n)||1;return n.map(v=>v/l);};
 const pad4=n=>Math.ceil(n/4)*4;
 export function foldedMeshesV71(state,geo,graph,{progress=100,authoring={}}={}){
- const model=buildTextureProofModel(state,geo,graph),transforms=buildFoldTransformsV50(graph,geo,progress,authoring);
+ const model=buildTextureProofModel(state,geo,graph),transforms=buildFoldTransformsV50(graph,geo,progress,motionAuthoringV78(graph,progress,authoring));
  const panels=model.panels.map(p=>{const m=transforms.get(p.nodeId),points=p.uvMap.points.map(q=>apply(m,[q[0]-geo.width/2,-(q[1]-geo.height/2),0]));return{...p,points,uvMap:{...p.uvMap,triangles:p.uvMap.triangles.map(t=>[...t].reverse())},normal:normal(...[...p.uvMap.triangles[0]].reverse().map(i=>points[i]))};});
  if(!panels.length)throw new Error('没有可导出的 3D 面板。');
  const all=panels.flatMap(p=>p.points);if(all.some(p=>p.some(v=>!Number.isFinite(v))))throw new Error('3D 坐标无效。');

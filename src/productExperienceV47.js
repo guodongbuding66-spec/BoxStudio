@@ -1,3 +1,4 @@
+import {isV78EngineTemplate} from './parametricTemplatesV78.js';
 import { STANDARD_TEMPLATE_CATALOG } from './templates.js';
 import { MATERIAL_PRESETS_V32, FLUTE_PRESETS_V32, resolveMaterialV32 } from './materialsV32.js';
 import { stateForTemplate, cloneState } from './model.js';
@@ -41,7 +42,7 @@ export function prepareTemplateStateV47(currentState,templateId,quickSize={}){
   for(const key of ['reviewV35','linkedV49','foldAuthoringV50','foldSequenceV51'])delete next[key];
   next.structure={...preset.structure,...size,template:templateId};next.elements=preset.elements;next.variables={...preset.variables};next.selectedId=preset.selectedId;next.projectName=`${found.nameZh||found.name} / Free Project`;next.page='editor';next.editorTab='Structure';next.foldProgress=100;next.savedAt=new Date().toISOString();next.projectId='';next.projectRemoteRevision=0;
   if(next.syncDimensions){const unit=String(next.variables.dimensionUnit||'MM').toUpperCase(),factor=unit==='INCH'?1/25.4:unit==='CM'?1/10:1;for(const key of ['length','width','height'])next.variables[key]=(next.structure[key]*factor).toFixed(unit==='INCH'?2:unit==='CM'?1:0);}
-  if(isV71EngineTemplate(templateId))Object.assign(next,artworkProfileV71(next.structure));
+  if(isV71EngineTemplate(templateId)||isV78EngineTemplate(templateId))Object.assign(next,artworkProfileV71(next.structure));
   return next;
 }
 
