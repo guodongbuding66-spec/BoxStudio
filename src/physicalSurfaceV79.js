@@ -1,0 +1,12 @@
+import {paperTextureSettingsV79,paperHeightPixelsV79,corrugatedSectionPixelsV79,PAPER_TEXTURES_V79} from './paperTextureV79.js';
+import {PRINT_FINISHES_V79,finishPlansV79} from './printFinishesV79.js';
+import {renderPanelArtworkCanvas} from './panelArtwork.js';
+function pixelTexture(T,pixels){const canvas=document.createElement('canvas');canvas.width=canvas.height=256;canvas.getContext('2d').putImageData(new ImageData(pixels,256,256),0,0);const texture=new T.CanvasTexture(canvas);texture.flipY=false;return texture;}
+export function applyPaperSurfaceV79(T,front,panel,meshes,colorMap){
+ const s=paperTextureSettingsV79(meshes.paperV79),tile=pixelTexture(T,paperHeightPixelsV79(s.kind));tile.wrapS=tile.wrapT=T.RepeatWrapping;tile.repeat.set(panel.panel.w/s.scale,panel.panel.h/s.scale);front.material.bumpMap=tile;front.material.bumpScale=PAPER_TEXTURES_V79[s.kind].amplitude*s.strength/meshes.span;
+ for(const child of front.children){child.userData.surfaceIndex=child.name==='edge'?2:1;if(child.name==='inner'){child.material.bumpMap=tile;child.material.bumpScale=front.material.bumpScale;}else if(child.name==='edge'&&s.kind==='corrugated'){const edge=pixelTexture(T,corrugatedSectionPixelsV79());edge.wrapS=T.RepeatWrapping;edge.repeat.set(1/s.flutePitch,1);edge.colorSpace=T.SRGBColorSpace;child.material.map=edge;child.material.color.set('#ffffff');child.material.roughness=.95;}}
+ for(const effect of finishPlansV79(panel.plan)){let maskTexture;const mask=renderPanelArtworkCanvas(effect.plan,{maxPixels:Math.min(1024,colorMap.image.width),background:'transparent',mask:true,onUpdate:()=>{if(maskTexture)maskTexture.needsUpdate=true;}});maskTexture=new T.CanvasTexture(mask);maskTexture.flipY=false;const f=PRINT_FINISHES_V79[effect.type],material=new T.MeshPhysicalMaterial({alphaMap:maskTexture,transparent:true,alphaTest:.015,depthWrite:false,side:T.FrontSide,roughness:f.roughness,metalness:f.metalness,clearcoat:f.clearcoat||0,color:f.color||'#ffffff',map:['uv','emboss','deboss'].includes(effect.type)?colorMap:null,polygonOffset:true,polygonOffsetFactor:-5,polygonOffsetUnits:-5});
+  if(['emboss','deboss'].includes(effect.type)){material.bumpMap=maskTexture;material.bumpScale=effect.depth/meshes.span*(effect.type==='deboss'?-1:1);}const mesh=new T.Mesh(front.geometry,material);mesh.name='finish-'+effect.type;mesh.userData.surfaceIndex=0;mesh.userData.finish=effect.type;mesh.renderOrder=1;front.add(mesh);
+ }
+ front.userData.surfaceIndex=0;
+}

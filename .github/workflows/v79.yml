@@ -1,0 +1,36 @@
+name: V0.79 Packaging, Font Shaping and Print Craft
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  original-resources-and-workflow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run prepare
+      - name: Real source bytes, full fonts, shaping, process plates and templates
+        run: node tests/v79.mjs
+      - name: Independent original SVG and native PDF rendering
+        run: |
+          python3 -m pip install --user cairosvg pillow pymupdf
+          python3 tests/v79-artwork-proofs.py
+      - name: Actual browser, local craft, scene objects and native file downloads
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)"
+          node tests/v79-browser.mjs "$CHROME"
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: boxstudio-v79-original-resources-and-browser
+          path: artifacts/v79/
