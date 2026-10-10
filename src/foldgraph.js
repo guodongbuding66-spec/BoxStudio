@@ -37,7 +37,7 @@ function rscGraph(geo) {
 
   const ids=new Set(nodes.map(n=>n.id));
   const edges=[
-    ['front','right','RIGHT VERTICAL',90],['right','back','BACK VERTICAL',90],['front','left','LEFT VERTICAL',-90],
+    ['front','right','RIGHT VERTICAL',90],['left','glue','GLUE TAB',-90],['right','back','BACK VERTICAL',90],['front','left','LEFT VERTICAL',-90],
     ['front','top-front','TOP FRONT',90],['back','top-back','TOP BACK',90],['left','top-left','TOP LEFT',90],['right','top-right','TOP RIGHT',90],
     ['front','bottom-front','BOTTOM FRONT',-90],['back','bottom-back','BOTTOM BACK',-90],['left','bottom-left','BOTTOM LEFT',-90],['right','bottom-right','BOTTOM RIGHT',-90]
   ].filter(([from,to])=>ids.has(from)&&ids.has(to)).map(([from,to,label,angle])=>({from,to,label,angle}));

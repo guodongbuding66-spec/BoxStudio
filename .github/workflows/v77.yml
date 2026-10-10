@@ -1,0 +1,43 @@
+name: V0.77 Geometry, Rich Text and Workbench Acceptance
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  geometry-and-native-files:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Locked dependencies
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run prepare
+      - name: Real glyphs, folding solids and CAD topology
+        run: node tests/v77.mjs
+      - name: Independent print renderers
+        run: |
+          python3 -m pip install --user cairosvg numpy pillow pymupdf
+          python3 tests/v77-files.py
+      - name: Actual fold animation and editing interactions
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)"
+          node tests/v77-preview.mjs "$CHROME"
+          node tests/v77-workbench.mjs "$CHROME"
+      - name: Build and production entry integrity
+        run: |
+          node tests/full-entry.mjs
+          node tests/ui-version.mjs
+          npm run build
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: boxstudio-v77-real-geometry-and-native-files
+          path: artifacts/v77/

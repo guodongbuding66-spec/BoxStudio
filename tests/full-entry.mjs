@@ -8,5 +8,6 @@ for(const path of ['tests/studio-screenshots.html','tests/artwork-live.html','te
  assert.deepEqual(modules(fixture),modules(index),`${path} must load every production module in order`);
  assert.deepEqual(styles(fixture),styles(index),`${path} must load production styles in order`);
  assert.ok(fixture.includes('data-studio-shell="unified"'));
+ if(fixture.includes('studio-seed.js'))assert.ok(fixture.indexOf('studio-seed.js')<fixture.indexOf('src/app.js'),`${path} must seed the test project before the editor captures state`);
 }
 console.log(`PASS full-entry fixtures: ${modules(index).length} production modules and ${styles(index).length} styles each`);

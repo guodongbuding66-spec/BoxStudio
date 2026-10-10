@@ -1,0 +1,37 @@
+import {applyDielineV77} from '../src/dielineApplyV77.js';
+import {dielineDocumentFromStateV38,moveNodeV38} from '../src/dielineCadV38.js';
+import assert from 'node:assert/strict';
+import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';
+import validator from 'gltf-validator';
+import {FONTS_V74,registerFontV74,getFontV74,fontTextSvgV74,fontGlyphIssuesV74} from '../src/fontSystemV74.js';
+import {layoutTextV76,textStyleV76} from '../src/textLayoutV76.js';
+import {validateRichRunsV77} from '../src/richTextLayoutV77.js';
+import {createMarkDocumentV67,setMarkArtboardV67,buildMarkSvgV67,buildMarkPdfV67,parseMarkDocumentV67} from '../src/standaloneMarksV67.js';
+import {buildProductionPdfV19} from '../src/exportV19.js';
+import {buildProductionPdfV23} from '../src/productionPdfV23.js';
+import {boardSurfacesV77} from '../src/boardSurfaceV77.js';
+import {foldedMeshesV71,encodeGlbV71} from '../src/threeExportV71.js';
+import {generateGeometry} from '../src/geometry.js';
+import {buildFoldGraph} from '../src/foldgraph.js';
+import {defaultState} from '../src/model.js';
+import {smartSnapV77,PX_MM_V77,dimensionSvgV77} from '../src/editorGeometryV77.js';
+import {PAPER_PRESETS_V77,validatePaperV77} from '../src/paperMaterialsV77.js';
+import {TEXT_PRESETS_V77} from '../src/textPresetsV77.js';
+mkdirSync('artifacts/v77/proofs',{recursive:true});let checks=0;const check=(v,t)=>{assert.ok(v,t);checks++;};
+for(const f of FONTS_V74)for(const weight of [400,700])registerFontV74(f.id,weight,readFileSync('assets/fonts-v74/'+f.id+'-'+weight+'.ttf'));
+const run=(start,end,extra={})=>({start,end,fontId:'serif-sc',fontSize:9,bold:true,color:'#214e91',italic:true,underline:true,strike:false,...extra});
+const doc=setMarkArtboardV67(createMarkDocumentV67('blank'),120,90),e={id:'rich-proof',type:'text',group:'marks',panelId:'label',x:12,y:15,w:96,h:58,r:0,fontSize:6,fontIdV74:'lato',bold:false,template:'BOX 纸箱\nPREMIUM 2026',textStyleV76:textStyleV76({color:'#142e6b',align:'center',verticalAlign:'center'}),textRunsV77:[run(4,6),run(7,14,{fontId:'playfair',color:'#933266',fontSize:10,italic:false,underline:false,strike:true})]};doc.elements=[e];doc.selectedId=e.id;
+const layout=layoutTextV76(getFontV74('lato'),e.template,e);check(!layout.overflow,'Mixed glyphs fit physical text frame');check(layout.paintRuns.some(r=>r.fontId==='serif-sc'&&r.color==='#214e91'),'Chinese run uses actual selected font and ink');check(layout.paintRuns.some(r=>r.fontId==='playfair'&&r.color==='#933266'),'Different font/size/color in one text object');check(fontGlyphIssuesV74(e,e.template).length===0,'Mixed glyph font preflight');check(fontTextSvgV74(e,e.template).includes('data-font-v74="serif-sc"'),'SVG identifies actual fragment font');
+check(parseMarkDocumentV67(JSON.stringify(doc)).elements[0].textRunsV77.length===2,'Rich styles survive saved project validation');
+for(const bad of [[run(-1,2)],[run(0,2),run(1,3)],[run(0,80)],[run(0,2,{fontId:'unknown'})],[run(0,2,{color:'url(x)'})]]){assert.throws(()=>validateRichRunsV77(bad,e.template));checks++;}
+assert.throws(()=>validateRichRunsV77([run(0,1)],'😀'));checks++;
+for(const [i,angle]of [0,30,90].entries()){const s=structuredClone(doc);s.elements[0].r=angle;writeFileSync('artifacts/v77/proofs/rich-'+i+'.svg',buildMarkSvgV67(s));writeFileSync('artifacts/v77/proofs/rich-'+i+'.pdf',buildMarkPdfV67(s));writeFileSync('artifacts/v77/proofs/v19-rich-'+i+'.pdf',buildProductionPdfV19(s));writeFileSync('artifacts/v77/proofs/v23-rich-'+i+'.pdf',buildProductionPdfV23(s));}
+const bounds={x:10,y:20,w:20,h:10},target=[{id:'other',x:51,y:50,w:20,h:10}];let snap=smartSnapV77(bounds,target,30.5,29.8,{tolerance:1});check(snap.dx===31&&snap.dy===30&&snap.guides.length===2,'Closest edges/centers snap together');snap=smartSnapV77(bounds,target,30.5,29.8,{enabled:false});check(snap.dx===30.5&&snap.guides.length===0,'Alt bypass keeps exact drag delta');check(Math.abs(PX_MM_V77*96-25.4)<1e-12,'Explicit CSS pixel to physical mm conversion');
+const geo=generateGeometry(defaultState.structure),graph=buildFoldGraph(geo),flat=foldedMeshesV71(defaultState,geo,graph,{progress:0}),closed=foldedMeshesV71(defaultState,geo,graph);check(JSON.stringify(flat.panels.map(p=>p.points))!==JSON.stringify(closed.panels.map(p=>p.points)),'Folding changes actual geometry');check(graph.edges.some(e=>e.to==='glue'),'Glue flap is connected to a real hinge');check(dimensionSvgV77(geo).includes('mm'),'Physical dieline dimensions');
+for(const panel of closed.panels){const surfaces=boardSurfacesV77(panel,2);check(surfaces.length===3,'Exterior, inner and edge solids '+panel.nodeId);const a=surfaces[0].positions.slice(0,3),b=surfaces[1].positions.slice(-3),distance=surfaces[0].positions.slice(0,3).reduce((s,v,i)=>s+(v-panel.points[panel.uvMap.triangles[0][0]][i])*panel.normal[i],0);check(Math.abs(distance-1)<1e-6,'Physical half thickness '+panel.nodeId);
+ for(const surface of surfaces)for(let i=0;i<surface.positions.length;i+=9){const a=surface.positions.slice(i,i+3),b=surface.positions.slice(i+3,i+6).map((v,k)=>v-a[k]),c=surface.positions.slice(i+6,i+9).map((v,k)=>v-a[k]),n=[b[1]*c[2]-b[2]*c[1],b[2]*c[0]-b[0]*c[2],b[0]*c[1]-b[1]*c[0]],normal=surface.normals.slice(i,i+3);check(n.reduce((s,v,k)=>s+v*normal[k],0)>0,'Triangle winding agrees with outward normal '+panel.nodeId+' '+surface.name);}}
+const png=Uint8Array.from(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLttAAAAABJRU5ErkJggg==','base64')),textures=new Map(closed.panels.map(p=>[p.nodeId,png])),bytes=encodeGlbV71(closed,{textures,thicknessMm:2,innerColor:'#eee6d9'}),dv=new DataView(bytes.buffer),jlen=dv.getUint32(12,true),json=JSON.parse(new TextDecoder().decode(bytes.slice(20,20+jlen)));
+check(json.meshes.every(m=>m.primitives.length===3),'GLB includes solid exterior, interior and cut edges');check(json.materials.every(m=>m.doubleSided===false),'GLB never mirrors exterior ink through reverse faces');check(json.meshes.every(m=>!json.materials[m.primitives[1].material].pbrMetallicRoughness.baseColorTexture),'GLB interiors do not reuse exterior print texture');const report=await validator.validateBytes(bytes);check(report.issues.numErrors===0,'Independent Khronos GLB validation '+JSON.stringify(report.issues.messages));writeFileSync('artifacts/v77/solid.glb',bytes);
+const cad=dielineDocumentFromStateV38(defaultState),proxy=applyDielineV77(defaultState,cad);check(proxy.structure.template==='imported'&&proxy.dielineV38.schema==='boxstudio-dieline-v38','CAD applies real semantic faces and crease hinges');const customGeo=generateGeometry(proxy.structure),customGraph=buildFoldGraph(customGeo);check(customGeo.cutLines.length>0&&customGraph.edges.length>0,'Applied CAD supplies preview and GLB geometry');check(foldedMeshesV71(proxy,customGeo,customGraph).panels.length===customGeo.panels.length,'Custom CAD includes every semantic panel in preview');
+check(PAPER_PRESETS_V77.length===8&&PAPER_PRESETS_V77.every(p=>validatePaperV77(p)),'Eight validated physical paper presets');assert.throws(()=>validatePaperV77({...PAPER_PRESETS_V77[0],thickness:Infinity}));checks++;check(TEXT_PRESETS_V77.length===24,'24 original typography presets');
+writeFileSync('artifacts/v77/model-results.json',JSON.stringify({status:'PASS',checks},null,2));console.log('PASS V77: '+checks+' rich glyph, fold, solid geometry, material, snap and independent GLB assertions');
