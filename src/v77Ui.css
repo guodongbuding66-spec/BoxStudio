@@ -49,3 +49,13 @@ body[data-v77] .v49-fold-presets{display:none}
 .v78-artwork-style{display:flex;align-items:center;gap:8px;padding:8px 24px;font-size:12px}.v78-artwork-style select{min-height:36px;border:1px solid #dce0e6;border-radius:6px;padding:4px 8px}
 @media(max-width:760px){body[data-v77] .v49-proof-pane #threeCanvas{height:360px;min-height:360px}body[data-v77] .v49-proof-pane .v49-foldbar{padding:10px}.v78-fold-settings select{min-width:62px}.v78-fold-settings{flex-wrap:wrap}}
 .v75-asset-tile .v78-original{width:100%;min-height:28px;font-size:10px;color:#657080;border:0;border-top:1px solid #eef0f3;background:white;border-radius:0}.v75-asset-tile .v78-original:hover{color:#315cda;background:#f5f7fb}
+@media(max-width:760px){
+ body[data-v77]:has(.v49-linked-page){overflow-y:auto}
+ body[data-v77] .workspace>.main:has(.v49-linked-page){height:740px;min-height:740px}
+ body[data-v77] .v49-linked-page{height:100%;min-height:0}
+ body[data-v77] .v49-proof-pane #threeCanvas{height:300px;min-height:300px;flex:none}
+ body[data-v77] .v49-proof-pane #threeCanvas canvas{height:100%!important}
+ body[data-v77] .v49-proof-head{flex:none}
+ body[data-v77] .v49-foldbar{flex:none}
+ body[data-v77] .three-help{display:none}
+}
