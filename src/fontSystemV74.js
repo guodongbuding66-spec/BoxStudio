@@ -25,7 +25,7 @@ export async function loadFontV74(id,bold=false){
  return pending.get(key);
 }
 export function fontGlyphIssuesV74(el,text){
- if(!el.fontIdV74)return [];
+ if(!el.fontIdV74)return el.textStyleV76?['请为排版文字选择已加载的字体。']:[];
  const font=getFontV74(el.fontIdV74,el.bold);if(!font)return ['所选字体尚未加载，请等待或重新选择字体。'];
  const missing=[...new Set([...String(text)].filter(c=>c.codePointAt(0)>32&&!font.cmap(c.codePointAt(0))))];
  if(el.textStyleV76&&!missing.length){try{if(layoutTextV76(font,text,el).overflow)return ['文字超出文字框，请增大框宽高或缩小字号。'];}catch(e){return [e.message];}}

@@ -29,7 +29,7 @@ export function barcodeChecksV70(state){
   add(e,'BARCODE_SIZE',Boolean(barcodeSizeV70(e.w,e.h)),barcodeSizeV70(e.w,e.h)?`${e.w} × ${e.h} mm · 整体比例 3.125 : 1`:BARCODE_SIZE_MESSAGE_V70);
   add(e,'BARCODE_DIRECTION',!Number(e.r)&&e.lockAspect!==false,'条码与二维码作为一个对象，禁止旋转、拆分或非等比变形。');
   add(e,'BARCODE_SAFE',elementInsideSafeArea(e,geo),'组合及留白必须完整位于当前面的安全区。');
-  const region=bounds(e,geo),covered=elements.filter(other=>other.id!==e.id&&!(other.v61PanelFill&&orderedElements(elements).indexOf(other)<orderedElements(elements).indexOf(e))&&overlap(region,bounds(other,geo)));
+  const region=bounds(e,geo),covered=elements.filter(other=>other.id!==e.id&&!((other.v61PanelFill||(other.patternIdV76&&elements.indexOf(other)<elements.indexOf(e)))&&orderedElements(elements).indexOf(other)<orderedElements(elements).indexOf(e))&&overlap(region,bounds(other,geo)));
   add(e,'BARCODE_OVERLAP',!covered.length,covered.length?`组合留白区域与 ${covered.map(x=>x.id).join('、')} 重叠，请移动这些对象。`:'组合区域无其他对象遮挡，使用白底单色黑。');
   try{
    const value=renderTemplate(e.barcodeValue,state.variables||{}).trim(),qrValue=renderTemplate(e.qrValue,state.variables||{}),type=e.barcodeType||'CODE39',g=barcodeGroupLayoutV70(e);

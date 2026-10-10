@@ -1,4 +1,4 @@
-name: V0.75 Resource Libraries and Studio Acceptance
+name: V0.76 Typesetting, Pattern Libraries and Studio Acceptance
 
 on:
   push:
@@ -297,6 +297,24 @@ jobs:
           trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
           timeout 300s node tests/v75-chrome-runner.mjs "$CHROME"
           python3 tests/v75-files.py
+      - name: V0.76 actual glyph typesetting and licensed original patterns
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/v76.mjs
+          python3 -m pip install --user lxml cairosvg numpy pillow pymupdf zxing-cpp==3.1.1
+          python3 tests/v76-files.py
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          timeout 300s node tests/v76-chrome-runner.mjs "$CHROME"
+          python3 tests/v76-browser-files.py
+      - name: Upload V0.76 actual-file and four-viewport acceptance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boxstudio-v76-typesetting-patterns-native-files
+          path: artifacts/v76/
+          if-no-files-found: error
       - name: Upload V0.75 reference upgrade acceptance
         if: always()
         uses: actions/upload-artifact@v4
