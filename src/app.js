@@ -188,7 +188,7 @@ function iconSvg(el,g){
 }
 function textBlock(el,text,g){
   const rr=resolveElementRect(el,g),lines=String(text).split('\n');
-  return `<g transform="translate(${rr.absX} ${rr.absY}) rotate(${el.r||0} ${el.w/2} ${el.h/2})" data-element-id="${el.id}" class="element-hit"><rect width="${el.w}" height="${el.h}" fill="rgba(255,255,255,.01)" stroke="none"/>${fontTextSvgV74(el,lines.join('\n'),4,1)||lines.map((line,i)=>`<text x="4" y="${Math.min(el.h-4,(i+1)*(el.fontSize||14)+2)}" class="svg-text" font-size="${el.fontSize||14}" ${el.bold?'font-weight="700"':''}>${esc(line)}</text>`).join('')}</g>`;
+  return `<g transform="translate(${rr.absX} ${rr.absY}) rotate(${el.r||0} ${el.w/2} ${el.h/2})" data-element-id="${el.id}" class="element-hit"><rect width="${el.w}" height="${el.h}" fill="rgba(255,255,255,.01)" stroke="none"/>${fontTextSvgV74(el,lines.join('\n'),4,1,state.variables)||lines.map((line,i)=>`<text x="4" y="${Math.min(el.h-4,(i+1)*(el.fontSize||14)+2)}" class="svg-text" font-size="${el.fontSize||14}" ${el.bold?'font-weight="700"':''}>${esc(line)}</text>`).join('')}</g>`;
 }
 function barcodeQrSvg(el,g){
   const rr=resolveElementRect(el,g), barcodeValue=renderTemplate(el.barcodeValue,state.variables), qrValue=renderTemplate(el.qrValue,state.variables);

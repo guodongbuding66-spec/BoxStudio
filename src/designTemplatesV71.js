@@ -1,3 +1,4 @@
+import {INDUSTRY_PRESETS_V79,createIndustryProjectV79} from './industryTemplatesV79.js';
 import {createArtworkV74} from './artworkLibraryV74.js';
 import {prepareTemplateStateV47,artworkProfileV71} from './productExperienceV47.js';
 import {defaultsForTemplate,generateGeometry} from './geometry.js';
@@ -36,9 +37,11 @@ export const DESIGN_PRESETS_V71=Object.freeze([
  {id:'tech',name:'设备配件',category:'industrial',brand:'FORM / 07',subtitle:'PRECISION PARTS',background:'#e2e6ee',accent:'#8595b1',layout:'diagonal'},
  {id:'minimal',name:'极简纸品',category:'minimal',brand:'PAPER / 08',subtitle:'LESS, BUT BETTER',background:'#f4f1eb',accent:'#c7c0b4',layout:'corner'},
 ]);
+export const DESIGN_PRESETS_ALL_V79=Object.freeze([...DESIGN_PRESETS_V71,...INDUSTRY_PRESETS_V79]);
 const category=id=>({care:'护理',food:'食品',gift:'礼品',industrial:'工业',minimal:'极简'})[id]||id;
 export const designCategoryLabelV71=category;
 export function createArtworkProjectV71(current,presetId,{templateId=current.structure?.template||'straight-tuck-end',title}={}){
+ const industry=INDUSTRY_PRESETS_V79.find(p=>p.id===presetId);if(industry)return createIndustryProjectV79(current,industry,{templateId,title});
  const preset=DESIGN_PRESETS_V71.find(p=>p.id===presetId);if(!preset)throw new Error('设计模板不存在。');
  const next=prepareTemplateStateV47(current,templateId,defaultsForTemplate(templateId)),geo=generateGeometry(next.structure);next.elements=[];
  for(const panel of geo.panels.filter(p=>p.kind!=='glue')){

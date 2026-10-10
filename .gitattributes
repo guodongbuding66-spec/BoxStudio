@@ -1,0 +1,6 @@
+# Preserve downloaded upstream license and vendor text without rewriting it.
+assets/fonts-v79/*OFL.txt -whitespace
+assets/packaging-v79/TWEMOJI-LICENSE -whitespace
+vendor/bidi/bidi.mjs -whitespace
+*.gz binary
+*.wasm binary

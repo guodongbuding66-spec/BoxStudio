@@ -16,7 +16,7 @@ export function foldedMeshesV71(state,geo,graph,{progress=100,authoring={}}={}){
  if(!panels.length)throw new Error('没有可导出的 3D 面板。');
  const all=panels.flatMap(p=>p.points);if(all.some(p=>p.some(v=>!Number.isFinite(v))))throw new Error('3D 坐标无效。');
  const min=[0,1,2].map(i=>Math.min(...all.map(p=>p[i]))),max=[0,1,2].map(i=>Math.max(...all.map(p=>p[i]))),center=min.map((v,i)=>(v+max[i])/2);
- return{panels,min,max,center,span:Math.max(...max.map((v,i)=>v-min[i])),upAxis:geo.foldRoot==='base'?'Z':'Y',progress};
+ return{panels,min,max,center,span:Math.max(...max.map((v,i)=>v-min[i])),upAxis:geo.foldRoot==='base'?'Z':'Y',paperV79:paperAppearanceV77(state.structure).textureV79,progress};
 }
 export async function artworkTexturesV71(meshes,{maxPixels=1024,background='#ffffff'}={}){
  if(typeof document==='undefined')throw new Error('图文贴图需要浏览器。');await document.fonts?.ready;

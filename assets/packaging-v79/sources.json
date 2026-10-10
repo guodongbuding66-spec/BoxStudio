@@ -1,0 +1,2717 @@
+[
+  {
+    "id": "pack-1f347",
+    "label": "葡萄",
+    "category": "食品",
+    "keywords": [
+      "葡萄",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f347.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "11609fd2874433e3bc5fac02b56cbb1f9bdab6f856aa108fd5deac601fb95a4d",
+    "regulatory": false,
+    "colors": [
+      "#77b255",
+      "#553788",
+      "#9266cc",
+      "#aa8dd8",
+      "#744eaa"
+    ]
+  },
+  {
+    "id": "pack-1f348",
+    "label": "蜜瓜",
+    "category": "食品",
+    "keywords": [
+      "蜜瓜",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f348.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "bc50515cb2506c1fccf4e1f5c48e038ef24ad5823f4493b77204f0273bd4e851",
+    "regulatory": false,
+    "colors": [
+      "#a6d388",
+      "#77b255",
+      "#5c913b"
+    ]
+  },
+  {
+    "id": "pack-1f349",
+    "label": "西瓜",
+    "category": "食品",
+    "keywords": [
+      "西瓜",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f349.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "ba4326afe4f23fbe9ab7bbee8dece542bb85cc92f697dbebbb1f3bc78fae1ef2",
+    "regulatory": false,
+    "colors": [
+      "#5c913b",
+      "#ffe8b6",
+      "#dd2e44",
+      "#000000"
+    ]
+  },
+  {
+    "id": "pack-1f34a",
+    "label": "柑橘",
+    "category": "食品",
+    "keywords": [
+      "柑橘",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f34a.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "f9806aebac632973570632862ce5c2b8ecb588bed24a5c0ba1c5f3316c43c598",
+    "regulatory": false,
+    "colors": [
+      "#f4900c",
+      "#662113",
+      "#5c913b"
+    ]
+  },
+  {
+    "id": "pack-1f34b",
+    "label": "柠檬",
+    "category": "食品",
+    "keywords": [
+      "柠檬",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f34b.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "d61acad4354635834f30e08921b03c2412f5bf0669846f8a93c7ac085b0315da",
+    "regulatory": false,
+    "colors": [
+      "#5c913b",
+      "#77b255",
+      "#ffcc4d"
+    ]
+  },
+  {
+    "id": "pack-1f34c",
+    "label": "香蕉",
+    "category": "食品",
+    "keywords": [
+      "香蕉",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f34c.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "27f2f433eb1084f3728a430bd72c8891819a45396354d89ab496a5afce76e6e4",
+    "regulatory": false,
+    "colors": [
+      "#ffe8b6",
+      "#ffd983",
+      "#ffcc4d",
+      "#a6d388",
+      "#3e721d",
+      "#c1694f"
+    ]
+  },
+  {
+    "id": "pack-1f34d",
+    "label": "菠萝",
+    "category": "食品",
+    "keywords": [
+      "菠萝",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f34d.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "e27f52c7e0cbe83939a6a52e9eb9385f938c8ef8ab129d01ab7221cbd5537ed9",
+    "regulatory": false,
+    "colors": [
+      "#5c913b",
+      "#ffac33",
+      "#ffcc4d"
+    ]
+  },
+  {
+    "id": "pack-1f96d",
+    "label": "芒果",
+    "category": "食品",
+    "keywords": [
+      "芒果",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f96d.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "0ee93dec9d72a8fbb747400746b31a003e33ef1ef2066dcf1280a4e8c0d86035",
+    "regulatory": false,
+    "colors": [
+      "#77b255",
+      "#ea564b",
+      "#f97253"
+    ]
+  },
+  {
+    "id": "pack-1f34e",
+    "label": "苹果",
+    "category": "食品",
+    "keywords": [
+      "苹果",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f34e.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "b55a6ab3403f37e8404dab174ed26b5997f48a67df2ac317c442b86916343d3e",
+    "regulatory": false,
+    "colors": [
+      "#dd2e44",
+      "#77b255",
+      "#662113"
+    ]
+  },
+  {
+    "id": "pack-1f34f",
+    "label": "青苹果",
+    "category": "食品",
+    "keywords": [
+      "青苹果",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f34f.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "fea750638167f4696e81e1649a12ac03d74e8a7fecd82857222a7121ea6be85b",
+    "regulatory": false,
+    "colors": [
+      "#77b255",
+      "#3e721d",
+      "#662113"
+    ]
+  },
+  {
+    "id": "pack-1f350",
+    "label": "梨",
+    "category": "食品",
+    "keywords": [
+      "梨",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f350.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "a5d2dbbe61a52c63dd703f8406e906dfc047dbffaafe1ddbfb26f6bb4a6e7047",
+    "regulatory": false,
+    "colors": [
+      "#a6d388",
+      "#662113"
+    ]
+  },
+  {
+    "id": "pack-1f351",
+    "label": "蜜桃",
+    "category": "食品",
+    "keywords": [
+      "蜜桃",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f351.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "e61b5a90bacb2e21ac945fd311a1e54926745c60e5d1cc9993983a58d77d0fb5",
+    "regulatory": false,
+    "colors": [
+      "#5c913b",
+      "#ff886c",
+      "#77b255",
+      "#dd2e44"
+    ]
+  },
+  {
+    "id": "pack-1f352",
+    "label": "樱桃",
+    "category": "食品",
+    "keywords": [
+      "樱桃",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f352.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "55169c27fc03a0e20bec5144194584685bbc44f4bd92ce6be21e5aa429c7b137",
+    "regulatory": false,
+    "colors": [
+      "#77b255",
+      "#5c913b",
+      "#be1931"
+    ]
+  },
+  {
+    "id": "pack-1f353",
+    "label": "草莓",
+    "category": "食品",
+    "keywords": [
+      "草莓",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f353.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "8fc89f2be1a50a72d5c44f28d2f84b642f7065bc4f97c6540ee3ae86d2eda2fc",
+    "regulatory": false,
+    "colors": [
+      "#be1931",
+      "#77b255",
+      "#f4abba"
+    ]
+  },
+  {
+    "id": "pack-1fad0",
+    "label": "蓝莓",
+    "category": "食品",
+    "keywords": [
+      "蓝莓",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1fad0.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "54a9e8e6ca7263f6e346925de94ebf7e843a8844739badd86926937eae8c6cc1",
+    "regulatory": false,
+    "colors": [
+      "#5c913b",
+      "#77b255",
+      "#5864b7",
+      "#334372",
+      "#aa8dd8",
+      "#253356"
+    ]
+  },
+  {
+    "id": "pack-1f95d",
+    "label": "猕猴桃",
+    "category": "食品",
+    "keywords": [
+      "猕猴桃",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f95d.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "36c97cee9a3aa1bfca24600ddd5a93c2e3113f972fc0a33b018a12f3c3adfdd7",
+    "regulatory": false,
+    "colors": [
+      "#c1694f",
+      "#77b255",
+      "#a6d388",
+      "#c6e5b3",
+      "#292f33"
+    ]
+  },
+  {
+    "id": "pack-1f345",
+    "label": "番茄",
+    "category": "食品",
+    "keywords": [
+      "番茄",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f345.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "4f88e52dc73fa86a88747dec7243d38e0bdd263400c29ac6bd0786cba71768f4",
+    "regulatory": false,
+    "colors": [
+      "#dd2e44",
+      "#77b255"
+    ]
+  },
+  {
+    "id": "pack-1f965",
+    "label": "椰子",
+    "category": "食品",
+    "keywords": [
+      "椰子",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f965.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "b43d2f0bfc2be24eb0cb39819c505f4cbd59b525e94828bb0824a4ae406ac04a",
+    "regulatory": false,
+    "colors": [
+      "#8b5e3c",
+      "#603913",
+      "#f5f8fa",
+      "#99aab5",
+      "#a97c50"
+    ]
+  },
+  {
+    "id": "pack-1f951",
+    "label": "牛油果",
+    "category": "食品",
+    "keywords": [
+      "牛油果",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f951.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "ecb631c1bcb4d79eb88aa0a49d6f5393d088770c04cb96a0c07ace0ce5d69803",
+    "regulatory": false,
+    "colors": [
+      "#3e721d",
+      "#a6d388",
+      "#c6e5b3",
+      "#662113",
+      "#7c3225"
+    ]
+  },
+  {
+    "id": "pack-1f346",
+    "label": "茄子",
+    "category": "食品",
+    "keywords": [
+      "茄子",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f346.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "6a51feacbc0c6653c8adf378b5bf03b10a82f8ff387674f6434d3ee9019416af",
+    "regulatory": false,
+    "colors": [
+      "#744eaa",
+      "#77b255"
+    ]
+  },
+  {
+    "id": "pack-1f954",
+    "label": "土豆",
+    "category": "食品",
+    "keywords": [
+      "土豆",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f954.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "70f46bb22acc8e9944843d6fcaf4813f10f49fd828a3a026e4fb1e5652008abf",
+    "regulatory": false,
+    "colors": [
+      "#d99e82",
+      "#c1694f"
+    ]
+  },
+  {
+    "id": "pack-1f955",
+    "label": "胡萝卜",
+    "category": "食品",
+    "keywords": [
+      "胡萝卜",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f955.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "095282c0ebfd6b8fd35cdad033cec807db20afa8a2558e3ebbc038670efd73c5",
+    "regulatory": false,
+    "colors": [
+      "#77b255",
+      "#f4900c",
+      "#d67503"
+    ]
+  },
+  {
+    "id": "pack-1f33d",
+    "label": "玉米",
+    "category": "食品",
+    "keywords": [
+      "玉米",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f33d.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "f9e206caef297d521a5b47c1bf560312ff66050eabec9502f07674b66da428e1",
+    "regulatory": false,
+    "colors": [
+      "#5c913b",
+      "#f4900c",
+      "#f7b82d",
+      "#77b255"
+    ]
+  },
+  {
+    "id": "pack-1f336",
+    "label": "辣椒",
+    "category": "食品",
+    "keywords": [
+      "辣椒",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f336.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "d00869056b7865f1fc34df83282f3e268a5e6abe6265b053107cb2ed3fdcebba",
+    "regulatory": false,
+    "colors": [
+      "#da2f47",
+      "#77b255"
+    ]
+  },
+  {
+    "id": "pack-1fad1",
+    "label": "甜椒",
+    "category": "食品",
+    "keywords": [
+      "甜椒",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1fad1.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "444c3096b758c9e12bc5dd8ae139c6a0af2299610983f82c09254520343b0251",
+    "regulatory": false,
+    "colors": [
+      "#3e721d",
+      "#5c913b",
+      "#77b255"
+    ]
+  },
+  {
+    "id": "pack-1f952",
+    "label": "黄瓜",
+    "category": "食品",
+    "keywords": [
+      "黄瓜",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f952.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "d9f92067492730ae019b6a434dbf9337a476968fd3a7e175cad7ee516586afd7",
+    "regulatory": false,
+    "colors": [
+      "#5c913b",
+      "#77b255"
+    ]
+  },
+  {
+    "id": "pack-1f96c",
+    "label": "绿叶菜",
+    "category": "食品",
+    "keywords": [
+      "绿叶菜",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f96c.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "85bc3d551df60cbcb3acc5ffa09aaac572b3de0d1c9ed34b49b96dde04d1496a",
+    "regulatory": false,
+    "colors": [
+      "#5c913b",
+      "#679e44",
+      "#3e721d",
+      "#77b255",
+      "#a6d388"
+    ]
+  },
+  {
+    "id": "pack-1f966",
+    "label": "西兰花",
+    "category": "食品",
+    "keywords": [
+      "西兰花",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f966.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "dd7e6102a1abbe1d8c4d978468447686c35424b195ef1df52d669232da0f9a59",
+    "regulatory": false,
+    "colors": [
+      "#77b255",
+      "#5c913b",
+      "#3e721d"
+    ]
+  },
+  {
+    "id": "pack-1f9c4",
+    "label": "大蒜",
+    "category": "食品",
+    "keywords": [
+      "大蒜",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f9c4.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "9b7610a3255bfd813aba95784aa6818e803cb3e27f1cbc69177660f85836b74c",
+    "regulatory": false,
+    "colors": [
+      "#99aab5",
+      "#e1e8ed"
+    ]
+  },
+  {
+    "id": "pack-1f9c5",
+    "label": "洋葱",
+    "category": "食品",
+    "keywords": [
+      "洋葱",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f9c5.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "786b1f098ae1753dc68442fe551210b6aff2e680b0f71b8895c1221a0821c517",
+    "regulatory": false,
+    "colors": [
+      "#d39954",
+      "#edd6a6",
+      "#e2a759"
+    ]
+  },
+  {
+    "id": "pack-1f344",
+    "label": "蘑菇",
+    "category": "食品",
+    "keywords": [
+      "蘑菇",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f344.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "a860eafef10242b3b82012394910768a5f03c2fd6be66d4815bf0ad23bc9c245",
+    "regulatory": false,
+    "colors": [
+      "#99aab5",
+      "#dd2e44",
+      "#f4abba"
+    ]
+  },
+  {
+    "id": "pack-1f95c",
+    "label": "花生",
+    "category": "食品",
+    "keywords": [
+      "花生",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f95c.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "2ccc07747dde868d3db93c40f1d05334f18ba14a43e53cc9ecaa2adf65b913b6",
+    "regulatory": false,
+    "colors": [
+      "#d99e82",
+      "#c1694f"
+    ]
+  },
+  {
+    "id": "pack-1f330",
+    "label": "栗子",
+    "category": "食品",
+    "keywords": [
+      "栗子",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f330.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "79d2ea722e6e861180797914f9878d5ad0292ea2c6867eae45741e38107add06",
+    "regulatory": false,
+    "colors": [
+      "#c1694f",
+      "#a95233",
+      "#662113"
+    ]
+  },
+  {
+    "id": "pack-1f35e",
+    "label": "面包",
+    "category": "食品",
+    "keywords": [
+      "面包",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f35e.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "e4854fc34fa77c36e266eb9d7fe2b658d281d0adea7754a1994f238192a6269b",
+    "regulatory": false,
+    "colors": [
+      "#d99e82",
+      "#cc927a",
+      "#ffe8b6"
+    ]
+  },
+  {
+    "id": "pack-1f950",
+    "label": "羊角面包",
+    "category": "食品",
+    "keywords": [
+      "羊角面包",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f950.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "eb3500e968fa39c7a79a2ebd5ecfb0289d874e01a75cbe1b3c843d746598e33c",
+    "regulatory": false,
+    "colors": [
+      "#f4900c",
+      "#db7803",
+      "#ffac33"
+    ]
+  },
+  {
+    "id": "pack-1f956",
+    "label": "法棍",
+    "category": "食品",
+    "keywords": [
+      "法棍",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f956.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "d0041de2b2a7c84fef767675bea0c80c07b2bf250959860bac8e0baa9d28164b",
+    "regulatory": false,
+    "colors": [
+      "#edb980",
+      "#e5a157",
+      "#ffd983"
+    ]
+  },
+  {
+    "id": "pack-1f96f",
+    "label": "贝果",
+    "category": "食品",
+    "keywords": [
+      "贝果",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f96f.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "5faece9aa504153357ea690968db88fc4c1c446727eed84c28a716f2047adf94",
+    "regulatory": false,
+    "colors": [
+      "#c1694f",
+      "#d99e82",
+      "#ccd6dd",
+      "#ffffff",
+      "#8a4b38"
+    ]
+  },
+  {
+    "id": "pack-1f95e",
+    "label": "松饼",
+    "category": "食品",
+    "keywords": [
+      "松饼",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f95e.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "d50bea97af2d27abe42cf81c052849edcb222f984c02c1fa2093e497ffb0892b",
+    "regulatory": false,
+    "colors": [
+      "#929497",
+      "#ccd6dc",
+      "#f19020",
+      "#faaa35",
+      "#e18524",
+      "#e5922e",
+      "#d17a28",
+      "#ffd882"
+    ]
+  },
+  {
+    "id": "pack-1f9c7",
+    "label": "华夫饼",
+    "category": "食品",
+    "keywords": [
+      "华夫饼",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f9c7.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "2097301a98ae9d594a8a569678207c896cc55bac26b835e13fd8dfeb33d27dd4",
+    "regulatory": false,
+    "colors": [
+      "#939598",
+      "#ccd6dd",
+      "#f4900c",
+      "#ffac33",
+      "#d3790d",
+      "#ffd983"
+    ]
+  },
+  {
+    "id": "pack-1f9c0",
+    "label": "芝士",
+    "category": "食品",
+    "keywords": [
+      "芝士",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f9c0.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "12d7cc96a5ea9d9156111287ad37fe7f6307e22c9edcf142d749cbecee3d1371",
+    "regulatory": false,
+    "colors": [
+      "#ffac33",
+      "#ffd983",
+      "#f4900c"
+    ]
+  },
+  {
+    "id": "pack-1f356",
+    "label": "肉食",
+    "category": "食品",
+    "keywords": [
+      "肉食",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f356.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "eb988a0e2cda4de5ff26f97d8ab0732668875e05950693acca352ca6e462fee7",
+    "regulatory": false,
+    "colors": [
+      "#ffd983",
+      "#c1694f",
+      "#662113"
+    ]
+  },
+  {
+    "id": "pack-1f357",
+    "label": "鸡肉",
+    "category": "食品",
+    "keywords": [
+      "鸡肉",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f357.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "fef4cca86148db3ab05bfdeb887c9bed9a0305a8b796b8904c84e61c82becf59",
+    "regulatory": false,
+    "colors": [
+      "#ffd983",
+      "#c1694f"
+    ]
+  },
+  {
+    "id": "pack-1f969",
+    "label": "牛排",
+    "category": "食品",
+    "keywords": [
+      "牛排",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f969.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "554dde3ca2681adc3af76b9724e618ba205476878cee93bcf510294e5515a78b",
+    "regulatory": false,
+    "colors": [
+      "#ffd983",
+      "#a0041e",
+      "#ffe8b6",
+      "#e6e7e8",
+      "#a7a9ac"
+    ]
+  },
+  {
+    "id": "pack-1f953",
+    "label": "培根",
+    "category": "食品",
+    "keywords": [
+      "培根",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f953.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "fbdb13069ca290d1959d3c358f823efaf5372449306d3b13555f447ce31ba911",
+    "regulatory": false,
+    "colors": [
+      "#dd2e44",
+      "#f4abba",
+      "#ffe8b6",
+      "#ea596e"
+    ]
+  },
+  {
+    "id": "pack-1f354",
+    "label": "汉堡",
+    "category": "食品",
+    "keywords": [
+      "汉堡",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f354.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "1b4dd5c3ef3320cfe96b6040a7ccff367f4e7dd19d2236e3360bc5aaa6d04816",
+    "regulatory": false,
+    "colors": [
+      "#d99e82",
+      "#662113",
+      "#ffcc4d",
+      "#77b255",
+      "#dd2e44",
+      "#ffe8b6"
+    ]
+  },
+  {
+    "id": "pack-1f355",
+    "label": "披萨",
+    "category": "食品",
+    "keywords": [
+      "披萨",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f355.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "38fedd10ba8a4fb9f35fc2d5b82d3af638c35f7f846ca904f06d0969815e6103",
+    "regulatory": false,
+    "colors": [
+      "#f4900c",
+      "#ffcc4d",
+      "#be1931"
+    ]
+  },
+  {
+    "id": "pack-1f96a",
+    "label": "三明治",
+    "category": "食品",
+    "keywords": [
+      "三明治",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f96a.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "fd87c2f206b48775f7ed4721feb74f3bb3ef0f4c08ea06c662749a24fae90eea",
+    "regulatory": false,
+    "colors": [
+      "#f4900c",
+      "#ffac33",
+      "#ffd983",
+      "#77b255",
+      "#ffcc4d",
+      "#be1931"
+    ]
+  },
+  {
+    "id": "pack-1f957",
+    "label": "蔬菜沙拉",
+    "category": "食品",
+    "keywords": [
+      "蔬菜沙拉",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f957.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "4a49195ae414da872efd17fb4f130dbe9797d064b010bf3de41f8f14e641ef7b",
+    "regulatory": false,
+    "colors": [
+      "#ccd6dd",
+      "#66757f",
+      "#77b255",
+      "#5c913b",
+      "#c6e5b3",
+      "#292f33",
+      "#dd2e44",
+      "#9266cc",
+      "#e1e8ed",
+      "#ea596e",
+      "#a6d388"
+    ]
+  },
+  {
+    "id": "pack-1f37f",
+    "label": "爆米花",
+    "category": "食品",
+    "keywords": [
+      "爆米花",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f37f.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "98d91b4a1d0d2d429ad8723cac4f9dfffea426e1dd694513f1f6fe942c991b05",
+    "regulatory": false,
+    "colors": [
+      "#e1e8ed",
+      "#da2f47",
+      "#99aab5",
+      "#ffd983",
+      "#ffac33",
+      "#ffffff"
+    ]
+  },
+  {
+    "id": "pack-1f359",
+    "label": "饭团",
+    "category": "食品",
+    "keywords": [
+      "饭团",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f359.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "3b6815622e57482c72d15fa5b6f0c1deabde82d1a1c45486803137a854cae41f",
+    "regulatory": false,
+    "colors": [
+      "#eeeeee",
+      "#ccd6dd",
+      "#292f33"
+    ]
+  },
+  {
+    "id": "pack-1f35a",
+    "label": "米饭",
+    "category": "食品",
+    "keywords": [
+      "米饭",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f35a.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "4cdea01f8b856397d0769c98e98ff91b21c941da5557ea6e02851f4f8ecead0a",
+    "regulatory": false,
+    "colors": [
+      "#dd2e44",
+      "#a0041e",
+      "#e6e9ea",
+      "#ccd6dd"
+    ]
+  },
+  {
+    "id": "pack-1f35c",
+    "label": "面条",
+    "category": "食品",
+    "keywords": [
+      "面条",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f35c.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "ca3c9d33c09d268774a9f1aae62f7b8bdf5dc0c2c71634bca20931e413c4b073",
+    "regulatory": false,
+    "colors": [
+      "#ccd6dd",
+      "#99aab5",
+      "#ea596e",
+      "#ffac33",
+      "#ffd983",
+      "#aa695b"
+    ]
+  },
+  {
+    "id": "pack-1f35d",
+    "label": "意面",
+    "category": "食品",
+    "keywords": [
+      "意面",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f35d.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "d0c4cf60ccfd16110e16e2a7aa596b669a7c1bec65c088bd8ede97c9519ee69b",
+    "regulatory": false,
+    "colors": [
+      "#939598",
+      "#f1f2f2",
+      "#ffcc4d",
+      "#ffe8b6",
+      "#dd2e44",
+      "#ea596e",
+      "#ffac33",
+      "#99aab5"
+    ]
+  },
+  {
+    "id": "pack-1f363",
+    "label": "寿司",
+    "category": "食品",
+    "keywords": [
+      "寿司",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f363.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "6f8dc879ec056e39b57abdbbf32ca455dd9f1f0b47778d9194ea1983e4c37e3e",
+    "regulatory": false,
+    "colors": [
+      "#eeeeee",
+      "#ccd6dd",
+      "#a0041e",
+      "#dd2e44",
+      "#ea596e",
+      "#292f33",
+      "#e1e8ed",
+      "#77b255",
+      "#f4900c"
+    ]
+  },
+  {
+    "id": "pack-1f364",
+    "label": "炸虾",
+    "category": "食品",
+    "keywords": [
+      "炸虾",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f364.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "7a6092eaf7ae200af332a7cf9298609870a406ccc25be3d9f3bf1360881d1d23",
+    "regulatory": false,
+    "colors": [
+      "#ffac33",
+      "#f4900c",
+      "#ff839b",
+      "#ea596e"
+    ]
+  },
+  {
+    "id": "pack-1f366",
+    "label": "冰淇淋",
+    "category": "食品",
+    "keywords": [
+      "冰淇淋",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f366.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "d7ac9b50cc187c218801caddbc1a9b728022c5c00f44a3bd2cd0920af808bc5f",
+    "regulatory": false,
+    "colors": [
+      "#ffcc4d",
+      "#ffac33",
+      "#f4900c",
+      "#ffe8b6",
+      "#ffd983"
+    ]
+  },
+  {
+    "id": "pack-1f369",
+    "label": "甜甜圈",
+    "category": "食品",
+    "keywords": [
+      "甜甜圈",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f369.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "396a0bcd67359b5b022a36879f3e04ca070ec267beedcc72474739de7b53fd2a",
+    "regulatory": false,
+    "colors": [
+      "#ffac33",
+      "#8a4b38",
+      "#f4900c",
+      "#f4abba",
+      "#55acee",
+      "#88c9f9"
+    ]
+  },
+  {
+    "id": "pack-1f36a",
+    "label": "曲奇",
+    "category": "食品",
+    "keywords": [
+      "曲奇",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f36a.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "88724da3173eaf855fc8b8094480d1d923f69c420107501da8d40b503163bcf2",
+    "regulatory": false,
+    "colors": [
+      "#da9f83",
+      "#8a4b38"
+    ]
+  },
+  {
+    "id": "pack-1f382",
+    "label": "生日蛋糕",
+    "category": "食品",
+    "keywords": [
+      "生日蛋糕",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f382.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "ad38cf5ad3543ba3fe2e12df581ca0362ff9ba7c588eed5f8dda9d4999da7bd6",
+    "regulatory": false,
+    "colors": [
+      "#8899a6",
+      "#ccd6dd",
+      "#dd2e44",
+      "#f4abba",
+      "#ea596e",
+      "#fff8e8",
+      "#faaa35"
+    ]
+  },
+  {
+    "id": "pack-1f9c1",
+    "label": "纸杯蛋糕",
+    "category": "食品",
+    "keywords": [
+      "纸杯蛋糕",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f9c1.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "59ae9ac3d83e9834118f41f0a98e92f1d21babf10611011f0aabbbd4d7a56272",
+    "regulatory": false,
+    "colors": [
+      "#bbddf5",
+      "#662113",
+      "#c1694f",
+      "#88c9f9",
+      "#ffe8b6",
+      "#ffcc4d",
+      "#dd2e44",
+      "#55acee",
+      "#77b255",
+      "#f4900c",
+      "#aa8dd8"
+    ]
+  },
+  {
+    "id": "pack-1f36b",
+    "label": "巧克力",
+    "category": "食品",
+    "keywords": [
+      "巧克力",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f36b.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "722690e067662a1d548507f54afcbb9e05b1bd85e7a8a8215d38398e5c2e1e27",
+    "regulatory": false,
+    "colors": [
+      "#c1694f",
+      "#8a4b38",
+      "#dd2e44",
+      "#be1931",
+      "#ccd6dd"
+    ]
+  },
+  {
+    "id": "pack-1f36c",
+    "label": "糖果",
+    "category": "食品",
+    "keywords": [
+      "糖果",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f36c.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "f63e8881aa5a91bcbb208d40f8236dff8ed953f4a5254ac435fd61369b4be573",
+    "regulatory": false,
+    "colors": [
+      "#dd2e44",
+      "#be1931",
+      "#f5f8fa"
+    ]
+  },
+  {
+    "id": "pack-1f36f",
+    "label": "蜂蜜",
+    "category": "食品",
+    "keywords": [
+      "蜂蜜",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f36f.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "87401b5ac6a1b2e38aef0680fdd5abf151a96cb1250c537bb340ac130172a590",
+    "regulatory": false,
+    "colors": [
+      "#f4900c",
+      "#be1931",
+      "#ffac33",
+      "#ffe8b6",
+      "#662113",
+      "#ffcc4d"
+    ]
+  },
+  {
+    "id": "pack-1f95b",
+    "label": "牛奶",
+    "category": "食品",
+    "keywords": [
+      "牛奶",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f95b.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "c8ccfa1c7f95623f15b390298fee4d328c7f45d312fcb95e49623c1282c4d655",
+    "regulatory": false,
+    "colors": [
+      "#ccd6dd",
+      "#ffffff",
+      "#8899a6",
+      "#e1e8ed"
+    ]
+  },
+  {
+    "id": "pack-2615",
+    "label": "咖啡",
+    "category": "食品",
+    "keywords": [
+      "咖啡",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/2615.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "8b8afd8f60833ca51907899d4a3279cdfd355282858ba8a73cd1034d2a1e31ff",
+    "regulatory": false,
+    "colors": [
+      "#99aab5",
+      "#ccd6dd",
+      "#f5f8fa",
+      "#8a4b38",
+      "#d99e82"
+    ]
+  },
+  {
+    "id": "pack-1f375",
+    "label": "绿茶",
+    "category": "食品",
+    "keywords": [
+      "绿茶",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f375.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "37d814314fd2c40ea44b63849a4551473f501ebc7623caa47ce5e76a8af30b7f",
+    "regulatory": false,
+    "colors": [
+      "#292f33",
+      "#66757f",
+      "#e1e8ed",
+      "#77b255",
+      "#a6d388",
+      "#5c913b"
+    ]
+  },
+  {
+    "id": "pack-1f9c3",
+    "label": "果汁",
+    "category": "食品",
+    "keywords": [
+      "果汁",
+      "食品"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f9c3.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "f569800d9e3f165e6d38443c0bf8a3c28624667b2e8877c090086d45d079e4c6",
+    "regulatory": false,
+    "colors": [
+      "#e3a919",
+      "#ffd983",
+      "#ffcc4d",
+      "#f4900c",
+      "#ea596e",
+      "#ffe8b6",
+      "#ccd6dd",
+      "#99aab5"
+    ]
+  },
+  {
+    "id": "pack-1f331",
+    "label": "嫩芽",
+    "category": "植物",
+    "keywords": [
+      "嫩芽",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f331.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "0be5e03bf83a6d8981bef07f84bfd64b54c36d34a7824b69a706891648eed9ce",
+    "regulatory": false,
+    "colors": [
+      "#77b255"
+    ]
+  },
+  {
+    "id": "pack-1f332",
+    "label": "松树",
+    "category": "植物",
+    "keywords": [
+      "松树",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f332.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "d106c455960971b48009ff38cb0d4c69d520c930abc532ddbeb25525910bda7a",
+    "regulatory": false,
+    "colors": [
+      "#662113",
+      "#5c913b",
+      "#3e721d"
+    ]
+  },
+  {
+    "id": "pack-1f333",
+    "label": "树木",
+    "category": "植物",
+    "keywords": [
+      "树木",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f333.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "28b0601f687f84e5fd61d3bd9637d30db7c280967a4518e85bba9f4b24671f57",
+    "regulatory": false,
+    "colors": [
+      "#662113",
+      "#5c913b",
+      "#3e721d"
+    ]
+  },
+  {
+    "id": "pack-1f334",
+    "label": "棕榈",
+    "category": "植物",
+    "keywords": [
+      "棕榈",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f334.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "9ee6223f478c4fd2e9dfe2b4b7ced5c3d52c0711215f111a4853830465dc4ca0",
+    "regulatory": false,
+    "colors": [
+      "#c1694f",
+      "#d99e82",
+      "#3e721d",
+      "#5c913b"
+    ]
+  },
+  {
+    "id": "pack-1f335",
+    "label": "仙人掌",
+    "category": "植物",
+    "keywords": [
+      "仙人掌",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f335.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "afd54f75d4bbb47593548f756b0ff8c4612fef66b7f8a6cfd6128b7fa28aa194",
+    "regulatory": false,
+    "colors": [
+      "#77b255",
+      "#3e721d"
+    ]
+  },
+  {
+    "id": "pack-1f33e",
+    "label": "稻穗",
+    "category": "植物",
+    "keywords": [
+      "稻穗",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f33e.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "42f1fc34efd5b3ac98ab688ec7e2dc6d6b4eef4ec5f14901da37b969edceddcb",
+    "regulatory": false,
+    "colors": [
+      "#ffcc4d",
+      "#77b255"
+    ]
+  },
+  {
+    "id": "pack-1f33f",
+    "label": "草本",
+    "category": "植物",
+    "keywords": [
+      "草本",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f33f.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "14a06262e787c4bc68eb46cacee04ef8da65e8613f889d6f6e7ad7351d93a47f",
+    "regulatory": false,
+    "colors": [
+      "#77b255",
+      "#a6d388",
+      "#5c913b",
+      "#a06253"
+    ]
+  },
+  {
+    "id": "pack-2618",
+    "label": "三叶草",
+    "category": "植物",
+    "keywords": [
+      "三叶草",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/2618.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "8d3ac7ed2a5c8565c0e76c1f90c0add97104041e93b04ab520ef73818c3d9515",
+    "regulatory": false,
+    "colors": [
+      "#77b255"
+    ]
+  },
+  {
+    "id": "pack-1f340",
+    "label": "四叶草",
+    "category": "植物",
+    "keywords": [
+      "四叶草",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f340.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "762a21a73ce5607534f037e439debaf601dc84f319a5c318d1a71c855c3bb0fc",
+    "regulatory": false,
+    "colors": [
+      "#77b255"
+    ]
+  },
+  {
+    "id": "pack-1f341",
+    "label": "枫叶",
+    "category": "植物",
+    "keywords": [
+      "枫叶",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f341.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "511e2c451e8e463b177f49fa1dc4b06d42a823cdc43e291b4c13039b9f677f46",
+    "regulatory": false,
+    "colors": [
+      "#dd2e44"
+    ]
+  },
+  {
+    "id": "pack-1f342",
+    "label": "秋叶",
+    "category": "植物",
+    "keywords": [
+      "秋叶",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f342.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "cb1560d62a4b39016ee7f3d0c61409db3a1a9f742bc436adca52843e26d90884",
+    "regulatory": false,
+    "colors": [
+      "#d99e82",
+      "#c1694f"
+    ]
+  },
+  {
+    "id": "pack-1f343",
+    "label": "绿叶",
+    "category": "植物",
+    "keywords": [
+      "绿叶",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f343.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "c050272691fb54b85e2ba0a3a2d2a60dfdd29cee0ed8b87a5b95638c8f8e6568",
+    "regulatory": false,
+    "colors": [
+      "#a6d388",
+      "#77b255",
+      "#5dadec"
+    ]
+  },
+  {
+    "id": "pack-1f337",
+    "label": "郁金香",
+    "category": "植物",
+    "keywords": [
+      "郁金香",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f337.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "05254c2227ef2b6687508aa90bd06b4a789b771f3dad7ca702df5b9d9876fdae",
+    "regulatory": false,
+    "colors": [
+      "#77b255",
+      "#ea596e",
+      "#f4abba"
+    ]
+  },
+  {
+    "id": "pack-1f339",
+    "label": "玫瑰",
+    "category": "植物",
+    "keywords": [
+      "玫瑰",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f339.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "e4811c2a5e7af97359c718a20571660a462910f79d2da7e57cec571b24262048",
+    "regulatory": false,
+    "colors": [
+      "#3e721d",
+      "#a0041e",
+      "#be1931"
+    ]
+  },
+  {
+    "id": "pack-1f33a",
+    "label": "木槿",
+    "category": "植物",
+    "keywords": [
+      "木槿",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f33a.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "d94a1896d5b545fd84c7edd0e5dcad9676684bb580bf905d2e2fe4512ff0db76",
+    "regulatory": false,
+    "colors": [
+      "#77b255",
+      "#f4abba",
+      "#ea596e",
+      "#be1931",
+      "#ffcc4d"
+    ]
+  },
+  {
+    "id": "pack-1f33b",
+    "label": "向日葵",
+    "category": "植物",
+    "keywords": [
+      "向日葵",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f33b.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "a8fc55b2149272c096cde2ed6c1481e7a2b6c8d20ae7657bf39c6f4117dd2f2a",
+    "regulatory": false,
+    "colors": [
+      "#3e721d",
+      "#ffac33",
+      "#732700"
+    ]
+  },
+  {
+    "id": "pack-1f33c",
+    "label": "雏菊",
+    "category": "植物",
+    "keywords": [
+      "雏菊",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f33c.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "33e047da81967d01cac8c2d3ac6489155e85a47a08fa67357b291c0e5f76cb50",
+    "regulatory": false,
+    "colors": [
+      "#77b255",
+      "#ccd6dd",
+      "#e1e8ed",
+      "#f4900c"
+    ]
+  },
+  {
+    "id": "pack-1f338",
+    "label": "樱花",
+    "category": "植物",
+    "keywords": [
+      "樱花",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f338.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "ff7f12f30aa1e6821bbbd96871fcda9b7f581bd30dad075171a82a328b111fe7",
+    "regulatory": false,
+    "colors": [
+      "#f4abba",
+      "#ffffff",
+      "#ea596e",
+      "#ffcc4d"
+    ]
+  },
+  {
+    "id": "pack-1f490",
+    "label": "花束",
+    "category": "植物",
+    "keywords": [
+      "花束",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f490.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "0e44d90927a92162b1e69e3e8e4fe1b1ab0fcdd34e2c21aad5a4bf0627e674da",
+    "regulatory": false,
+    "colors": [
+      "#3e721d",
+      "#77b255",
+      "#dd2e44",
+      "#ea596e",
+      "#f4900c",
+      "#ffcc4d"
+    ]
+  },
+  {
+    "id": "pack-1fab4",
+    "label": "盆栽",
+    "category": "植物",
+    "keywords": [
+      "盆栽",
+      "植物"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1fab4.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "6a0ec4dc18a505ff467c5cdc3e2c97e4b0d94a0caf2a4f2937059039bae308cb",
+    "regulatory": false,
+    "colors": [
+      "#c1694f",
+      "#a04e3c",
+      "#662113",
+      "#3e721d",
+      "#5c913b",
+      "#77b255",
+      "#a6d388",
+      "#c6e5b3"
+    ]
+  },
+  {
+    "id": "pack-1f381",
+    "label": "礼物",
+    "category": "节日",
+    "keywords": [
+      "礼物",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f381.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "05a6562177e8e5f89852e08f7bbd6b62597b35d70c92238fcab4d6674ec76048",
+    "regulatory": false,
+    "colors": [
+      "#fdd888",
+      "#fcab40",
+      "#da2f47"
+    ]
+  },
+  {
+    "id": "pack-1f380",
+    "label": "丝带",
+    "category": "节日",
+    "keywords": [
+      "丝带",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f380.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "eb48df1cae357dd22640d42beccb277f56098ee9d19b46a24028b660ddc81fec",
+    "regulatory": false,
+    "colors": [
+      "#dd2e44",
+      "#a0041e",
+      "#ea596e"
+    ]
+  },
+  {
+    "id": "pack-1f388",
+    "label": "气球",
+    "category": "节日",
+    "keywords": [
+      "气球",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f388.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "57ccb51903834dfeedd2809b2ae4775eb0751945d3f75ab2e5942b5c25b2aa27",
+    "regulatory": false,
+    "colors": [
+      "#fcab40",
+      "#bb1a34"
+    ]
+  },
+  {
+    "id": "pack-1f389",
+    "label": "庆祝",
+    "category": "节日",
+    "keywords": [
+      "庆祝",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f389.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "194de9942601b9a42cc9ea79663aaca170816cfc07cbe8b2a568852427fa7088",
+    "regulatory": false,
+    "colors": [
+      "#dd2e44",
+      "#ea596e",
+      "#a0041e",
+      "#aa8dd8",
+      "#77b255",
+      "#5c913b",
+      "#9266cc",
+      "#ffcc4d"
+    ]
+  },
+  {
+    "id": "pack-1f38a",
+    "label": "彩纸",
+    "category": "节日",
+    "keywords": [
+      "彩纸",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f38a.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "dfb19110b437ed30143169445062a18fb6e0973dd800f2f7416a494125213f69",
+    "regulatory": false,
+    "colors": [
+      "#292f33",
+      "#ffac33",
+      "#be1931",
+      "#aa8dd8",
+      "#77b255",
+      "#5c913b",
+      "#9266cc",
+      "#ffcc4d"
+    ]
+  },
+  {
+    "id": "pack-1f384",
+    "label": "圣诞树",
+    "category": "节日",
+    "keywords": [
+      "圣诞树",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f384.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "70f3677bc5e73d869cd121b1acfd958ea3e77de5b3c62fc0d31fe3a99c8ddeff",
+    "regulatory": false,
+    "colors": [
+      "#662113",
+      "#5c913b",
+      "#3e721d",
+      "#ffcc4d",
+      "#dd2e44",
+      "#a6d388",
+      "#ffac33"
+    ]
+  },
+  {
+    "id": "pack-1f383",
+    "label": "万圣节",
+    "category": "节日",
+    "keywords": [
+      "万圣节",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f383.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "08534448b329cce0c49d2da55190e777d0f6ffd7d474b40429c983b8c335e691",
+    "regulatory": false,
+    "colors": [
+      "#f4900c",
+      "#3f7123",
+      "#642116"
+    ]
+  },
+  {
+    "id": "pack-1f9e7",
+    "label": "红包",
+    "category": "节日",
+    "keywords": [
+      "红包",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f9e7.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "90cf913ccb43ea5060bcf1d8e8d5c25b518c538423c110e7bc66b7471dc415a8",
+    "regulatory": false,
+    "colors": [
+      "#fa3c32",
+      "#dc282c",
+      "#b3282c",
+      "#ffe933"
+    ]
+  },
+  {
+    "id": "pack-1f3ee",
+    "label": "灯笼",
+    "category": "节日",
+    "keywords": [
+      "灯笼",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f3ee.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "c269cfea97a289fb4f3de9ef78ec5433ced3bda933c5e9ed0636fcf5e4f823f8",
+    "regulatory": false,
+    "colors": [
+      "#292f33",
+      "#be1931",
+      "#dd2e44"
+    ]
+  },
+  {
+    "id": "pack-1f96e",
+    "label": "月饼",
+    "category": "节日",
+    "keywords": [
+      "月饼",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f96e.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "636eeeabb03e3c884bed87a4bdead8513b939cdbcc110f876280b9a634564d21",
+    "regulatory": false,
+    "colors": [
+      "#ffac33",
+      "#f4900c",
+      "#994500",
+      "#662113"
+    ]
+  },
+  {
+    "id": "pack-1f56f",
+    "label": "蜡烛",
+    "category": "节日",
+    "keywords": [
+      "蜡烛",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f56f.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "64ee251227c0023a7b0ebcbc9b12378f2953648a17139b8dd0286f2d7753f31b",
+    "regulatory": false,
+    "colors": [
+      "#67757f",
+      "#e1e8ed",
+      "#fcab40",
+      "#fdcb58",
+      "#ccd6dd"
+    ]
+  },
+  {
+    "id": "pack-2b50",
+    "label": "星星",
+    "category": "节日",
+    "keywords": [
+      "星星",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/2b50.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "2bf5907894a70b877089c24817fcc65db655cfed28840aa16c8f3810cd412620",
+    "regulatory": false,
+    "colors": [
+      "#ffac33"
+    ]
+  },
+  {
+    "id": "pack-2744",
+    "label": "雪花",
+    "category": "节日",
+    "keywords": [
+      "雪花",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/2744.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "9d51dd37d9ca180799c29c8a14e2079d01d2d3b576a096f3edcabe8bb8bcde0d",
+    "regulatory": false,
+    "colors": [
+      "#88c9f9"
+    ]
+  },
+  {
+    "id": "pack-1f49d",
+    "label": "心形礼盒",
+    "category": "节日",
+    "keywords": [
+      "心形礼盒",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f49d.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "98a62dc9daea2e487587d31c4823262e716b225a1b8e21d707cb628a68d2a9b7",
+    "regulatory": false,
+    "colors": [
+      "#dd2e44",
+      "#fdd888",
+      "#fdcb58"
+    ]
+  },
+  {
+    "id": "pack-1f48c",
+    "label": "信笺",
+    "category": "节日",
+    "keywords": [
+      "信笺",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f48c.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "2a71dbb62dd1fd47aca9ad674d313194d5103ad8cd09ec68b9f2b228df397cfc",
+    "regulatory": false,
+    "colors": [
+      "#ccd6dd",
+      "#99aab5",
+      "#e1e8ed",
+      "#dd2e44"
+    ]
+  },
+  {
+    "id": "pack-1fa85",
+    "label": "彩饰",
+    "category": "节日",
+    "keywords": [
+      "彩饰",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1fa85.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "33eed2946604169a77a4f5b3fd5ca6c66d7d50afcbfaf41e77a7c297418bfc0e",
+    "regulatory": false,
+    "colors": [
+      "#77b255",
+      "#e954d2",
+      "#3b88c3",
+      "#ffcc4d",
+      "#9266cc",
+      "#ea596e",
+      "#55acee",
+      "#f4900c",
+      "#aa8dd8",
+      "#3e721d"
+    ]
+  },
+  {
+    "id": "pack-1f9f8",
+    "label": "玩具熊",
+    "category": "节日",
+    "keywords": [
+      "玩具熊",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f9f8.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "695cee7e0cbc768ff80e30000d9d7e292ec9d8f85e59bcf779bbe1fa3a21335f",
+    "regulatory": false,
+    "colors": [
+      "#c1694f",
+      "#a0041e",
+      "#662113",
+      "#292f33",
+      "#d99e82",
+      "#934035"
+    ]
+  },
+  {
+    "id": "pack-1f430",
+    "label": "兔子",
+    "category": "节日",
+    "keywords": [
+      "兔子",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f430.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "19f213da129217b424595228e6f25eadf8c737a6128827a1e36058fba237f1d2",
+    "regulatory": false,
+    "colors": [
+      "#99aab5",
+      "#f4abba",
+      "#ccd6dd",
+      "#ffffff",
+      "#292f33"
+    ]
+  },
+  {
+    "id": "pack-1f98c",
+    "label": "鹿",
+    "category": "节日",
+    "keywords": [
+      "鹿",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f98c.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "eddcd2e43a46c652103e0df0fcb57a9be561e7c8cc5c7468ff643fe0ad397f75",
+    "regulatory": false,
+    "colors": [
+      "#662113",
+      "#c1694f",
+      "#272b2b",
+      "#e6aaaa"
+    ]
+  },
+  {
+    "id": "pack-1f54a",
+    "label": "和平鸽",
+    "category": "节日",
+    "keywords": [
+      "和平鸽",
+      "节日"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f54a.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "c0d31764848cc9f3873efce6f159f1a917fd9540d01e396e417bad653a23c118",
+    "regulatory": false,
+    "colors": [
+      "#5c913b",
+      "#99aab5",
+      "#ccd6dd"
+    ]
+  },
+  {
+    "id": "pack-1f9f4",
+    "label": "乳液",
+    "category": "日化服饰",
+    "keywords": [
+      "乳液",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f9f4.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "feb5cd899e8a2f0813f7ca47741afde7922e69aea32331248f16800a25208497",
+    "regulatory": false,
+    "colors": [
+      "#66757f",
+      "#99aab5",
+      "#ffac33",
+      "#ccd6dd",
+      "#ffcc4d",
+      "#ffe8b6"
+    ]
+  },
+  {
+    "id": "pack-1f9fc",
+    "label": "香皂",
+    "category": "日化服饰",
+    "keywords": [
+      "香皂",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f9fc.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "f6a74ac3871e6c2b2011119bc7a9c9c4132723a98ea9908eba51c1a85cdff894",
+    "regulatory": false,
+    "colors": [
+      "#ccd6dd",
+      "#f5f8fa",
+      "#ea596e",
+      "#f4abba",
+      "#ffccd6"
+    ]
+  },
+  {
+    "id": "pack-1f9fd",
+    "label": "海绵",
+    "category": "日化服饰",
+    "keywords": [
+      "海绵",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f9fd.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "e1984ca5b07ef5f89f36ae9ef12825872d748c52f23207b5722c702797743f38",
+    "regulatory": false,
+    "colors": [
+      "#f4900c",
+      "#ffcc4d",
+      "#ffac33"
+    ]
+  },
+  {
+    "id": "pack-1f9f9",
+    "label": "清洁",
+    "category": "日化服饰",
+    "keywords": [
+      "清洁",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f9f9.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "95670746ab05c2c486434a13fea927c3dae244c7c326923f851991a4cc2acd26",
+    "regulatory": false,
+    "colors": [
+      "#c1694f",
+      "#66757f",
+      "#ffcc4d",
+      "#ffac33",
+      "#55acee",
+      "#226699"
+    ]
+  },
+  {
+    "id": "pack-1faa5",
+    "label": "牙刷",
+    "category": "日化服饰",
+    "keywords": [
+      "牙刷",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1faa5.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "3a92d068a070ee5c0b34190d6c72497f951533e71777053a9331c58aaf1422e8",
+    "regulatory": false,
+    "colors": [
+      "#ccd6dd",
+      "#99aab5",
+      "#289193",
+      "#3db8c1"
+    ]
+  },
+  {
+    "id": "pack-1f9fa",
+    "label": "洗衣篮",
+    "category": "日化服饰",
+    "keywords": [
+      "洗衣篮",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f9fa.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "534ee9b69dbce7ecf92dd9c7cb4759af5188b4a9a2c695dfac933d86fccdea5e",
+    "regulatory": false,
+    "colors": [
+      "#c1694f",
+      "#d99e82",
+      "#662113",
+      "#8a4633"
+    ]
+  },
+  {
+    "id": "pack-1f9f5",
+    "label": "缝线",
+    "category": "日化服饰",
+    "keywords": [
+      "缝线",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f9f5.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "bff7864b8685e9470f8394fd5ce43d219e2f56dcd8db679a9c60cdf2c992887f",
+    "regulatory": false,
+    "colors": [
+      "#553788",
+      "#c1694f",
+      "#744eaa",
+      "#9266cc"
+    ]
+  },
+  {
+    "id": "pack-1faa1",
+    "label": "绣针",
+    "category": "日化服饰",
+    "keywords": [
+      "绣针",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1faa1.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "a01908068230229256516cfd099e20a996ad014b2efcb2e2127f7328b61fd1b7",
+    "regulatory": false,
+    "colors": [
+      "#99aab5",
+      "#ccd6dd",
+      "#553788",
+      "#e1e8ed"
+    ]
+  },
+  {
+    "id": "pack-1f455",
+    "label": "上衣",
+    "category": "日化服饰",
+    "keywords": [
+      "上衣",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f455.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "37722c23ce04fce70cd43f573983b385b15d5e55bc7d85f907c1003f55b925b5",
+    "regulatory": false,
+    "colors": [
+      "#3b88c3",
+      "#55acee"
+    ]
+  },
+  {
+    "id": "pack-1f456",
+    "label": "牛仔裤",
+    "category": "日化服饰",
+    "keywords": [
+      "牛仔裤",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f456.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "90c499b62a4bf32b6d40f0c9f4443137d7ba9255775de2b8c25a3e83fcd8abe6",
+    "regulatory": false,
+    "colors": [
+      "#3b88c3",
+      "#226699"
+    ]
+  },
+  {
+    "id": "pack-1f457",
+    "label": "连衣裙",
+    "category": "日化服饰",
+    "keywords": [
+      "连衣裙",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f457.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "2a6454d85a907602621164bbac894a6f2c9f2008b25590b9dd8c9f8c84f7c0b3",
+    "regulatory": false,
+    "colors": [
+      "#55acee",
+      "#bbddf5",
+      "#3b88c3"
+    ]
+  },
+  {
+    "id": "pack-1f9e3",
+    "label": "围巾",
+    "category": "日化服饰",
+    "keywords": [
+      "围巾",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f9e3.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "137d15672b897faa322590e610abcf60df800c74867f05419712687eb0b24460",
+    "regulatory": false,
+    "colors": [
+      "#a0041e",
+      "#dd2e44"
+    ]
+  },
+  {
+    "id": "pack-1f9e4",
+    "label": "手套",
+    "category": "日化服饰",
+    "keywords": [
+      "手套",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f9e4.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "50a3500f380dd4d32c4e79bf8c2574e3712953f59daef2490b8247512c2475fd",
+    "regulatory": false,
+    "colors": [
+      "#292f33",
+      "#66757f",
+      "#99aab5"
+    ]
+  },
+  {
+    "id": "pack-1f9e6",
+    "label": "袜子",
+    "category": "日化服饰",
+    "keywords": [
+      "袜子",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f9e6.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "6303c4d2170818213889bf9d2771b60574b89597f3ae6a6e96733f98c6b02f36",
+    "regulatory": false,
+    "colors": [
+      "#55acee",
+      "#1c6399",
+      "#ffcc4d"
+    ]
+  },
+  {
+    "id": "pack-1f452",
+    "label": "帽子",
+    "category": "日化服饰",
+    "keywords": [
+      "帽子",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f452.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "0d2383893dd5a8bf2d93f16b500524e7d03dc8f8433158217d322ebd976c4841",
+    "regulatory": false,
+    "colors": [
+      "#ffd983",
+      "#9266cc",
+      "#ffffff",
+      "#ffac33"
+    ]
+  },
+  {
+    "id": "pack-1f45f",
+    "label": "运动鞋",
+    "category": "日化服饰",
+    "keywords": [
+      "运动鞋",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f45f.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "c7d442c9b785d8d043a726ae6730620b1706a68b2171bf3658bdfb0bdec5a9cd",
+    "regulatory": false,
+    "colors": [
+      "#8899a6",
+      "#be1931",
+      "#a0041e",
+      "#dd2e44",
+      "#ccd6dd"
+    ]
+  },
+  {
+    "id": "pack-1f45c",
+    "label": "手袋",
+    "category": "日化服饰",
+    "keywords": [
+      "手袋",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f45c.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "951d12e5b8a99a80533c33049699d3ebcb628e560b89d5597d8d814f17040658",
+    "regulatory": false,
+    "colors": [
+      "#ffac33",
+      "#9266cc",
+      "#ffd983"
+    ]
+  },
+  {
+    "id": "pack-1f576",
+    "label": "眼镜",
+    "category": "日化服饰",
+    "keywords": [
+      "眼镜",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f576.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "304b6cdf7cba6a8cb573a5e7b09c068b73311b1000b0180edebafed3f3c0016d",
+    "regulatory": false,
+    "colors": [
+      "#31373d"
+    ]
+  },
+  {
+    "id": "pack-1f484",
+    "label": "彩妆",
+    "category": "日化服饰",
+    "keywords": [
+      "彩妆",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f484.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "ca8ea8e890ff09a88ef291fbb63a2402aa770d3df14c9535d5eb940471ec377b",
+    "regulatory": false,
+    "colors": [
+      "#ea596e",
+      "#dd2e44",
+      "#f4abba",
+      "#ffcc4d",
+      "#ffac33"
+    ]
+  },
+  {
+    "id": "pack-1f48e",
+    "label": "珠宝",
+    "category": "日化服饰",
+    "keywords": [
+      "珠宝",
+      "日化服饰"
+    ],
+    "source": "https://github.com/twitter/twemoji/blob/v14.0.2/assets/svg/1f48e.svg",
+    "license": "CC-BY-4.0",
+    "author": "Twitter / Twemoji contributors",
+    "sha256": "6e7a1458d222e42798409e0e827860aa1cdff49188b5fd8bb249eae14d38e532",
+    "regulatory": false,
+    "colors": [
+      "#bdddf4",
+      "#5dadec",
+      "#4289c1",
+      "#8ccaf7"
+    ]
+  },
+  {
+    "id": "ghs-acid",
+    "label": "腐蚀",
+    "category": "监管标识",
+    "keywords": [
+      "腐蚀",
+      "监管标识"
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File%3AGHS-pictogram-acid.svg",
+    "license": "Public domain",
+    "author": "Unknown authorUnknown author",
+    "sha256": "e70b57e57cb7a53ef97b8b0f9d7d143674293b6bb1338991dfebdfd5848097c0",
+    "regulatory": true,
+    "colors": [
+      "#ff0000",
+      "#ffffff",
+      "#000000"
+    ]
+  },
+  {
+    "id": "ghs-bottle",
+    "label": "高压气体",
+    "category": "监管标识",
+    "keywords": [
+      "高压气体",
+      "监管标识"
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File%3AGHS-pictogram-bottle.svg",
+    "license": "Public domain",
+    "author": "Unknown authorUnknown author",
+    "sha256": "5792f474c746302f73d075a91cf5eb5872fa4de1e2068b02f44537177746aeae",
+    "regulatory": true,
+    "colors": [
+      "#ffffff",
+      "#ff0000",
+      "#000000"
+    ]
+  },
+  {
+    "id": "ghs-exclam",
+    "label": "有害或刺激",
+    "category": "监管标识",
+    "keywords": [
+      "有害或刺激",
+      "监管标识"
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File%3AGHS-pictogram-exclam.svg",
+    "license": "Public domain",
+    "author": "Unknown authorUnknown author",
+    "sha256": "0774fa5f0b69944b5732df42195310513745f1835222b7c6fe51dfb8cffa7372",
+    "regulatory": true,
+    "colors": [
+      "#ffffff",
+      "#ff0000",
+      "#000000"
+    ]
+  },
+  {
+    "id": "ghs-explos",
+    "label": "爆炸危险",
+    "category": "监管标识",
+    "keywords": [
+      "爆炸危险",
+      "监管标识"
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File%3AGHS-pictogram-explos.svg",
+    "license": "Public domain",
+    "author": "Unknown authorUnknown author",
+    "sha256": "7daedecc22828389b734a0735a0e207f483184b1e4e3446e8b009df9ebff1c43",
+    "regulatory": true,
+    "colors": [
+      "#ffffff",
+      "#ff0000",
+      "#000000"
+    ]
+  },
+  {
+    "id": "ghs-flamme",
+    "label": "易燃",
+    "category": "监管标识",
+    "keywords": [
+      "易燃",
+      "监管标识"
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File%3AGHS-pictogram-flamme.svg",
+    "license": "Public domain",
+    "author": "Unknown authorUnknown author",
+    "sha256": "e812ae23f6139af28167cab0a6ad131c116677121b785098a57213c281e03752",
+    "regulatory": true,
+    "colors": [
+      "#ffffff",
+      "#ff0000",
+      "#000000"
+    ]
+  },
+  {
+    "id": "ghs-pollu",
+    "label": "环境危害",
+    "category": "监管标识",
+    "keywords": [
+      "环境危害",
+      "监管标识"
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File%3AGHS-pictogram-pollu.svg",
+    "license": "Public domain",
+    "author": "Unknown authorUnknown author",
+    "sha256": "ac03bb8aa044e841ffb84c1d1e7a2453c2553475750a2b97bd2bdac891071d19",
+    "regulatory": true,
+    "colors": [
+      "#ff0000",
+      "#ffffff",
+      "#000000"
+    ]
+  },
+  {
+    "id": "ghs-rondflam",
+    "label": "氧化性",
+    "category": "监管标识",
+    "keywords": [
+      "氧化性",
+      "监管标识"
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File%3AGHS-pictogram-rondflam.svg",
+    "license": "Public domain",
+    "author": "Unknown authorUnknown author",
+    "sha256": "aab8cd9f2f842a499768ef1ac58a7ae2947e0a0b9ce9835167d4da1b45320904",
+    "regulatory": true,
+    "colors": [
+      "#ffffff",
+      "#ff0000",
+      "#000000"
+    ]
+  },
+  {
+    "id": "ghs-silhouette",
+    "label": "严重健康危害",
+    "category": "监管标识",
+    "keywords": [
+      "严重健康危害",
+      "监管标识"
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File%3AGHS-pictogram-silhouette.svg",
+    "license": "Public domain",
+    "author": "Unknown authorUnknown author",
+    "sha256": "a9d7063bf811a5a8462b6aef95b9e1cfff7cf4799242104a9ecae365c0483029",
+    "regulatory": true,
+    "colors": [
+      "#ff0000",
+      "#ffffff",
+      "#000000"
+    ]
+  },
+  {
+    "id": "ghs-skull",
+    "label": "急性毒性",
+    "category": "监管标识",
+    "keywords": [
+      "急性毒性",
+      "监管标识"
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File%3AGHS-pictogram-skull.svg",
+    "license": "Public domain",
+    "author": "Unknown authorUnknown author",
+    "sha256": "8f84bcbb0e09d83011afda408e001cb9fc15603dba4a47a673b55db867ba4394",
+    "regulatory": true,
+    "colors": [
+      "#ff0000",
+      "#ffffff",
+      "#000000"
+    ]
+  }
+]
