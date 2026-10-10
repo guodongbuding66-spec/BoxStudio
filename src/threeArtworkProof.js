@@ -1,3 +1,4 @@
+import {buildFoldTransformsV50} from './threeArtworkProofV50.js';
 import {mountPaperPreviewV77} from './paperPreviewV77.js';
 import { buildArtworkAtlas, renderPanelArtworkCanvas } from './panelArtwork.js';
 
@@ -56,5 +57,5 @@ function drawTextureTriangle(ctx,image,src,dst){const m=affineFromTriangles(src,
 function pointInPolygon(point,polygon=[]){let inside=false;const[x,y]=point;for(let i=0,j=polygon.length-1;i<polygon.length;j=i++){const[xi,yi]=polygon[i],[xj,yj]=polygon[j],intersect=((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi||1e-9)+xi);if(intersect)inside=!inside}return inside}
 
 export function mountArtworkProof(container,state,geo,graph,options={}){
- return mountPaperPreviewV77(container,state,geo,graph,buildTextureProofModel(state,geo,graph),{...options,buildTransforms:buildFoldTransforms});
+ return mountPaperPreviewV77(container,state,geo,graph,buildTextureProofModel(state,geo,graph),{...options,buildTransforms:buildFoldTransformsV50});
 }

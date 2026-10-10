@@ -29,5 +29,5 @@ function depthMap(graph){const out=new Map([[graph?.root,0]]),children=new Map()
 function add3(a,b){return[a[0]+b[0],a[1]+b[1],a[2]+b[2]]}
 
 export function mountArtworkProofV50(container,state,geo,graph,options={}){
- return mountPaperPreviewV77(container,state,geo,graph,buildTextureProofModel(state,geo,graph),{...options,buildTransforms:buildFoldTransformsV50});
+ const proof=mountPaperPreviewV77(container,state,geo,graph,buildTextureProofModel(state,geo,graph),{...options,buildTransforms:buildFoldTransformsV50});container.querySelector('canvas').dataset.v50Renderer='true';container.querySelector('canvas').classList.add('v50-proof-renderer');return proof;
 }

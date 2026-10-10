@@ -18,5 +18,5 @@ function depthMap(graph){const out=new Map([[graph?.root,0]]),children=new Map()
 function normalizeAuthoring(value={}){return{edgeAngles:{...(value.edgeAngles||{})},edgeProgress:{...(value.edgeProgress||{})},explode:clamp(value.explode??0,0,1),dimensionsVisible:value.dimensionsVisible!==false,selectedEdgeKey:value.selectedEdgeKey||null,penetrationPanels:[...(value.collisionPanels||value.penetrationPanels||[])],overlapPanels:[...(value.overlapPanels||[])],activePanels:[...(value.activePanels||[])]}}
 
 export function mountCollisionProofV52(container,state,geo,graph,options={}){
- return mountPaperPreviewV77(container,state,geo,graph,buildTextureProofModel(state,geo,graph),{...options,buildTransforms:buildFoldTransformsV50});
+ const proof=mountPaperPreviewV77(container,state,geo,graph,buildTextureProofModel(state,geo,graph),{...options,buildTransforms:buildFoldTransformsV50});container.querySelector('canvas').dataset.v52Renderer='true';container.querySelector('canvas').classList.add('v52-proof-renderer');return proof;
 }

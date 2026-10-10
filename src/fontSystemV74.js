@@ -38,7 +38,7 @@ export function fontTextSvgV74(el,text,x=3,y=0){
  const font=getFontV74(el.fontIdV74,el.bold);if(!font)return null;
  const issues=fontGlyphIssuesV74(el,text);if(issues.length&&!el.textStyleV76)return null;
  const layout=el.textStyleV76?layoutTextV76(font,text,el):{commands:textOutlineCommands(font,text,x,y,el.fontSize||5),color:'#111'};
- return (layout.paintRuns||[{commands:layout.commands,color:layout.color}]).map(r=>'<path data-font-v74="'+el.fontIdV74+'" d="'+commandsToSvgPath(r.commands)+'" fill="'+r.color+'"/>').join('');
+ return (layout.paintRuns||[{commands:layout.commands,color:layout.color}]).map(r=>'<path data-font-v74="'+(r.fontId||el.fontIdV74)+'" d="'+commandsToSvgPath(r.commands)+'" fill="'+r.color+'"/>').join('');
 }
 export function paintFontV74(ctx,el,text,x,y,scale=1){
  const font=getFontV74(el.fontIdV74,el.bold);if(!font)return false;
