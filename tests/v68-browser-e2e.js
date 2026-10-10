@@ -20,6 +20,9 @@ try{
  // Explicit horizontal icon fixture: its occupied area requires the approved smaller group.
  const sample=createMarkDocumentV67();sample.projectName='运输唛头 · 多选排版';Object.assign(sample.elements.find(e=>e.id==='label-barcode'),{w:200,h:64,preset:'200x64'});Object.assign(sample.elements.find(e=>e.id==='label-up'),{x:230,y:120});Object.assign(sample.elements.find(e=>e.id==='label-fragile'),{x:256,y:124});Object.assign(sample.elements.find(e=>e.id==='label-dry'),{x:286,y:128});api.commitMarkState(sample);await settle();
  const startHistory=history();choose('label-up');choose('label-fragile',{shiftKey:true});choose('label-dry',{shiftKey:true});
+ // These cases isolate explicit movement and the ten millimetre grid.
+ // Object edge/center snapping has separate real mouse acceptance in V77.
+ await wait(()=>q('[data-v77-nudge] [data-smart]'),'object snap preference');const smart=q('[data-v77-nudge] [data-smart]');smart.checked=false;smart.dispatchEvent(new Event('change',{bubbles:true}));
  assert(selection().length===3,'Shift click selects multiple objects');
  assert(q('[data-mark-board]').querySelectorAll('.selection-box').length===3,'Every selected object has an outline');
  assert(q('.v68-selection-summary').textContent.includes('3 个对象'),'Inspector explains group selection');

@@ -22,7 +22,7 @@ const clone=x=>structuredClone(x),LIBRARY='boxstudio-standalone-library-v1';
 let startupError='';
 function load(){try{const raw=localStorage.getItem(MARK_DOCUMENT_KEY_V67);return raw?parseMarkDocumentV67(raw):createMarkDocumentV67();}catch(e){try{localStorage.setItem(MARK_DOCUMENT_KEY_V67+'-recovery',localStorage.getItem(MARK_DOCUMENT_KEY_V67)||'');}catch{}startupError='上次唛头文件无法读取，已保留恢复备份。请通过项目窗口导入有效 JSON。';return createMarkDocumentV67();}}
 let doc=syncMarkFacesV74(load()),history=[clone(doc)],index=0,zoom=1,inspectorTab='data',libraryTab='components',grid=false,host=null,drag=null;
-let smartV77=true;
+let smartV77=localStorage.getItem('boxstudio-mark-smart-guides-v77')!=='0';
 let selectionIds=doc.selectedId?[doc.selectedId]:[],multiSelect=false,snap=false,alignTarget='selection',symbolSearch='',symbolCategory='全部';
 const selected=()=>doc.elements.find(e=>e.id===doc.selectedId);
 const selection=()=>markSelectionV68(doc,selectionIds);
@@ -178,7 +178,7 @@ function mount(page){cancelDrag();host=page;page.innerHTML=`<div class="v67-mark
    for(const [k,v]of Object.entries({x:r.x,y:r.y,width:r.w,height:r.h}))rect.setAttribute(k,v);
   }else{
    try{
-    const b=markBoundsV68(selection()),targets=visibleMarkElementsV67(doc).filter(e=>!drag.ids.includes(e.id)).concat([{id:'artboard',x:0,y:0,w:doc.artboard.width,h:doc.artboard.height},{id:'safe',x:8,y:8,w:doc.artboard.width-16,h:doc.artboard.height-16}]),candidate=smartSnapV77(b,targets,p.x-drag.start.x,p.y-drag.start.y,{enabled:smartV77&&!e.altKey,tolerance:6/(zoom*96/25.4)}),delta=boundedMarkMoveV68(doc,drag.ids,candidate.dx,candidate.dy,{snap:snap?10:0});const svg=host.querySelector('[data-mark-board] svg');svg.querySelector('.v77-smart-guides')?.remove();svg.insertAdjacentHTML('beforeend',guideSvgV77(candidate.guides,doc.artboard.width,doc.artboard.height));
+    const b=markBoundsV68(selection()),targets=visibleMarkElementsV67(doc).filter(e=>!drag.ids.includes(e.id)).concat([{id:'artboard',x:0,y:0,w:doc.artboard.width,h:doc.artboard.height},{id:'safe',x:8,y:8,w:doc.artboard.width-16,h:doc.artboard.height-16}]),candidate=smartSnapV77(b,targets,p.x-drag.start.x,p.y-drag.start.y,{enabled:smartV77&&!e.altKey,tolerance:6/(zoom*96/25.4)}),delta=boundedMarkMoveV68(doc,drag.ids,candidate.dx,candidate.dy,{snap:snap&&!e.altKey?10:0});const svg=host.querySelector('[data-mark-board] svg');svg.querySelector('.v77-smart-guides')?.remove();svg.insertAdjacentHTML('beforeend',guideSvgV77(candidate.guides,doc.artboard.width,doc.artboard.height));
     drag.dx=delta.dx;drag.dy=delta.dy;drag.moved=delta.dx!==0||delta.dy!==0;
     for(const origin of drag.origins)host.querySelector(`[data-mark-object="${CSS.escape(origin.id)}"]`)?.setAttribute('transform',`translate(${origin.x+delta.dx} ${origin.y+delta.dy})`);
    }catch(error){cancelDrag();toast(error.message);return;}
@@ -218,4 +218,4 @@ window.addEventListener('keydown',e=>{
  if(delta&&!mod&&selectionIds.length){e.preventDefault();cancelDrag();const step=(e.shiftKey?10:1)*PX_MM_V77;safely(()=>commit(moveMarkSelectionV68(doc,selectionIds,delta[0]*step,delta[1]*step)));}
 });
 
-export const standaloneMarkUiV67={setSmartGuides:value=>{smartV77=Boolean(value);},getState:()=>syncMarkFacesV74(doc),switchFace:face=>{commit(switchMarkFaceV74(doc,face,setMarkArtboardV67));fit();},refresh:render,getSelection:()=>[...selectionIds],getHistory:()=>({index,length:history.length}),select:ids=>{cancelDrag();normalizeSelection(ids);inspectorTab='object';render();},mount,cancelGesture:()=>{if(!drag)return false;cancelDrag();return true;},saveProject,openProjects,openExport,commit,undo:()=>historyStep(-1),redo:()=>historyStep(1),fit,exportPng};
+export const standaloneMarkUiV67={setSmartGuides:value=>{smartV77=Boolean(value);localStorage.setItem('boxstudio-mark-smart-guides-v77',smartV77?'1':'0');},getSmartGuides:()=>smartV77,getState:()=>syncMarkFacesV74(doc),switchFace:face=>{commit(switchMarkFaceV74(doc,face,setMarkArtboardV67));fit();},refresh:render,getSelection:()=>[...selectionIds],getHistory:()=>({index,length:history.length}),select:ids=>{cancelDrag();normalizeSelection(ids);inspectorTab='object';render();},mount,cancelGesture:()=>{if(!drag)return false;cancelDrag();return true;},saveProject,openProjects,openExport,commit,undo:()=>historyStep(-1),redo:()=>historyStep(1),fit,exportPng};

@@ -8,7 +8,10 @@ const tick=()=>new Promise(resolve=>setTimeout(resolve,120));
 
 function renderedFacePoint(canvas){
   const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height,data=ctx.getImageData(0,0,w,h).data;
-  const bright=(x,y)=>{if(x<0||y<0||x>=w||y>=h)return false;const i=(Math.floor(y)*w+Math.floor(x))*4;return data[i]+data[i+1]+data[i+2]>430&&data[i+3]>200};
+  // A light workbench is also bright. Distinguish printed paper from the actual
+  // background and neutral ground shadow before choosing a pointer hit.
+  const bg=[data[0],data[1],data[2]],bgLight=bg.reduce((a,b)=>a+b,0);
+  const bright=(x,y)=>{if(x<0||y<0||x>=w||y>=h)return false;const i=(Math.floor(y)*w+Math.floor(x))*4,c=[data[i],data[i+1],data[i+2]],light=c.reduce((a,b)=>a+b,0),difference=c.reduce((sum,v,k)=>sum+(v-bg[k])**2,0);return light>430&&data[i+3]>200&&difference>225&&(Math.max(...c)-Math.min(...c)>8||light>bgLight+24)};
   for(let y=8;y<h-8;y+=4)for(let x=8;x<w-8;x+=4){if(bright(x,y)&&bright(x-4,y)&&bright(x+4,y)&&bright(x,y-4)&&bright(x,y+4))return{x,y}}
   return null;
 }

@@ -27,7 +27,8 @@ try{
  await chooseTab('data');change('[name="gw"]','1');submit('[data-mark-data]');await settle();assert(q('[data-data-error]').textContent.includes('毛重'),'Invalid shipping data explained');assert(api.getMarkState().variables.gw==='14','Invalid data does not overwrite document');
  change('[name="gw"]','14');submit('[data-mark-data]');await settle();
  const svg=q('[data-mark-board] svg'),r=svg.getBoundingClientRect(),bc=api.getMarkState().elements.find(e=>e.type==='barcode-qr-group');
- const g=q(`[data-mark-object="${bc.id}"]`),start={clientX:r.left+(bc.x+2)/320*r.width,clientY:r.top+(bc.y+2)/220*r.height,pointerId:7,bubbles:true};
+ // Alt deliberately bypasses object guides for this exact millimetre drag.
+ const g=q(`[data-mark-object="${bc.id}"]`),start={clientX:r.left+(bc.x+2)/320*r.width,clientY:r.top+(bc.y+2)/220*r.height,pointerId:7,bubbles:true,altKey:true};
  g.dispatchEvent(new PointerEvent('pointerdown',start));q('[data-mark-stage]').dispatchEvent(new PointerEvent('pointermove',{...start,clientX:start.clientX+r.width*10/320,clientY:start.clientY+r.height*5/220}));q('[data-mark-stage]').dispatchEvent(new PointerEvent('pointerup',start));await settle();
  assert(api.getMarkState().elements.find(e=>e.id===bc.id).x===bc.x+10,'Pointer drag moves selected object in mm');
  change('[data-mark-properties] [name="preset"]','200x64');submit('[data-mark-properties]');await settle();const resized=api.getMarkState().elements.find(e=>e.id===bc.id);assert(resized.w===200&&resized.h===64,'Barcode QR fixed small size and aspect ratio locked');

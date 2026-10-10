@@ -13,7 +13,7 @@ function rebuild(){const base=v50State();if(!base)return false;linked=buildLinke
 function model(){return buildFoldSequenceModelV51(state,graph,geo)}
 function currentSelectedPanel(){return window.BoxStudioV49?.getState?.()?.linkedV49?.selectedPanelId||state?.linkedV49?.selectedPanelId||null}
 
-function currentAuthoring(){const m=model(),base=rendererAuthoringV51(m,report),highlight=activeEventId?collisionHighlightV52(report||{},activeEventId):{penetrationPanels:[],overlapPanels:[],activePanels:[]};return{...base,...(foldModeV77==='uniform'?{edgeProgress:{}}:{}),penetrationPanels:highlight.penetrationPanels,collisionPanels:highlight.penetrationPanels,overlapPanels:highlight.overlapPanels,activePanels:highlight.activePanels}}
+function currentAuthoring(){const m=model(),base=rendererAuthoringV51(m,report),highlight=collisionHighlightV52(report||{},activeEventId);return{...base,showCollisions:Boolean(activeEventId)||document.body.dataset.v58Advanced!=='false',...(foldModeV77==='uniform'?{edgeProgress:{}}:{}),penetrationPanels:highlight.penetrationPanels,collisionPanels:highlight.penetrationPanels,overlapPanels:highlight.overlapPanels,activePanels:highlight.activePanels}}
 function refreshProof(){if(!proof)return;proof.setAuthoring(currentAuthoring());proof.setProgress(foldModeV77==='uniform'?(window.BoxStudioV49?.getState?.()?.foldProgress??100):100);proof.setSelectedPanel(currentSelectedPanel())}
 function runScan({render=true}={}){if(!rebuild())return null;report=scanFoldSequenceV51(state,graph,geo);activeEventId=null;optimization=null;if(render)renderAll();return report}
 
