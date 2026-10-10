@@ -148,14 +148,14 @@ function semanticParametricGraph(geo){
     if(!choice)break;
     const from=seen.has(choice.a)?choice.a:choice.b,to=from===choice.a?choice.b:choice.a,parent=panelMap.get(from),child=panelMap.get(to),hinge=choice.hinge||sharedHinge(parent,child);
     if(!parent||!child||!hinge)break;
-    edges.push({from,to,label:`${from}/${to}`,angle:foldAngle(parent,child,hinge),hinge:{...hinge,fallback:Boolean(hinge.fallback||choice.source==='fallback')},confirmed:true,source:choice.source});seen.add(to);
+    edges.push({from,to,label:`${from}/${to}`,angle:foldAngle(parent,child,hinge)*(/return$/.test(to)?2:1),hinge:{...hinge,fallback:Boolean(hinge.fallback||choice.source==='fallback')},confirmed:true,source:choice.source});seen.add(to);
   }
   return{template:geo.template,root,nodes,edges,unreached:nodes.filter(n=>!seen.has(n.id)).map(n=>n.id),semantic:true};
 }
 function componentGraphV71(geo){
  const panels=geo.panels, roots=geo.components.map(c=>c.root), edges=[];
  const nodes=panels.map(p=>node(p.id,p.label,p.w,p.h,flatPoseFromPanel(p,geo),flatPoseFromPanel(p,geo),{role:p.role,artPanel:p.id,kind:p.kind}));
- for(const p of panels){if(!p.parent)continue;const parent=geo.panelMap[p.parent],hinge=exactSharedHinge(parent,p);if(!hinge)throw new Error('Missing physical hinge: '+p.id);edges.push({from:p.parent,to:p.id,label:p.parent+'/'+p.id,angle:foldAngle(parent,p,hinge),hinge,confirmed:true,source:'component-parent'});}
+ for(const p of panels){if(!p.parent)continue;const parent=geo.panelMap[p.parent],hinge=exactSharedHinge(parent,p);if(!hinge)throw new Error('Missing physical hinge: '+p.id);edges.push({from:p.parent,to:p.id,label:p.parent+'/'+p.id,angle:p.foldAngleV78??foldAngle(parent,p,hinge)*(/return$/.test(p.id)?2:1),hinge,confirmed:true,source:'component-parent'});}
  return{template:geo.template,root:roots[0],roots,nodes,edges,components:structuredClone(geo.components),unreached:[],semantic:true};
 }
 function attachHinges(graph,geo){

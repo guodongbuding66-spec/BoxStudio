@@ -1,0 +1,33 @@
+name: V0.78 Fold Choreography and Complete Filled Library
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  physical-assembly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run prepare
+      - name: Clock, connected hinges, paper caliper and every original asset
+        run: node tests/v78.mjs
+      - name: Real browsers and exported animation
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)"
+          node tests/v78-browser.mjs "$CHROME"
+          node tests/v78-video.mjs "$CHROME"
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: boxstudio-v78-physical-assembly
+          path: artifacts/v78/

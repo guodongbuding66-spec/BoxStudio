@@ -16,7 +16,7 @@ import {sceneSettingsV71,scenePointV71} from '../src/scene3dV71.js';
 import {buildProductionPdf} from '../src/export.js';
 let checks=0;const check=(condition,label)=>{assert.ok(condition,label);checks++;};
 mkdirSync('artifacts/v71',{recursive:true});
-check(actionableTemplatesV47().length===30,'Thirty distinct executable structures');
+check(actionableTemplatesV47().length===32,'Thirty-two distinct executable structures');
 const signatures=new Set();
 for(const t of V71_TEMPLATE_CATALOG){
  const s=prepareTemplateStateV47(defaultState,t.id),g=generateGeometry(s.structure),f=buildFoldGraph(g);check(s.elements.length===0,t.id+' starts with an editable clean artboard');check(runPreflight(s).every(c=>c.severity!=='error'),t.id+' clean structural projects do not require shipping marks');

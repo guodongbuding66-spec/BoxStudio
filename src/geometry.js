@@ -1,3 +1,4 @@
+import {generateAdditionalTemplateV78,isV78EngineTemplate,V78_TEMPLATE_DEFAULTS} from './parametricTemplatesV78.js';
 export * from './geometryLegacyV31.js';
 import * as legacy from './geometryLegacyV31.js';
 import { generateAdditionalTemplateV32, isV32EngineTemplate } from './parametricTemplatesV32.js';
@@ -35,7 +36,7 @@ const V48_DEFAULTS={
   },
 };
 
-export const TEMPLATE_DEFAULTS=Object.freeze({...legacy.TEMPLATE_DEFAULTS,...V32_DEFAULTS,...V48_DEFAULTS,...V71_TEMPLATE_DEFAULTS});
+export const TEMPLATE_DEFAULTS=Object.freeze({...legacy.TEMPLATE_DEFAULTS,...V32_DEFAULTS,...V48_DEFAULTS,...V71_TEMPLATE_DEFAULTS,...V78_TEMPLATE_DEFAULTS});
 export const defaultStructure={...TEMPLATE_DEFAULTS['side-seal-rsc']};
 
 const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
@@ -43,8 +44,8 @@ const clamp=(v,min,max=Infinity)=>Math.min(max,Math.max(min,v));
 const line=(x1,y1,x2,y2,type='CUT')=>({x1,y1,x2,y2,type});
 const close=(a,b)=>Math.abs(Number(a)-Number(b))<1e-6;
 const sameSegment=(a,b)=>((close(a.x1,b.x1)&&close(a.y1,b.y1)&&close(a.x2,b.x2)&&close(a.y2,b.y2))||(close(a.x1,b.x2)&&close(a.y1,b.y2)&&close(a.x2,b.x1)&&close(a.y2,b.y1)));
-const isParametricEngineTemplate=template=>isV32EngineTemplate(template)||isV48EngineTemplate(template)||isV71EngineTemplate(template);
-const generateParametricTemplate=s=>isV71EngineTemplate(s.template)?generateAdditionalTemplateV71(s):isV48EngineTemplate(s.template)?generateAdditionalTemplateV48(s):generateAdditionalTemplateV32(s);
+const isParametricEngineTemplate=template=>isV32EngineTemplate(template)||isV48EngineTemplate(template)||isV71EngineTemplate(template)||isV78EngineTemplate(template);
+const generateParametricTemplate=s=>isV78EngineTemplate(s.template)?generateAdditionalTemplateV78(s):isV71EngineTemplate(s.template)?generateAdditionalTemplateV71(s):isV48EngineTemplate(s.template)?generateAdditionalTemplateV48(s):generateAdditionalTemplateV32(s);
 
 export function defaultsForTemplate(template='side-seal-rsc'){
   return structuredClone(TEMPLATE_DEFAULTS[template]||TEMPLATE_DEFAULTS['side-seal-rsc']);
