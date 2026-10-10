@@ -16,3 +16,10 @@ body[data-v77] .v49-proof-pane,body[data-v77] #threeCanvas{background:#f1f1ef!im
 .v77-align{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px!important}.v77-align button{font-size:11px}.v77-text-presets-open{border:1px solid #dce0e6;border-radius:8px;background:white;color:#202733;font-family:inherit;min-height:36px;padding:6px 12px;cursor:pointer}.topbar>.v77-text-presets-open{font-size:12px}.v77-text-presets-open:focus-visible,.v77-nudge button:focus-visible,.v77-downloads button:focus-visible{outline:2px solid #315cda;outline-offset:2px}
 
 .v77-tool-menu{display:grid;gap:12px}.v77-tool-menu button{padding:14px;text-align:left;min-height:44px}
+
+body[data-v77] .workspace[data-v67-tab="Structure"] .panel-label{display:none}body[data-v77][data-v58-advanced="false"] .workspace[data-v67-tab="Structure"] .fold-graph-overlay,body[data-v77][data-v58-advanced="false"] .workspace[data-v67-tab="Structure"] .dieline-node-edit,body[data-v77][data-v58-advanced="false"] .workspace[data-v67-tab="Structure"] .curve-node-edit,body[data-v77][data-v58-advanced="false"] .workspace[data-v67-tab="Structure"] .selection-box,body[data-v77][data-v58-advanced="false"] .workspace[data-v67-tab="Structure"] .selection-handle{display:none}
+body[data-v77] .workspace[data-v67-tab="Structure"] .dieline-cut{stroke:#b66c63;stroke-width:1;vector-effect:non-scaling-stroke}body[data-v77] .workspace[data-v67-tab="Structure"] .dieline-crease{stroke:#737b88;stroke-width:.8;stroke-dasharray:5 3;vector-effect:non-scaling-stroke}body[data-v77] .workspace[data-v67-tab="Structure"] .guide-safe,body[data-v77] .workspace[data-v67-tab="Structure"] .guide-bleed{stroke-width:.6;vector-effect:non-scaling-stroke}
+
+body[data-v77][data-v58-advanced="false"] [data-v77-fold-details]{display:none}
+
+body[data-v77][data-v58-advanced="false"] .workspace[data-v67-tab="Structure"] .v42-panel-labels,body[data-v77] .workspace[data-v67-tab="Structure"] #boxstudio-v26-guide-overlay > line[stroke="#8b5cf6"]{display:none}
