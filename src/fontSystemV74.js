@@ -1,3 +1,4 @@
+import {registerRichFontV77} from './richTextLayoutV77.js';
 import {layoutTextV76,moveTextCommandsV76} from './textLayoutV76.js';
 import {parseTrueTypeFont,textOutlineCommands,commandsToSvgPath} from './ttfOutline.js';
 export const FONTS_V74=Object.freeze([
@@ -16,7 +17,7 @@ export const FONTS_V74=Object.freeze([
 ]);
 const fonts=new Map(),pending=new Map();
 export function getFontV74(id,bold=false){return fonts.get(id+'-'+(bold?700:400))||null;}
-export function registerFontV74(id,weight,bytes){if(!FONTS_V74.some(f=>f.id===id))throw new Error('字体不存在。');const font=parseTrueTypeFont(bytes,id+'-'+weight);fonts.set(id+'-'+weight,font);return font;}
+export function registerFontV74(id,weight,bytes){if(!FONTS_V74.some(f=>f.id===id))throw new Error('字体不存在。');const font=parseTrueTypeFont(bytes,id+'-'+weight);fonts.set(id+'-'+weight,font);registerRichFontV77(id,weight,font);return font;}
 export async function loadFontV74(id,bold=false){
  if(!id||id==='system')return null;
  if(!FONTS_V74.some(f=>f.id===id))throw new Error('字体不存在。');
@@ -27,20 +28,21 @@ export async function loadFontV74(id,bold=false){
 export function fontGlyphIssuesV74(el,text){
  if(!el.fontIdV74)return el.textStyleV76?['请为排版文字选择已加载的字体。']:[];
  const font=getFontV74(el.fontIdV74,el.bold);if(!font)return ['所选字体尚未加载，请等待或重新选择字体。'];
+ if(el.textRunsV77?.length){try{const layout=layoutTextV76(font,text,el);return layout.overflow?['文字超出文字框，请增大框宽高或缩小字号。']:[];}catch(e){return[e.message];}}
  const missing=[...new Set([...String(text)].filter(c=>c.codePointAt(0)>32&&!font.cmap(c.codePointAt(0))))];
  if(el.textStyleV76&&!missing.length){try{if(layoutTextV76(font,text,el).overflow)return ['文字超出文字框，请增大框宽高或缩小字号。'];}catch(e){return [e.message];}}
  return missing.length?['所选字体缺少字符：'+missing.slice(0,12).join('')+'。请选择中英字体或导入完整字体。']:[];
 }
-export async function prepareFontsV74(state){await Promise.all((state.elements||[]).filter(e=>e.fontIdV74).map(e=>loadFontV74(e.fontIdV74,e.bold)));}
+export async function prepareFontsV74(state){await Promise.all((state.elements||[]).flatMap(e=>[...(e.fontIdV74?[loadFontV74(e.fontIdV74,e.bold)]:[]),...(e.textRunsV77||[]).map(r=>loadFontV74(r.fontId,r.bold))]));}
 export function fontTextSvgV74(el,text,x=3,y=0){
  const font=getFontV74(el.fontIdV74,el.bold);if(!font)return null;
  const issues=fontGlyphIssuesV74(el,text);if(issues.length&&!el.textStyleV76)return null;
- const commands=el.textStyleV76?layoutTextV76(font,text,el).commands:textOutlineCommands(font,text,x,y,el.fontSize||5);
- return '<path data-font-v74="'+el.fontIdV74+'" d="'+commandsToSvgPath(commands)+'" fill="'+(el.textStyleV76?layoutTextV76(font,text,el).color:'#111')+'"/>';
+ const layout=el.textStyleV76?layoutTextV76(font,text,el):{commands:textOutlineCommands(font,text,x,y,el.fontSize||5),color:'#111'};
+ return (layout.paintRuns||[{commands:layout.commands,color:layout.color}]).map(r=>'<path data-font-v74="'+el.fontIdV74+'" d="'+commandsToSvgPath(r.commands)+'" fill="'+r.color+'"/>').join('');
 }
 export function paintFontV74(ctx,el,text,x,y,scale=1){
  const font=getFontV74(el.fontIdV74,el.bold);if(!font)return false;
- const path=new Path2D(commandsToSvgPath(el.textStyleV76?moveTextCommandsV76(layoutTextV76(font,text,el).commands,el.x,el.y):textOutlineCommands(font,text,x,y,el.fontSize||5)));
- ctx.save();ctx.scale(scale,scale);ctx.fillStyle=el.textStyleV76?layoutTextV76(font,text,el).color:'#111';ctx.fill(path);ctx.restore();return true;
+ const layout=el.textStyleV76?layoutTextV76(font,text,el):{commands:textOutlineCommands(font,text,x,y,el.fontSize||5),color:'#111'};
+ ctx.save();ctx.scale(scale,scale);for(const r of layout.paintRuns||[{commands:layout.commands,color:layout.color}]){ctx.fillStyle=r.color;ctx.fill(new Path2D(commandsToSvgPath(el.textStyleV76?moveTextCommandsV76(r.commands,el.x,el.y):r.commands)));}ctx.restore();return true;
 }
 export function fontOptionsV74(id=''){return '<option value="">系统字体</option>'+FONTS_V74.map(f=>'<option value="'+f.id+'" '+(id===f.id?'selected':'')+'>'+f.label+' · '+f.kind+'</option>').join('');}

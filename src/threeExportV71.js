@@ -9,7 +9,7 @@ const normal=(a,b,c)=>{const n=cross(sub(b,a),sub(c,a)),l=Math.hypot(...n)||1;re
 const pad4=n=>Math.ceil(n/4)*4;
 export function foldedMeshesV71(state,geo,graph,{progress=100,authoring={}}={}){
  const model=buildTextureProofModel(state,geo,graph),transforms=buildFoldTransformsV50(graph,geo,progress,authoring);
- const panels=model.panels.map(p=>{const m=transforms.get(p.nodeId),points=p.uvMap.points.map(q=>apply(m,[q[0]-geo.width/2,-(q[1]-geo.height/2),0]));return{...p,points,normal:normal(...p.uvMap.triangles[0].map(i=>points[i]))};});
+ const panels=model.panels.map(p=>{const m=transforms.get(p.nodeId),points=p.uvMap.points.map(q=>apply(m,[q[0]-geo.width/2,-(q[1]-geo.height/2),0]));return{...p,points,uvMap:{...p.uvMap,triangles:p.uvMap.triangles.map(t=>[...t].reverse())},normal:normal(...[...p.uvMap.triangles[0]].reverse().map(i=>points[i]))};});
  if(!panels.length)throw new Error('没有可导出的 3D 面板。');
  const all=panels.flatMap(p=>p.points);if(all.some(p=>p.some(v=>!Number.isFinite(v))))throw new Error('3D 坐标无效。');
  const min=[0,1,2].map(i=>Math.min(...all.map(p=>p[i]))),max=[0,1,2].map(i=>Math.max(...all.map(p=>p[i]))),center=min.map((v,i)=>(v+max[i])/2);
@@ -34,7 +34,7 @@ export function encodeGlbV71(meshes,{textures=new Map(),name='BoxStudio',thickne
   const emit=(indices,normalValue,shift)=>{for(const i of indices){const q=panel.points[i].map((v,k)=>(v-meshes.center[k]+normalValue[k]*shift)/1000);positions.push(...q);normals.push(...normalValue);uvs.push(...panel.uvMap.uv[i]);}};
   for(const tri of panel.uvMap.triangles){emit(tri,n,half);if(half>0)emit([...tri].reverse(),n.map(v=>-v),half);}
   if(half>0){for(let i=0;i<panel.points.length;i++){const j=(i+1)%panel.points.length,a=panel.points[i],b=panel.points[j],edgeNormal=normal(a,b,a.map((v,k)=>v+n[k]));const corners=[[i,half],[j,half],[j,-half],[i,-half]];for(const k of [0,1,2,0,2,3]){const[v,shift]=corners[k];positions.push(...panel.points[v].map((p,d)=>(p-meshes.center[d]+n[d]*shift)/1000));normals.push(...edgeNormal);uvs.push(...panel.uvMap.uv[v]);}}}
-  if(meshes.upAxis==='Z'){for(let i=0;i<positions.length;i+=3){const y=positions[i+1];positions[i+1]=positions[i+2];positions[i+2]=-y;const ny=normals[i+1];normals[i+1]=normals[i+2];normals[i+2]=-ny;}}
+  if(meshes.upAxis==='Z'){for(let i=0;i<positions.length;i+=3){const y=positions[i+1];positions[i+1]=-positions[i+2];positions[i+2]=y;const ny=normals[i+1];normals[i+1]=-normals[i+2];normals[i+2]=ny;}}
   const material={name:panel.label,doubleSided:true,pbrMetallicRoughness:{baseColorFactor:[1,1,1,1],metallicFactor:0,roughnessFactor:.85}};
   const texture=textures.get(panel.nodeId);if(texture){if(!(texture instanceof Uint8Array)||texture.length<8||texture[0]!==137||texture[1]!==80)throw new Error('3D 贴图必须是有效 PNG。');const image=json.images.length;json.images.push({bufferView:view(texture),mimeType:'image/png',name:panel.nodeId});const ti=json.textures.length;json.textures.push({source:image,sampler:0});material.pbrMetallicRoughness.baseColorTexture={index:ti};}
   const mi=json.materials.length;json.materials.push(material);const mesh=json.meshes.length;json.meshes.push({name:panel.nodeId,primitives:[{attributes:{POSITION:accessor(positions,3,'VEC3'),NORMAL:accessor(normals,3,'VEC3'),TEXCOORD_0:accessor(uvs,2,'VEC2')},material:mi,mode:4}]});json.scenes[0].nodes.push(json.nodes.length);json.nodes.push({name:panel.label,mesh,extras:{panelId:panel.panelId}});

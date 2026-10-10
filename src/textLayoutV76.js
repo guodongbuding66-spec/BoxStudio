@@ -1,3 +1,4 @@
+import {layoutRichTextV77} from './richTextLayoutV77.js';
 import {glyphCommands} from './ttfOutline.js';
 const DEFAULT={align:'left',verticalAlign:'top',direction:'horizontal',wrap:true,letterSpacing:0,lineHeight:1.15,italic:false,underline:false,strike:false,color:'#111111'};
 export function textStyleV76(value={}){const s={...DEFAULT,...value};if(!['left','center','right','justify'].includes(s.align)||!['top','center','bottom'].includes(s.verticalAlign)||!['horizontal','vertical-rl'].includes(s.direction)||!Number.isFinite(s.letterSpacing)||s.letterSpacing< -2||s.letterSpacing>20||!Number.isFinite(s.lineHeight)||s.lineHeight<.8||s.lineHeight>3||!/^#[0-9a-f]{6}$/i.test(s.color)||['wrap','italic','underline','strike'].some(k=>typeof s[k]!=='boolean'))throw new Error('文字排版参数无效。');return s;}
@@ -8,6 +9,7 @@ export function textCommandBoundsV76(commands){let minX=Infinity,minY=Infinity,m
 function rectangle(x,y,w,h){return[{op:'M',x,y},{op:'L',x:x+w,y},{op:'L',x:x+w,y:y+h},{op:'L',x,y:y+h},{op:'Z'}];}
 export function layoutTextV76(font,text,el){
  if(!font)throw new Error('字体尚未加载。');text=String(text).replace(/\r\n?/g,'\n');const s=textStyleV76(el.textStyleV76),fs=Number(el.fontSize||5),w=Number(el.w),h=Number(el.h);if(text.length>3000||!Number.isFinite(fs)||fs<1||fs>80||![w,h].every(n=>Number.isFinite(n)&&n>=4&&n<=1500))throw new Error('文字最多 3000 字符，字号 1–80 mm，文字框 4–1500 mm。');
+ if(el.textRunsV77?.length)return layoutRichTextV77(font,text,el,s);
  const sc=fs/font.unitsPerEm,slant=s.italic?Math.tan(13*Math.PI/180):0,advance=c=>Math.max(fs*.05,(font.advance[font.cmap(c.codePointAt(0))]||font.unitsPerEm*.5)*sc+s.letterSpacing),glyph=c=>transform(glyphCommands(font,font.cmap(c.codePointAt(0))||0),(x,y)=>[(x+y*slant)*sc,-y*sc]),rows=[],runs=[];let commands=[];
  if(s.direction==='horizontal'){
   const available=Math.max(.01,w-6);for(const para of text.split('\n')){let chars=[],width=0;for(const c of [...para]){const n=advance(c);if(s.wrap&&chars.length&&width+n-s.letterSpacing>available){rows.push({chars,width:width-s.letterSpacing,soft:true});chars=[];width=0;}chars.push(c);width+=n;}rows.push({chars,width:Math.max(0,width-s.letterSpacing),soft:false});}
