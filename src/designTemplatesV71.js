@@ -1,3 +1,5 @@
+import {fitPolygonTemplateV80} from './templateFitV80.js';
+import {INDUSTRY_PRESETS_V80,createIndustryProjectV80} from './industryTemplatesV80.js';
 import {INDUSTRY_PRESETS_V79,createIndustryProjectV79} from './industryTemplatesV79.js';
 import {createArtworkV74} from './artworkLibraryV74.js';
 import {prepareTemplateStateV47,artworkProfileV71} from './productExperienceV47.js';
@@ -38,10 +40,12 @@ export const DESIGN_PRESETS_V71=Object.freeze([
  {id:'minimal',name:'极简纸品',category:'minimal',brand:'PAPER / 08',subtitle:'LESS, BUT BETTER',background:'#f4f1eb',accent:'#c7c0b4',layout:'corner'},
 ]);
 export const DESIGN_PRESETS_ALL_V79=Object.freeze([...DESIGN_PRESETS_V71,...INDUSTRY_PRESETS_V79]);
+export const DESIGN_PRESETS_ALL_V80=Object.freeze([...DESIGN_PRESETS_ALL_V79,...INDUSTRY_PRESETS_V80]);
 const category=id=>({care:'护理',food:'食品',gift:'礼品',industrial:'工业',minimal:'极简'})[id]||id;
 export const designCategoryLabelV71=category;
 export function createArtworkProjectV71(current,presetId,{templateId=current.structure?.template||'straight-tuck-end',title}={}){
- const industry=INDUSTRY_PRESETS_V79.find(p=>p.id===presetId);if(industry)return createIndustryProjectV79(current,industry,{templateId,title});
+ const newer=INDUSTRY_PRESETS_V80.find(p=>p.id===presetId);if(newer)return fitPolygonTemplateV80(createIndustryProjectV80(current,newer,{templateId,title}));
+ const industry=INDUSTRY_PRESETS_V79.find(p=>p.id===presetId);if(industry)return fitPolygonTemplateV80(createIndustryProjectV79(current,industry,{templateId,title}));
  const preset=DESIGN_PRESETS_V71.find(p=>p.id===presetId);if(!preset)throw new Error('设计模板不存在。');
  const next=prepareTemplateStateV47(current,templateId,defaultsForTemplate(templateId)),geo=generateGeometry(next.structure);next.elements=[];
  for(const panel of geo.panels.filter(p=>p.kind!=='glue')){
@@ -56,5 +60,5 @@ export function createArtworkProjectV71(current,presetId,{templateId=current.str
  next.projectName=String(title||preset.name+' / 包装设计').trim().slice(0,120)||preset.name;next.editorTab='Design';next.hiddenGroups={};next.lockedGroups={dieline:true};next.selectedIds=[];next.selectedId=next.elements.find(e=>e.type==='text')?.id||null;next.designPresetV71=preset.id;Object.assign(next,artworkProfileV71(next.structure));
  // Reset fold authoring when changing structure: old edge overrides and sequence
  // keys belong to the previous geometry and must not deform a new template.
- for(const key of ['reviewV35','linkedV49','foldAuthoringV50','foldSequenceV51'])delete next[key];return next;
+ for(const key of ['reviewV35','linkedV49','foldAuthoringV50','foldSequenceV51'])delete next[key];return fitPolygonTemplateV80(next);
 }

@@ -1,0 +1,202 @@
+[
+  {
+    "id": "Paper001",
+    "label": "天然白纸纤维",
+    "source": "https://ambientcg.com/a/Paper001",
+    "download": "https://ambientcg.com/get?file=Paper001_1K-JPG.zip",
+    "author": "Lennart Demes / ambientCG",
+    "license": "CC0-1.0",
+    "licenseURL": "https://docs.ambientcg.com/license/",
+    "archiveSha256": "5be094ffad8a6343ed96ec728e6eda3d84ae542cd2b16c32bc2ad67bb57a0013",
+    "maps": {
+      "normal": {
+        "file": "/assets/materials-v80/Paper001-normal.jpg",
+        "width": 1024,
+        "height": 600,
+        "originalSha256": "ae083d9d11e13f686d1de0b5ba30518c3ecac6ec5ec06c2016462c9eb197c0dd",
+        "sha256": "24abad8e42061d64f0a8d3cfb860fd4776e2fc61393a00f53fb1dc76a7df7f46"
+      },
+      "roughness": {
+        "file": "/assets/materials-v80/Paper001-roughness.jpg",
+        "width": 1024,
+        "height": 600,
+        "originalSha256": "28bcbbc7648ff0f99a47417b272bf98ae130126f74e8e5de640b7c2defd4e855",
+        "sha256": "b845005cafc726c6875a6a41fdb88d75194e9614e41924a24d1b05fdfa7f3182"
+      },
+      "color": {
+        "file": "/assets/materials-v80/Paper001-color.jpg",
+        "width": 1024,
+        "height": 600,
+        "originalSha256": "e8db6f5b91f7882f4711ab5b2dc5c2e91f822d4f80a7d0081991532cf5cd9b9a",
+        "sha256": "472bf339441bdb8614417bd82e8b228aa13622381fac9123aeb13dfc18b5e942"
+      },
+      "height": {
+        "file": "/assets/materials-v80/Paper001-height.jpg",
+        "width": 1024,
+        "height": 600,
+        "originalSha256": "b84db2a627401482fc471ea4df8038ca7da34b2b05e096c12c3728fa311ae8e2",
+        "sha256": "1a5e7b614dbbcc029a8566d96c71b330bc66461f89bb265acc01bb5c8c50098d"
+      }
+    }
+  },
+  {
+    "id": "Paper002",
+    "label": "再生纸纤维",
+    "source": "https://ambientcg.com/a/Paper002",
+    "download": "https://ambientcg.com/get?file=Paper002_1K-JPG.zip",
+    "author": "Lennart Demes / ambientCG",
+    "license": "CC0-1.0",
+    "licenseURL": "https://docs.ambientcg.com/license/",
+    "archiveSha256": "15b07f4abef6960de4e8b890228cf96dbadd86522c2053b46f6eaa5000426110",
+    "maps": {
+      "normal": {
+        "file": "/assets/materials-v80/Paper002-normal.jpg",
+        "width": 794,
+        "height": 1024,
+        "originalSha256": "7d9f6f37210275cba3f72945a4d362a7fffe7465f43889b3ca725bf5dbf7954f",
+        "sha256": "025063d69650c540e516fc62c8f3408d9456258857df2c2b565da4a605e50a52"
+      },
+      "roughness": {
+        "file": "/assets/materials-v80/Paper002-roughness.jpg",
+        "width": 794,
+        "height": 1024,
+        "originalSha256": "c54403673811acb9bfa2bb98a358b3258cf28eb1b3d2801b5d64eb2659f3e74f",
+        "sha256": "60c8d22a6af005047309b8ec251db2aaf5d222cddd3f485f3bae1e5f43de3a73"
+      },
+      "color": {
+        "file": "/assets/materials-v80/Paper002-color.jpg",
+        "width": 794,
+        "height": 1024,
+        "originalSha256": "15e45b65948f054d9c783dee72067b0a8029975de1b22984a2c3c084a4c6d460",
+        "sha256": "aa488898906fe36ee1cfac7c2cf7612fc053e200f94c83bff1976c9039720a13"
+      },
+      "height": {
+        "file": "/assets/materials-v80/Paper002-height.jpg",
+        "width": 794,
+        "height": 1024,
+        "originalSha256": "2c2eabeaedbf992d13d2798e076832dcb52a87847dd8b9901093f3d6622dce42",
+        "sha256": "5ffa86c4be9214bfee8314bc9233f09741ebe636d2275031e158b8554eafe467"
+      }
+    }
+  },
+  {
+    "id": "Cardboard001",
+    "label": "牛皮卡纸纹理",
+    "source": "https://ambientcg.com/a/Cardboard001",
+    "download": "https://ambientcg.com/get?file=Cardboard001_1K-JPG.zip",
+    "author": "Lennart Demes / ambientCG",
+    "license": "CC0-1.0",
+    "licenseURL": "https://docs.ambientcg.com/license/",
+    "archiveSha256": "59c1f49dcac80ece23a95b4445127a4d56e3e05b9ffd0b051fd793bb2afc2230",
+    "maps": {
+      "normal": {
+        "file": "/assets/materials-v80/Cardboard001-normal.jpg",
+        "width": 1024,
+        "height": 1024,
+        "originalSha256": "911bd808638272c671c250c22d17ce338c2a293439ca60d645c73295a8b6f87a",
+        "sha256": "b437d875b0dd69dc9ff5b50f481033f8a8cc70b0abdf4e26774a83786a353498"
+      },
+      "roughness": {
+        "file": "/assets/materials-v80/Cardboard001-roughness.jpg",
+        "width": 1024,
+        "height": 1024,
+        "originalSha256": "915fca7319a44c4dd436d30a34373b59ae7450fa2d0526428903c65aece1bf6c",
+        "sha256": "37cee4d1da1c424b65776aed35531b4e2596f9e4af202293194d19b1595c1a94"
+      },
+      "color": {
+        "file": "/assets/materials-v80/Cardboard001-color.jpg",
+        "width": 1024,
+        "height": 1024,
+        "originalSha256": "fe21687752fde80f9738d8a9609df1f2cfbeede343507963932a49f9527b336f",
+        "sha256": "de103209b16911b1ff3ea0aeaccc9e8bea09bdf348418e120093d5e96ff2f460"
+      },
+      "height": {
+        "file": "/assets/materials-v80/Cardboard001-height.jpg",
+        "width": 1024,
+        "height": 1024,
+        "originalSha256": "3f7de6575a6073f492b7b824a03f0a5e4004680042a572e86a1f982039ebca65",
+        "sha256": "8605ec1c335a706c93183406ac1c031b07cbd2642889348ce77a2ea4bf68e73e"
+      }
+    }
+  },
+  {
+    "id": "Cardboard002",
+    "label": "细纤维卡纸",
+    "source": "https://ambientcg.com/a/Cardboard002",
+    "download": "https://ambientcg.com/get?file=Cardboard002_1K-JPG.zip",
+    "author": "Lennart Demes / ambientCG",
+    "license": "CC0-1.0",
+    "licenseURL": "https://docs.ambientcg.com/license/",
+    "archiveSha256": "c9e666f77d36889873c5e9cfcdd470f153802ac3025cb0d3f765b64725184f2c",
+    "maps": {
+      "normal": {
+        "file": "/assets/materials-v80/Cardboard002-normal.jpg",
+        "width": 1024,
+        "height": 1024,
+        "originalSha256": "29e8ff279deac531a5ca793fdde60fe1da36367eaca82fcab6832448d6a14f5a",
+        "sha256": "b90f9b18f0a53f72683d0f4ad35d8dc1021484a252081d47fecc9e6108f2c0ec"
+      },
+      "roughness": {
+        "file": "/assets/materials-v80/Cardboard002-roughness.jpg",
+        "width": 1024,
+        "height": 1024,
+        "originalSha256": "39ead79d0e19ec7470a6bf95dc69e268ddc4079160763db423d93ca9a1fae90e",
+        "sha256": "dacc67e39c0c61ab3f11f133c8f330702f4da56ec7896f50fc1a2cbb2ecda0e5"
+      },
+      "color": {
+        "file": "/assets/materials-v80/Cardboard002-color.jpg",
+        "width": 1024,
+        "height": 1024,
+        "originalSha256": "94443ec58d123a5bb99a54ae21beb53ce6a70247f52035688678625a31cbddde",
+        "sha256": "2730b6645a307d2a9f5e9f785c5ab9bfa15ca1fb1a22ef5d7a219de9114746b5"
+      },
+      "height": {
+        "file": "/assets/materials-v80/Cardboard002-height.jpg",
+        "width": 1024,
+        "height": 1024,
+        "originalSha256": "f8b9bb233c958078f5e961f8c889611c3c4ddbfb4819ea7dba1bf47c1fb70675",
+        "sha256": "e33791d65646e43a0a47f6b32c6e56700c6b5f1a1e04f93f62a85a90699ea90c"
+      }
+    }
+  },
+  {
+    "id": "Cardboard003",
+    "label": "粗纤维卡纸",
+    "source": "https://ambientcg.com/a/Cardboard003",
+    "download": "https://ambientcg.com/get?file=Cardboard003_1K-JPG.zip",
+    "author": "Lennart Demes / ambientCG",
+    "license": "CC0-1.0",
+    "licenseURL": "https://docs.ambientcg.com/license/",
+    "archiveSha256": "f050ecedd762abe84a542a2c412d11c81f0c7ab8b0888ecabc61aa21c8e3515b",
+    "maps": {
+      "normal": {
+        "file": "/assets/materials-v80/Cardboard003-normal.jpg",
+        "width": 1024,
+        "height": 1024,
+        "originalSha256": "2b9dba40c83b1426fab0c879d74450987d8d7dd7de692d17b364b47af4bed162",
+        "sha256": "a6b606075d4c46b54c271e1b09cdfb1a2c07f076ddce502c3547cf890056c153"
+      },
+      "roughness": {
+        "file": "/assets/materials-v80/Cardboard003-roughness.jpg",
+        "width": 1024,
+        "height": 1024,
+        "originalSha256": "c064915567b6d5370846c88b49c42dcb82a28a507ba394dcf0123ac0f0afafbc",
+        "sha256": "177047d1805c9c3cf94d89499afcb27efd2f48355d12ea75c88130892e3830d6"
+      },
+      "color": {
+        "file": "/assets/materials-v80/Cardboard003-color.jpg",
+        "width": 1024,
+        "height": 1024,
+        "originalSha256": "e7c87f4a2d1791d1b1f8b742b91f6dea8a86d5b7c61ed91f5bf7ec1291fb47ae",
+        "sha256": "2364e7b97199efcc0c6eaa15268acabf2773af723178fc0e64552b3f62c2db20"
+      },
+      "height": {
+        "file": "/assets/materials-v80/Cardboard003-height.jpg",
+        "width": 1024,
+        "height": 1024,
+        "originalSha256": "b62a65a32c24dae276bf1b3fce35e48620e4f2d3a93caa6c45eff1414bf1362c",
+        "sha256": "6b3c8cf18e1fa9e240e23f69aec14d9fdbb54484b3114e7f42356da6876d3f39"
+      }
+    }
+  }
+]

@@ -24,7 +24,7 @@ export function panelPolygon(panel){
 }
 
 export function panelUvForPoint(panel,point){const w=Math.max(.001,num(panel?.w,1)),h=Math.max(.001,num(panel?.h,1));return[(num(point?.[0])-num(panel?.x))/w,(num(point?.[1])-num(panel?.y))/h]}
-export function panelUvMap(panel){const points=panelPolygon(panel),tri=triangulatePolygon(points),uv=tri.points.map(p=>panelUvForPoint(panel,p)),outside=uv.filter(([u,v])=>u<-.001||v<-.001||u>1.001||v>1.001).length;return{points:tri.points,uv,triangles:tri.triangles,fallback:tri.fallback,outside}}
+export function panelUvMap(panel){const points=panelPolygon(panel),tri=triangulatePolygon(points),uv=tri.points.map(p=>panelUvForPoint(panel,p)),outside=uv.filter(([u,v])=>u<-.001||v<-.001||u>1.001||v>1.001).length;return{points:tri.points,uv,triangles:tri.triangles.map(t=>area2(...t.map(i=>tri.points[i]))>=0?t:[...t].reverse()),fallback:tri.fallback,outside}}
 
 function nodePanel(graphNode,geo){return geo?.panelMap?.[graphNode?.id]||geo?.panelMap?.[graphNode?.artPanel]||null}
 function uvEdge(panel,hinge){return[panelUvForPoint(panel,[hinge.x1,hinge.y1]),panelUvForPoint(panel,[hinge.x2,hinge.y2])]}

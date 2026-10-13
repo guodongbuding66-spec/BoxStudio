@@ -12,3 +12,6 @@ dist/
 
 vendor/three/
 vendor/mediabunny/
+
+/vendor/zxing/*.js
+/vendor/zxing/*.wasm
