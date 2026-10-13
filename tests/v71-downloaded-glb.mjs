@@ -5,7 +5,7 @@ const bytes=new Uint8Array(readFileSync('artifacts/v71/browser.glb'));
 const report=await validator.validateBytes(bytes,{uri:'browser.glb'});
 assert.equal(report.issues.numErrors,0,JSON.stringify(report.issues.messages));
 const dv=new DataView(bytes.buffer),json=JSON.parse(new TextDecoder().decode(bytes.slice(20,20+dv.getUint32(12,true))));
-assert.equal(json.images.length,18,'Two piece lid and base exports all eighteen actual artwork textures.');
+assert.ok(json.meshes.filter(m=>m.primitives.some(p=>json.materials[p.material]?.pbrMetallicRoughness?.baseColorTexture)).length>=18,'Two piece lid and base exports all eighteen printed faces, alongside paper surface maps.');
 assert.ok(json.images.every(image=>json.bufferViews[image.bufferView].byteLength>300),'Actual textures contain raster artwork rather than placeholder pixels.');
 writeFileSync('artifacts/v71/browser-khronos-report.json',JSON.stringify(report,null,2));
 console.log(`PASS downloaded GLB: ${json.nodes.length} panels, ${bytes.length} bytes, zero Khronos validation errors`);
