@@ -4,3 +4,4 @@ assets/packaging-v79/TWEMOJI-LICENSE -whitespace
 vendor/bidi/bidi.mjs -whitespace
 *.gz binary
 *.wasm binary
+assets/packaging-v80/TWEMOJI-LICENSE -whitespace

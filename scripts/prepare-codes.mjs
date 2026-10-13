@@ -16,3 +16,9 @@ await mkdir(new URL('../vendor/mediabunny/',import.meta.url),{recursive:true});
 await copyFile(new URL('../node_modules/mediabunny/dist/bundles/mediabunny.min.mjs',import.meta.url),new URL('../vendor/mediabunny/mediabunny.min.mjs',import.meta.url));
 await copyFile(new URL('../node_modules/mediabunny/LICENSE',import.meta.url),new URL('../vendor/mediabunny/LICENSE',import.meta.url));
 await writeFile(new URL('../vendor/mediabunny/SOURCE.txt',import.meta.url),'Mediabunny 1.61.3, unmodified official npm browser bundle. MPL-2.0.\nCorresponding source (including src/): https://registry.npmjs.org/mediabunny/-/mediabunny-1.61.3.tgz\nhttps://github.com/Vanilagy/mediabunny\n');
+
+for(const relative of ['loaders/GLTFLoader.js','loaders/OBJLoader.js','loaders/STLLoader.js','utils/BufferGeometryUtils.js','exporters/GLTFExporter.js']){const dest=new URL('../vendor/three/addons/'+relative,import.meta.url);await mkdir(new URL('./',dest),{recursive:true});const {readFile}=await import('node:fs/promises'),source=await readFile(new URL('../node_modules/three/examples/jsm/'+relative,import.meta.url),'utf8');await writeFile(dest,source.replaceAll("from 'three'","from '../../three.module.min.js'"));}
+await mkdir(new URL('../vendor/zxing/',import.meta.url),{recursive:true});
+await copyFile(new URL('../node_modules/zxing-wasm/dist/iife/reader/index.js',import.meta.url),new URL('../vendor/zxing/zxing-wasm-3.1.4.js',import.meta.url));
+await copyFile(new URL('../node_modules/zxing-wasm/dist/reader/zxing_reader.wasm',import.meta.url),new URL('../vendor/zxing/zxing_reader.wasm',import.meta.url));
+await copyFile(new URL('../node_modules/zxing-wasm/LICENSE',import.meta.url),new URL('../vendor/zxing/LICENSE',import.meta.url));

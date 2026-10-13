@@ -1,6 +1,6 @@
 {
-  "name": "boxstudio-v0.79",
-  "version": "0.79.0",
+  "name": "boxstudio-v0.80",
+  "version": "0.80.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -45,7 +45,8 @@
     "test:v73": "node tests/v73.mjs",
     "test:v74": "node tests/v74.mjs",
     "test:v76": "node tests/v76.mjs",
-    "test:v79": "node tests/v79.mjs"
+    "test:v79": "node tests/v79.mjs",
+    "test:v80": "node tests/v80.mjs"
   },
   "dependencies": {
     "@bwip-js/generic": "4.11.4",
@@ -53,7 +54,8 @@
     "harfbuzzjs": "1.6.3",
     "mediabunny": "1.61.3",
     "pg": "^8.13.1",
-    "three": "0.180.0"
+    "three": "0.180.0",
+    "zxing-wasm": "3.1.4"
   },
   "devDependencies": {
     "gltf-validator": "^2.0.0-dev.3.10",

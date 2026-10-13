@@ -1,0 +1,7 @@
+ZXing WASM reader 3.1.4, exact official npm package, MIT.
+https://registry.npmjs.org/zxing-wasm/-/zxing-wasm-3.1.4.tgz
+https://github.com/Sec-ant/zxing-wasm/tree/v3.1.4
+ZXing-C++ pinned source commit 0b2d9a8fc81f420f369928c24331091ff0525976, Apache-2.0.
+https://github.com/zxing-cpp/zxing-cpp/tree/0b2d9a8fc81f420f369928c24331091ff0525976
+Generated JS / WASM are rebuilt from package-lock.json via npm run prepare.
+Photo decoding verifies content only and does not generate ISO quality grades.

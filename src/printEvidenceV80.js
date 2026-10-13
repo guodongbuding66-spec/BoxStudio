@@ -1,0 +1,4 @@
+let pending;
+async function database(){return pending||=new Promise((resolve,reject)=>{const r=indexedDB.open('boxstudio-print-evidence-v80',1);r.onupgradeneeded=()=>r.result.createObjectStore('files');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+export async function savePrintFileV80(hash,file){const db=await database();return new Promise((resolve,reject)=>{const tx=db.transaction('files','readwrite');tx.objectStore('files').put(file,hash);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});}
+export async function readPrintFileV80(hash){const db=await database();return new Promise((resolve,reject)=>{const tx=db.transaction('files','readonly'),r=tx.objectStore('files').get(hash);tx.oncomplete=()=>resolve(r.result);tx.onerror=()=>reject(tx.error);});}

@@ -1,0 +1,36 @@
+name: V0.80 Flat Paper, Model Import and Physical Production
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  physical-production-and-workflow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run prepare
+      - name: Real structures, flat orientation, source hashes, core voids and template bounds
+        run: npm run test:v80
+      - name: Independent original SVG rendering
+        run: |
+          python3 -m pip install --user cairosvg pillow pymupdf
+          python3 tests/v80-artwork-proofs.py
+      - name: Actual browser, independent marks, native scene GLB and scan evidence downloads
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)"
+          node tests/v80-browser.mjs "$CHROME"
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: boxstudio-v80-physical-production-and-browser
+          path: artifacts/v80/
