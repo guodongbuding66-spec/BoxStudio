@@ -74,3 +74,5 @@ body[data-v67=true] .topbar>.brand{flex:none}
 body[data-v67=true] .topbar>.v66-navigation{overflow-x:auto;scrollbar-width:thin}
 @media(max-width:1200px){body[data-v67=true] .topbar>.v77-text-presets-open{display:none}}
 @media(max-width:760px){body[data-v67=true] .topbar{grid-template-columns:minmax(0,1fr) auto}body[data-v67=true] .topbar>#quickExport{grid-column:2}body[data-v67=true] .topbar>.v66-navigation{grid-row:3;grid-column:1/-1;justify-content:flex-start;flex-wrap:wrap;overflow:visible;width:100%}}
+
+dialog.v71-dialog.v71-templates[open]{display:flex;flex-direction:column;overflow:hidden!important;height:min(900px,calc(100dvh - 32px));max-height:calc(100dvh - 32px)}dialog.v71-templates>header{flex:none}dialog.v71-templates>.v71-content{flex:1;min-height:0;max-height:none;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
