@@ -33,3 +33,11 @@ await assert.rejects(()=>buildProjectPackageV81('box',marks,()=>null),/纸盒项
 await assert.rejects(()=>buildProjectPackageV81('marks',state,()=>null),/独立唛头项目/);
 await assert.rejects(()=>buildProjectPackageV81('box',{...state,elements:[{id:'bad',panelId:'none',w:1,h:1}]},()=>null),/目标面/);
 console.log('PASS V81: portable boxes / both mark faces, attachment deduplication, exact metadata, hashes, CRC, truncation, traversal, duplicates, extra files, schema and bounded parsing');
+
+// Business variables and spreadsheet rows may legitimately use type="model".
+const business=structuredClone(defaultState);business.variables.type='model';business.batch.rows=[{type:'model',sku:'MODEL-001'}];
+const businessZip=await buildProjectPackageV81('box',business,()=>assert.fail('Business data is not an attachment'));
+const businessRestore=await inspectProjectPackageV81(businessZip.bytes);assert.equal(businessRestore.assets.length,0);assert.equal(businessRestore.state.variables.type,'model');assert.equal(businessRestore.state.batch.rows[0].type,'model');
+const markBusiness=createMarkDocumentV67('blank');markBusiness.variables.type='model';assert.equal((await inspectProjectPackageV81((await buildProjectPackageV81('marks',markBusiness,()=>assert.fail('Business data is not an attachment'))).bytes)).state.variables.type,'model');
+const missingModel=structuredClone(business);missingModel.sceneV71={objectsV79:[{id:'broken',type:'model'}]};await assert.rejects(()=>buildProjectPackageV81('box',missingModel,()=>null),/导入模型记录无效/);
+console.log('PASS V81.1: model-valued variables and CSV rows round-trip without false asset references; actual broken scene models are still rejected');

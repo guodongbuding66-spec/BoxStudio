@@ -53,7 +53,7 @@ export function packageReferencesV81(state){
   if(!refs.has(path))refs.set(path,{role,sha256:hash,path,name:String(name||path).slice(0,200)});
  }
  walk(state,o=>{
-  if(o.type==='model'){
+  if(o.type==='model'&&o.assetV80&&typeof o.assetV80==='object'){
    if(!/^model-[a-f0-9]{64}$/.test(o.assetV80?.id))fail('场景模型编号无效。');
    add('model',o.assetV80.id.slice(6),o.assetV80.name||o.name);
   }
