@@ -90,7 +90,9 @@ export async function buildProjectPackageV81(kind,state,readAsset){
   total+=data.byteLength;
   if(total>PACKAGE_LIMIT_V81)fail('项目包超过 128 MB，请减少模型或印刷附件。');
   if(await packageShaV81(data)!==ref.sha256)fail('原文件完整性校验失败：'+ref.name);
-  assets.push({...ref,bytes:data.length,mime:typeof asset.type==='string'?asset.type:'model/gltf-binary',lastModified:Number(asset.lastModified)||0});
+  const name=typeof asset.name==='string'&&asset.name?asset.name:ref.name;
+  if(name.length>512)fail('附件文件名过长。');
+  assets.push({...ref,name,bytes:data.length,mime:typeof asset.type==='string'?asset.type:'model/gltf-binary',lastModified:Number(asset.lastModified)||0});
   files.push({name:ref.path,bytes:data});
  }
  const manifest={schema,version:1,kind,name:snapshot.projectName,createdAt:new Date().toISOString(),project:{path:'project.json',sha256:await packageShaV81(json),bytes:json.length},assets};
@@ -115,7 +117,7 @@ export async function inspectProjectPackageV81(input){
  for(const a of manifest.assets){
   const ref=byPath.get(a.path),data=files.get(a.path);
   if(!ref||a.role!==ref.role||a.sha256!==ref.sha256||!data||a.bytes!==data.length||data.length>(a.role==='model'?30:20)*1024*1024||!data.length||await packageShaV81(data)!==ref.sha256)fail('附件缺失或完整性校验失败。');
-  if(typeof a.name!=='string'||a.name.length>200||typeof a.mime!=='string'||a.mime.length>100||!Number.isFinite(a.lastModified)||a.lastModified<0||a.lastModified>8640000000000000)fail('附件元数据无效。');
+  if(typeof a.name!=='string'||a.name.length>512||typeof a.mime!=='string'||a.mime.length>100||!Number.isFinite(a.lastModified)||a.lastModified<0||a.lastModified>8640000000000000)fail('附件元数据无效。');
   assets.push({...a,bytes:data.slice()});byPath.delete(a.path);
  }
  return{manifest,state,assets};

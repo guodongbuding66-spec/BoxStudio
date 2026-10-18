@@ -7,7 +7,7 @@ import {syncMarkFacesV74,switchMarkFaceV74} from '../src/markFacesV74.js';
 import {setMarkArtboardV67} from '../src/standaloneMarksV67.js';
 const photo=new File(['photo fixture'],'实印照片.png',{type:'image/png',lastModified:1710000000000}),report=new File(['report fixture'],'检测报告.pdf',{type:'application/pdf',lastModified:1720000000000});
 const ph=await packageShaV81(await photo.arrayBuffer()),rh=await packageShaV81(await report.arrayBuffer()),files=new Map([[ph,photo],[rh,report]]),state=structuredClone(defaultState);
-state.projectName='纸盒迁移';state.printProofsV80=[{photoSha256:ph,photoName:photo.name,reportFile:{sha256:rh,name:report.name},isoGrade:null},{photoSha256:ph,photoName:photo.name}];
+state.projectName='纸盒迁移';state.printProofsV80=[{photoSha256:ph,photoName:'record-reference.png',reportFile:{sha256:rh,name:report.name},isoGrade:null},{photoSha256:ph,photoName:photo.name}];
 const bundle=await buildProjectPackageV81('box',state,r=>files.get(r.sha256)),restored=await inspectProjectPackageV81(bundle.bytes);
 assert.equal(restored.assets.length,2);assert.equal(restored.state.printProofsV80.length,2);assert.equal(restored.state.projectName,state.projectName);assert.equal(restored.assets[0].lastModified,photo.lastModified);assert.equal(restored.assets[0].mime,photo.type);assert.equal(restored.assets[0].name,photo.name);assert.equal(restored.state.printProofsV80[0].isoGrade,null);
 await assert.rejects(()=>buildProjectPackageV81('box',state,()=>null),/缺少原文件/);
