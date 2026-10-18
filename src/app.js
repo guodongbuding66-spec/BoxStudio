@@ -456,8 +456,8 @@ render();
 // External Artwork modules commit through the same state/history as core tools.
 window.BoxStudioEditor = {
   getState: () => cloneState(state),
-  navigate: (page,tab=null) => {state.page=page;if(tab)state.editorTab=tab;persist();render();},
-  commitState: next => {state=cloneState(next);pushHistory();render();window.dispatchEvent(new CustomEvent('boxstudio:statechange'));return cloneState(state);},
+  navigate: (page,tab=null,beforeRender=null) => {const previous=state,raw=localStorage.getItem(STORAGE_KEY);let written=false;state={...cloneState(state),page,...(tab?{editorTab:tab}:{})};try{persist();written=true;beforeRender?.();}catch(error){state=previous;if(written){if(raw===null)localStorage.removeItem(STORAGE_KEY);else localStorage.setItem(STORAGE_KEY,raw);}throw error;}render();},
+  commitState: next => {const previous=state,previousHistory=history,previousIndex=historyIndex;state=cloneState(next);try{pushHistory();}catch(error){state=previous;history=previousHistory;historyIndex=previousIndex;throw error;}render();window.dispatchEvent(new CustomEvent('boxstudio:statechange'));return cloneState(state);},
   reloadFromStorage: ({history: record=true}={}) => {
     const scroll = [...document.querySelectorAll('.canvas-shell,.rightpanel')].map(node => ({selector: node.classList.contains('rightpanel')?'.rightpanel':'.canvas-shell',x:node.scrollLeft,y:node.scrollTop}));
     state=load();
