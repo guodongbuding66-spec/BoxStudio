@@ -6,7 +6,7 @@ import {resolve,extname} from 'node:path';
 import puppeteer from 'puppeteer-core';
 import {nativeDownloadsV74} from './native-download-v74.mjs';
 const chrome=process.argv[2];assert.ok(chrome);const root=resolve('.');await mkdir('artifacts/v76',{recursive:true});
-const releaseVersion='V'+JSON.parse(await readFile('package.json','utf8')).version.split('.').slice(0,2).join('.');
+const releaseVersion='V'+JSON.parse(await readFile('package.json','utf8')).version.replace(/\.0$/,'');
 // The server and browser share the same execution namespace, including on isolated runners.
 const server=createServer((req,res)=>{let path=decodeURIComponent(new URL(req.url,'http://localhost').pathname);if(path==='/'||path==='/marks')path='/index.html';const file=resolve(root,'.'+path);if(!file.startsWith(root+'/')){res.writeHead(403).end();return;}res.setHeader('Content-Type',({'.html':'text/html','.js':'application/javascript','.mjs':'application/javascript','.css':'text/css','.json':'application/json','.svg':'image/svg+xml','.ttf':'font/ttf'}[extname(file)]||'application/octet-stream'));const stream=createReadStream(file);stream.on('error',()=>res.writeHead(404).end());stream.pipe(res);});await new Promise(r=>server.listen(0,'127.0.0.1',r));const url='http://127.0.0.1:'+server.address().port;
 const browser=await puppeteer.launch({executablePath:chrome,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--disable-background-networking','--use-gl=angle','--use-angle=swiftshader']});const summaries=[];
