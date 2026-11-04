@@ -1,0 +1,40 @@
+name: V0.82 Carton Handling Symbols
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  handling-symbols:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run prepare
+      - name: Vector, search and portable-project regression
+        run: |
+          node tests/v72.mjs
+          node tests/v73.mjs
+          node tests/v81.mjs
+          node tests/v82.mjs
+      - name: Chinese UI glyph coverage
+        run: |
+          python -m pip install fonttools
+          python scripts/build-ui-font.py --check
+      - name: Full-entry browser and native downloads
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)"
+          node tests/v82-browser.mjs "$CHROME"
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: boxstudio-v82-handling-symbols
+          path: artifacts/v82/
