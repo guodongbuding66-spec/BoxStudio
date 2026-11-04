@@ -1,11 +1,19 @@
 // Public-domain / CC0 source artwork; shared by SVG, PDF and Canvas.
 import {HANDLING_ART_V73 as art,HANDLING_GLYPHS_V73 as glyphs} from './handlingArtworkV73.js';
-export const HANDLING_SYMBOLS_V72=Object.freeze([
+import {EXTRA_HANDLING_SYMBOLS_V82,HANDLING_ART_V82,HANDLING_KEYWORDS_V82} from './handlingArtworkV82.js';
+const originalSymbols=[
  ['up','向上','方向'],['fragile','小心轻放','保护'],['dry','怕雨 / 保持干燥','保护'],
  ['stackLimit','堆码层数上限','堆码'],['stackHeight','最大堆码高度','堆码'],['stackWeight','堆码重量上限','堆码'],['noStack','禁止堆码','堆码'],
  ['noHooks','禁止手钩','搬运'],['noClamp','禁止夹持','搬运'],['clampHere','由此夹持','搬运'],['slingHere','由此吊起','搬运'],['centerGravity','重心位置','搬运'],
- ['protectHeat','怕晒 / 远离热源','保护'],['temperature','温度范围','保护'],['noRoll','禁止翻滚','搬运'],['noHandTruck','禁止手推车','搬运'],['recycle','回收标识','回收'],
-].map(([id,label,category])=>Object.freeze({id,label,category})));
+ ['protectHeat','怕晒 / 避免阳光直射','保护'],['temperature','温度范围','保护'],['noRoll','禁止翻滚','搬运'],['noHandTruck','禁止手推车','搬运'],['recycle','回收标识','回收'],
+].map(([id,label,category])=>Object.freeze({id,label,category,keywords:Object.freeze(HANDLING_KEYWORDS_V82[id]||[])}));
+export const HANDLING_SYMBOLS_V72=Object.freeze([...originalSymbols,...EXTRA_HANDLING_SYMBOLS_V82]);
+export const HANDLING_CATEGORIES_V82=Object.freeze(['全部','搬运','保护','堆码','方向','开箱','警示','使用','回收']);
+const searchable=s=>String(s).normalize('NFKC').toLowerCase().replace(/[‐‑–—_-]/g,' ');
+export function searchHandlingSymbolsV82({search='',category='全部'}={}){
+ const words=searchable(search).trim().split(/\s+/).filter(Boolean);
+ return HANDLING_SYMBOLS_V72.filter(s=>(category==='全部'||s.category===category)&&words.every(word=>searchable([s.id,s.label,s.category,...s.keywords].join(' ')).includes(word))).sort((a,b)=>Number(Boolean(b.featured))-Number(Boolean(a.featured)));
+}
 export const handlingSymbolV72=id=>HANDLING_SYMBOLS_V72.find(s=>s.id===id);
 export function handlingParamsV72(el){
  const int=(key,min,max,fallback)=>{const n=Number(el[key]??fallback);if(!Number.isInteger(n)||n<min||n>max)throw new Error(`${key} 需为 ${min}–${max} 的整数。`);return n;};
@@ -35,7 +43,7 @@ export function handlingPrimitivesV73(el){
  if(el.icon==='stackHeight'){const arrow=subpaths(art.up[0])[0],down={...arrow,ops:mapOps(arrow.ops,1,1,-1,-1)};return [unitBox(.15,.63,.4,.25),{...unitBox(.15,.4,.4,.18),fill:false,stroke:.03},...fitPaths([arrow],.67,.39,.16,.22),...fitPaths([down],.67,.67,.16,.22),label(p.stackHeight+'m',.08,.06,.84,.22)];}
  if(el.icon==='noStack')return [unitBox(.27,.65,.46,.24),{...unitBox(.27,.37,.46,.22),fill:false,stroke:.03},...fitPaths(art.noClamp.filter(q=>!q.fill),.23,.3,.54,.36)];
  if(el.icon==='temperature')return [...place(art.temperature,.22,.12,.56,.76),label(p.temperatureMax+'°C',.61,.08,.37,.17),label(p.temperatureMin+'°C',.02,.7,.4,.17)];
- return art[el.icon];
+ return HANDLING_ART_V82[el.icon]||art[el.icon];
 }
 // Compatibility for old callers that inspect vector geometry.
 export const handlingPathsV72=el=>handlingPrimitivesV73(el).flatMap(p=>p.ops);

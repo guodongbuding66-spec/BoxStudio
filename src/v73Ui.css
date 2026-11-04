@@ -9,3 +9,6 @@
 body[data-v67=true] .v58-marks-studio [data-v73-box-symbols]{margin-top:20px}.v58-marks-studio [data-v73-box-symbols] button{font-family:inherit}
 @media(max-width:650px){.v73-symbol-detail{grid-template-columns:1fr;gap:16px;padding-top:16px}.v73-large-symbol{min-height:160px;padding:16px}.v73-large-symbol svg{max-width:140px}.v73-symbol-dialog{max-height:92dvh}.v73-symbol-filters button{min-height:44px}.v73-symbol-tile .v73-symbol-details{min-height:40px}.v73-symbol-tile .v72-symbol-card{padding-bottom:44px}.v73-source-list{max-height:44dvh}}
 @media(prefers-reduced-motion:reduce){.v73-symbol-dialog button{transition:none!important;transform:none!important}}
+
+.v82-symbol-new{position:absolute;top:6px;right:6px;padding:2px 5px;border-radius:4px;background:#edf4ff;color:#245ac0;font-size:9px;font-style:normal;line-height:1.5}
+.v73-symbol-tile button:focus-visible{outline:2px solid var(--studio-blue)!important;outline-offset:-3px}

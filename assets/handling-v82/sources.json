@@ -1,0 +1,191 @@
+[
+  {
+    "id": "teamLift",
+    "file": "teamLift.svg",
+    "source": "/assets/handling-v82/teamLift.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "heavy",
+    "file": "heavy.svg",
+    "source": "/assets/handling-v82/heavy.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "handleCare",
+    "file": "handleCare.svg",
+    "source": "/assets/handling-v82/handleCare.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "noForklift",
+    "file": "noForklift.svg",
+    "source": "/assets/handling-v82/noForklift.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "forkliftHere",
+    "file": "forkliftHere.svg",
+    "source": "/assets/handling-v82/forkliftHere.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "handTruck",
+    "file": "handTruck.svg",
+    "source": "/assets/handling-v82/handTruck.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "noDrop",
+    "file": "noDrop.svg",
+    "source": "/assets/handling-v82/noDrop.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "noStep",
+    "file": "noStep.svg",
+    "source": "/assets/handling-v82/noStep.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "noSit",
+    "file": "noSit.svg",
+    "source": "/assets/handling-v82/noSit.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "noBlade",
+    "file": "noBlade.svg",
+    "source": "/assets/handling-v82/noBlade.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "openHere",
+    "file": "openHere.svg",
+    "source": "/assets/handling-v82/openHere.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "liftHere",
+    "file": "liftHere.svg",
+    "source": "/assets/handling-v82/liftHere.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "protectRadiation",
+    "file": "protectRadiation.svg",
+    "source": "/assets/handling-v82/protectRadiation.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "keepFrozen",
+    "file": "keepFrozen.svg",
+    "source": "/assets/handling-v82/keepFrozen.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "noFreeze",
+    "file": "noFreeze.svg",
+    "source": "/assets/handling-v82/noFreeze.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "esd",
+    "file": "esd.svg",
+    "source": "/assets/handling-v82/esd.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "keepAwayHeat",
+    "file": "keepAwayHeat.svg",
+    "source": "/assets/handling-v82/keepAwayHeat.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "foodContact",
+    "file": "foodContact.svg",
+    "source": "/assets/handling-v82/foodContact.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "tidyman",
+    "file": "tidyman.svg",
+    "source": "/assets/handling-v82/tidyman.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "readInstructions",
+    "file": "readInstructions.svg",
+    "source": "/assets/handling-v82/readInstructions.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  },
+  {
+    "id": "wearGloves",
+    "file": "wearGloves.svg",
+    "source": "/assets/handling-v82/wearGloves.svg",
+    "author": "BoxStudio contributors",
+    "license": "CC0-1.0",
+    "addedIn": "0.82",
+    "adaptation": "Original general-purpose carton pictogram; editable vector artwork."
+  }
+]
