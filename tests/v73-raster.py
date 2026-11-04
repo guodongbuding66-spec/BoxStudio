@@ -6,8 +6,12 @@ import cairosvg
 import fitz
 import numpy as np
 from PIL import Image, ImageDraw
-root=Path('artifacts/v73/symbols');report=[];sheet=Image.new('RGB',(960,720),'#eef0f3');draw=ImageDraw.Draw(sheet)
-for i,path in enumerate(sorted(root.glob('*.svg'))):
+root=Path('artifacts/v73/symbols');report=[]
+expected=json.loads(Path('artifacts/v73/model-results.json').read_text())['symbols']
+paths=sorted(root.glob('*.svg'))
+assert len(paths)==expected,(len(paths),expected)
+sheet=Image.new('RGB',(960,((expected+5)//6)*240),'#eef0f3');draw=ImageDraw.Draw(sheet)
+for i,path in enumerate(paths):
     svg=Image.open(BytesIO(cairosvg.svg2png(url=str(path),dpi=300))).convert('RGB')
     pdf=fitz.open(path.with_suffix('.pdf'));pix=pdf[0].get_pixmap(matrix=fitz.Matrix(300/72,300/72),alpha=False)
     actual=Image.frombytes('RGB',(pix.width,pix.height),pix.samples).crop((0,0,*svg.size))
@@ -17,7 +21,7 @@ for i,path in enumerate(sorted(root.glob('*.svg'))):
     assert a.sum()>1000,(path.stem,'Empty artwork')
     report.append({'symbol':path.stem,'ink_overlap':round(ratio,5)})
     col=i%6;row=i//6;sheet.paste(svg.resize((144,144)),(col*160+8,row*240+24));draw.text((col*160+8,row*240+178),path.stem,fill='#202733')
-assert len(report)==17
+assert len(report)==expected
 sheet.save('artifacts/v73/symbols-contact-sheet.png')
 Path('artifacts/v73/raster-results.json').write_text(json.dumps({'status':'PASS','independent_renderers':['CairoSVG','MuPDF'],'results':report},indent=2))
 print(f'PASS independent raster: {len(report)} final production SVG/PDF symbols, minimum ink overlap {min(r["ink_overlap"] for r in report):.3%}')
