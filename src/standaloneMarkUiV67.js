@@ -114,7 +114,7 @@ function renderLibrary(){
  if(libraryTab==='symbols')mountSymbolLibraryV73(left.querySelector('[data-v73-symbol-library]'),{
    search:symbolSearch,category:symbolCategory,onFilter:f=>{symbolSearch=f.search;symbolCategory=f.category;},
    onInsert:(id,params)=>insert(id,null,params),
-   batch:{plan:config=>planSymbolBatchV83(doc,config,'label'),insert:config=>{
+   batch:{plan:config=>({...planSymbolBatchV83(doc,config,'label'),panelLabel:MARK_FACES_V74.find(f=>f.id===doc.activeMarkFaceV74)?.label||'唛头画布'}),insert:config=>{
     const next=insertSymbolBatchV83(doc,config,'label');inspectorTab='object';
     commit(next.state,{selection:next.ids});toast(`已插入 ${next.ids.length} 个标识`);
    }}

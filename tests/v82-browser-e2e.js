@@ -84,6 +84,9 @@ try{
  check(state().elements.length===batchPrior.elements.length+4,'Carton editing preserves the standalone batch');
  click('[data-v83-batch-open]');click('[data-v83-set="team"]');
  check(q('.v83-batch-dialog').getBoundingClientRect().width<=innerWidth&&q('.v83-batch-dialog').scrollWidth<=q('.v83-batch-dialog').clientWidth+2,'Batch controls fit the viewport');
+ const applyBounds=q('[data-v83-apply]').getBoundingClientRect(),modalBounds=q('.v83-batch-dialog').getBoundingClientRect();
+ check(applyBounds.bottom<=Math.min(modalBounds.bottom,innerHeight)+1&&applyBounds.height>=44,'Insert action is fully visible with a full-size touch target');
+ check(q('[data-v83-set="team"]').getAttribute('aria-pressed')==='true'&&q('[data-v83-status]').textContent.includes('正唛'),'Selected preset and target mark face are identified');
  check(window.BoxStudioUiRuntimeV64.stats().errors.length===0,'No shared runtime errors');
  document.body.dataset.v82Result=JSON.stringify({status:'PASS',checks,downloads,viewport:[innerWidth,innerHeight]});
 }catch(error){document.body.dataset.v82Result=JSON.stringify({status:'FAIL',checks,downloads,error:error.stack});console.error(error);}finally{URL.createObjectURL=nativeUrl;}

@@ -47,11 +47,15 @@ function batchDialog(trigger,{plan,insert},scope){
  const mm=n=>Number(n.toFixed(1));
  function drawOptions(){
   const items=searchHandlingSymbolsV82({search:search.value}).filter(s=>canBatchSymbolV83(s.id));
-  options.innerHTML=items.map(s=>`<label><input type="checkbox" data-v83-pick="${s.id}" ${selected.has(s.id)?'checked':''}><svg viewBox="0 0 40 40" aria-hidden="true">${handlingSvgV72({icon:s.id,w:40,h:40})}</svg><span>${esc(s.label)}</span></label>`).join('')||'<p class="v83-batch-hint">没有找到可选标识，请换一个关键词。</p>';
+  options.innerHTML=items.map(s=>`<label title="${esc(s.label)}"><input type="checkbox" data-v83-pick="${s.id}" aria-label="${esc(s.label)}" ${selected.has(s.id)?'checked':''}><svg viewBox="0 0 40 40" aria-hidden="true">${handlingSvgV72({icon:s.id,w:40,h:40})}</svg><span>${esc(s.label.split(' / ')[0])}</span></label>`).join('')||'<p class="v83-batch-hint">没有找到可选标识，请换一个关键词。</p>';
  }
  function refresh(){
   apply.disabled=true;error.textContent='';status.textContent=`已选 ${selected.size} / ${MAX_BATCH_SYMBOLS_V83}`;
   preview.textContent=selected.size?'填写尺寸后查看预览。':'请选择一个常用组合，或勾选标识。';
+  for(const button of d.querySelectorAll('[data-v83-set]')){
+   const icons=SYMBOL_SETS_V83.find(s=>s.id===button.dataset.v83Set).icons;
+   button.setAttribute('aria-pressed',String(icons.join()===Array.from(selected).join()));
+  }
   for(const box of options.querySelectorAll('[data-v83-pick]'))box.disabled=!box.checked&&selected.size>=MAX_BATCH_SYMBOLS_V83;
   if(!selected.size)return;
   try{
