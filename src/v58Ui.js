@@ -1,5 +1,6 @@
 import {mountFoldPlayerV78} from './foldPlayerV78.js';
 import {mountSymbolLibraryV73} from './symbolLibraryV73.js';
+import {insertSymbolBatchV83,planSymbolBatchV83} from './symbolBatchV83.js';
 import {handlingSvgV72} from './handlingSymbolsV72.js';
 import {iconV67} from './uiIconsV67.js';
 import { STORAGE_KEY, defaultState, cloneState } from './model.js';
@@ -61,7 +62,13 @@ function marksPalette(){
 function enhanceMarks(){
   const main=document.querySelector('.workspace .main');if(!main||currentTab()!=='Marks'||document.querySelector('[data-v58-marks-studio]'))return;const canvas=main.querySelector('.canvas-shell');if(!canvas)return;canvas.insertAdjacentHTML('beforebegin',marksPalette());const studio=main.querySelector('[data-v58-marks-studio]'),panel=studio.querySelector('[data-v58-mark-panel]');
   studio.querySelectorAll('[data-v58-mark]').forEach(b=>b.onclick=()=>{try{const result=addMarkPresetV66(readState(),b.dataset.v58Mark,{panelId:panel.value});saveState(result.state);if(window.BoxStudioEditor?.reloadFromStorage)window.BoxStudioEditor.reloadFromStorage();else location.reload()}catch(error){let message=studio.querySelector('[data-mark-error]');if(!message){message=document.createElement('p');message.dataset.markError='true';message.setAttribute('role','alert');studio.appendChild(message)}message.textContent=error?.message||String(error);studio.dataset.error=message.textContent}});
-  mountSymbolLibraryV73(studio.querySelector('[data-v73-box-symbols]'),{onInsert:(id,params)=>{const result=addMarkPresetV66(readState(),id,{panelId:panel.value});if(params)Object.assign(result.element,params);saveState(result.state);window.BoxStudioEditor.reloadFromStorage();}});
+  mountSymbolLibraryV73(studio.querySelector('[data-v73-box-symbols]'),{
+    onInsert:(id,params)=>{const result=addMarkPresetV66(readState(),id,{panelId:panel.value});if(params)Object.assign(result.element,params);saveState(result.state);window.BoxStudioEditor.reloadFromStorage();},
+    batch:{
+      plan:config=>planSymbolBatchV83(window.BoxStudioEditor.getState(),config,panel.value),
+      insert:config=>window.BoxStudioEditor.commitState(insertSymbolBatchV83(window.BoxStudioEditor.getState(),config,panel.value).state)
+    }
+  });
   const svg=main.querySelector('#designSvg');
   if(svg){svg.addEventListener('dragover',e=>{if(e.dataTransfer.types.includes('application/boxstudio-mark')){e.preventDefault();e.dataTransfer.dropEffect='copy';}});svg.addEventListener('drop',e=>{const id=e.dataTransfer.getData('application/boxstudio-mark');if(!id)return;e.preventDefault();try{const point=svg.createSVGPoint();point.x=e.clientX;point.y=e.clientY;const local=point.matrixTransform(svg.getScreenCTM().inverse());window.BoxStudioEditor.commitState(dropBoxSymbolV73(readState(),id,local));}catch(error){studio.querySelector('[data-symbol-error]').textContent=error.message;}});}
   studio.querySelector('[data-v58-batch-focus]').onclick=()=>{const file=document.querySelector('#batchFile')?.closest('.panel-section');file?.scrollIntoView({behavior:'smooth',block:'start'});document.querySelector('#batchFile')?.closest('.file-drop')?.classList.add('v58-pulse')};

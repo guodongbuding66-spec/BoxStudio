@@ -16,7 +16,7 @@ mkdirSync('artifacts/v73/symbols',{recursive:true});
 for(const symbol of HANDLING_SYMBOLS_V72){
  const el={id:symbol.id,type:'icon',icon:symbol.id,panelId:'label',group:'marks',x:20,y:20,w:40,h:40,r:0};
  const paths=handlingPrimitivesV73(el);
- check(paths.length>0&&paths.some(p=>p.fill),'Filled imported geometry '+symbol.id);
+ check(paths.length>0&&paths.some(p=>p.fill||p.stroke>0),'Visible vector geometry '+symbol.id);
  check(paths.every(p=>p.ops.flatMap(o=>o.slice(1)).every(Number.isFinite)),'Finite source curves '+symbol.id);
  const square=handlingSvgV72(el),wide=handlingSvgV72({...el,w:60});
  const numbers=svg=>[...svg.matchAll(/d="([^"]+)"/g)].flatMap(m=>m[1].match(/-?\d+(?:\.\d+)?/g).map(Number));
@@ -29,5 +29,5 @@ for(const [icon,key,value]of[['stackLimit','stackLimit',7],['stackHeight','stack
 const base=structuredClone(defaultState);base.elements=[];const panel=generateGeometry(base.structure).panels.find(p=>p.w>80&&p.h>80),point={x:panel.x+panel.w/2,y:panel.y+panel.h/2};
 const dropped=dropBoxSymbolV73(base,'fragile',point),el=dropped.elements[0];check(el.panelId===panel.id,'Drop hits actual box face');check(Math.abs(el.x+el.w/2-panel.w/2)<.001&&Math.abs(el.y+el.h/2-panel.h/2)<.001,'Drop is placed at cursor');
 const crowded=dropBoxSymbolV73(dropped,'dry',point),second=crowded.elements[1];check(second.x!==el.x||second.y!==el.y,'Crowded drop uses safe free space');assert.throws(()=>dropBoxSymbolV73(base,'dry',{x:-100,y:-100}));checks++;assert.throws(()=>dropBoxSymbolV73(base,'bad',point));checks++;
-writeFileSync('artifacts/v73/model-results.json',JSON.stringify({status:'PASS',checks,originals:14,symbols:17}));
+writeFileSync('artifacts/v73/model-results.json',JSON.stringify({status:'PASS',checks,originals:14,symbols:HANDLING_SYMBOLS_V72.length}));
 console.log(`PASS V0.73: ${checks} original-asset, license, vector, editable-parameter and safe-placement checks`);

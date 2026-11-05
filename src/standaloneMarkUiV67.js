@@ -3,6 +3,7 @@ import {zipStoredV74} from './zipStoredV74.js';
 import {fontOptionsV74,loadFontV74,prepareFontsV74} from './fontSystemV74.js';
 import {createSideMarkFaceV74,MARK_FACES_V74,syncMarkFacesV74,switchMarkFaceV74} from './markFacesV74.js';
 import {mountSymbolLibraryV73} from './symbolLibraryV73.js';
+import {insertSymbolBatchV83,planSymbolBatchV83} from './symbolBatchV83.js';
 import {HANDLING_SYMBOLS_V72,handlingSymbolV72,handlingSvgV72,handlingParamsV72} from './handlingSymbolsV72.js';
 import {CODE_TYPES_V72,codeTypeV72,insertGeneratedCodeV72} from './codeGeneratorV72.js';
 import {openCodeGeneratorV72} from './codeGeneratorUiV72.js';
@@ -110,7 +111,14 @@ function renderLibrary(){
  }else if(libraryTab==='symbols')content='<div data-v73-symbol-library></div>';else content=`<button class="v72-open-codes" data-v72-generator>${iconV67('barcode',24)}<span>条码 / 二维码生成器</span></button>`+V58_MARK_GROUPS.map(g=>`<section class="v67-components"><h3>${g.label}</h3><div>${g.items.map(id=>`<button data-mark-insert="${id}" draggable="true">${V58_MARK_PRESETS[id].kind==='icon'?`<svg viewBox="0 0 40 40" width="24" height="24" aria-hidden="true">${handlingSvgV72({icon:id,w:40,h:40})}</svg>`:iconV67(id==='barcodeQr'?'barcode':id==='variable'?'var':'text',22)}<span>${V58_MARK_PRESETS[id].label}</span></button>`).join('')}</div></section>`).join('')+`<section class="v67-components"><h3>自由设计</h3><div>${button('data-mark-custom="text"','自定义文字','text')}${button('data-mark-custom="shape"','矩形边框','shape')}${button('data-mark-image','Logo / 图片','image')}</div></section>`;
  left.innerHTML=`<div class="v67-library-head"><span class="v67-eyebrow">MARK LIBRARY</span><h2>设计你的唛头</h2><p>从组件开始，或使用现成模板。</p></div><div class="v67-library-tabs" role="tablist" aria-label="唛头素材"><button role="tab" data-library-tab="components" aria-selected="${libraryTab==='components'}">组件</button><button role="tab" data-library-tab="templates" aria-selected="${libraryTab==='templates'}">模板</button><button role="tab" data-library-tab="symbols" aria-selected="${libraryTab==='symbols'}">标识</button><button role="tab" data-library-tab="layers" aria-selected="${libraryTab==='layers'}">图层</button></div><div class="v67-library-content">${content}</div>`;
  left.querySelector('[data-v72-generator]')?.addEventListener('click',()=>openCodeGeneratorV72({variables:clone(doc.variables),onInsert:config=>{inspectorTab='object';commit(insertGeneratedCodeV72(doc,config));toast('编码已插入，可继续修改内容。');}}));
- if(libraryTab==='symbols')mountSymbolLibraryV73(left.querySelector('[data-v73-symbol-library]'),{search:symbolSearch,category:symbolCategory,onFilter:f=>{symbolSearch=f.search;symbolCategory=f.category;},onInsert:(id,params)=>insert(id,null,params)});
+ if(libraryTab==='symbols')mountSymbolLibraryV73(left.querySelector('[data-v73-symbol-library]'),{
+   search:symbolSearch,category:symbolCategory,onFilter:f=>{symbolSearch=f.search;symbolCategory=f.category;},
+   onInsert:(id,params)=>insert(id,null,params),
+   batch:{plan:config=>({...planSymbolBatchV83(doc,config,'label'),panelLabel:MARK_FACES_V74.find(f=>f.id===doc.activeMarkFaceV74)?.label||'唛头画布'}),insert:config=>{
+    const next=insertSymbolBatchV83(doc,config,'label');inspectorTab='object';
+    commit(next.state,{selection:next.ids});toast(`已插入 ${next.ids.length} 个标识`);
+   }}
+ });
  left.querySelectorAll('[data-library-tab]').forEach(b=>b.onclick=()=>{libraryTab=b.dataset.libraryTab;renderLibrary();});left.querySelectorAll('[data-mark-insert]').forEach(b=>{b.onclick=()=>insert(b.dataset.markInsert);b.ondragstart=e=>e.dataTransfer.setData('application/boxstudio-mark',b.dataset.markInsert);});
  left.querySelectorAll('[data-side-template]').forEach(b=>b.onclick=()=>safely(()=>{const next=clone(doc),side=createSideMarkFaceV74();next.elements=b.dataset.sideTemplate==='blank'?[]:side.elements;next.selectedId=next.elements[0]?.id||'';commit(setMarkArtboardV67(next,220,220));fit();toast('侧唛排版已更新');}));
  left.querySelectorAll('[data-mark-template]').forEach(b=>b.onclick=()=>safely(()=>{preserve();commit(createMarkDocumentV67(b.dataset.markTemplate));fit();toast('已创建新唛头，原项目已保存');}));

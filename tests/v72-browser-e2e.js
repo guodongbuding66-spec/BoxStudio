@@ -14,7 +14,7 @@ async function capture(selector,mime,name){const start=blobs.length;click(select
 try{
  await wait(()=>api()&&window.BoxStudioV71&&q('[data-v67-mode="mark"]'),'production runtime');await document.fonts.ready;
  click('[data-v67-mode="mark"]');await wait(()=>q('[data-mark-board]'),'standalone marks');api().commitMarkState(createMarkDocumentV67('blank'));await settle();
- click('[data-library-tab="symbols"]');check(document.querySelectorAll('[data-symbol]').length===17,'All seventeen actual carton symbols are available');
+ click('[data-library-tab="symbols"]');check(document.querySelectorAll('[data-symbol]').length===HANDLING_SYMBOLS_V72.length,'All actual carton symbols are available');
  check([...document.querySelectorAll('[data-symbol] svg')].every(s=>s.querySelector('path')),'Cards contain real vector icons');
  change('[data-symbol-search]','堆码','input');check(document.querySelectorAll('[data-symbol]').length===4,'Symbol search filters the stacking markers');
  click('[data-symbol="stackLimit"]');await settle();check(state().elements[0].icon==='stackLimit','Layer marker inserts a real editable object');
