@@ -50,6 +50,10 @@ function rotatedBounds(e){
   return{x:Number(e.x)+(Number(e.w)-w)/2,y:Number(e.y)+(Number(e.h)-h)/2,w,h};
 }
 
+export function markOccupiedBoundsV66(state,panelId){
+  return (state.elements||[]).filter(e=>e.panelId===panelId&&!e.hidden&&!e.v61PanelFill&&!(e.type==='notice'&&!isPackageNoticeVisible(state.variables))).map(rotatedBounds);
+}
+
 function insidePolygon(x,y,points){
   let inside=false;
   for(let i=0,j=points.length-1;i<points.length;j=i++){
@@ -68,7 +72,7 @@ export function addMarkPresetV66(state,presetId,{panelId=null}={}){
   const scale=e.type==='barcode-qr-group'?1:Math.min(1,maxW/e.w,maxH/e.h);
   e.w*=scale;e.h*=scale;
   if(e.fontSize)e.fontSize*=scale;
-  const occupied=(state.elements||[]).filter(x=>x.panelId===panel.id&&!x.hidden&&!x.v61PanelFill&&!(x.type==='notice'&&!isPackageNoticeVisible(state.variables))).map(rotatedBounds);
+  const occupied=markOccupiedBoundsV66(state,panel.id);
   const xs=[safe,...occupied.map(r=>r.x+r.w+gap)].sort((a,b)=>a-b),ys=[safe,...occupied.map(r=>r.y+r.h+gap)].sort((a,b)=>a-b);
   const polygon=panel.points?.length>=3?panel.points:null;
   let placement=null;

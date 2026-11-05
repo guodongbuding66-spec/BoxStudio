@@ -1,6 +1,7 @@
 import {HANDLING_SYMBOLS_V72,handlingSymbolV72,handlingParamsV72,handlingSvgV72,HANDLING_CATEGORIES_V82,searchHandlingSymbolsV82} from './handlingSymbolsV72.js';
 import {HANDLING_SOURCES_V82 as HANDLING_SOURCES_V73} from './handlingSourcesV82.js';
 import {iconV67} from './uiIconsV67.js';
+import {canBatchSymbolV83,MAX_BATCH_SYMBOLS_V83,SYMBOL_SETS_V83,symbolBatchLayoutV83} from './symbolBatchV83.js';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const categories=HANDLING_CATEGORIES_V82;
@@ -22,9 +23,62 @@ function detail(id,onInsert){
  d.querySelector('[data-download-symbol]').onclick=()=>{try{download(read());}catch(e){d.querySelector('[data-symbol-error]').textContent=e.message;}};
 }
 export function symbolLibraryMarkupV73({search='',category='全部'}={}){return`<div class="v73-symbol-intro"><b>箱面运输标识</b><p>点击添加，或拖到画布。支持双人抬箱等搬运标识。</p></div><div class="v72-symbol-head"><input type="search" data-symbol-search aria-label="搜索箱面标识" placeholder="搜索两人抬箱、叉车、禁刀 / team lift…" value="${esc(search)}"></div><nav class="v73-symbol-filters" aria-label="标识分类">${categories.map(c=>`<button type="button" data-symbol-category="${c}" aria-pressed="${category===c}">${c}</button>`).join('')}</nav><div class="v73-symbol-count" data-symbol-count aria-live="polite"></div><p data-symbol-error role="alert"></p><div class="v72-symbol-grid" data-symbol-grid></div><button class="v73-symbol-source" data-symbol-sources>${iconV67('file',14)}素材来源 · 免费商用</button>`;}
-export function mountSymbolLibraryV73(host,{search='',category='全部',onInsert,onFilter=()=>{}}={}){
+function batchDialog(trigger,{plan,insert},scope){
+ const d=dialog('标识组合排版',`<form data-v83-batch-form>
+   <p class="v83-batch-hint">选好标识和实际尺寸，一次放入当前画布。每个标识仍可单独编辑。</p>
+   <div class="v83-batch-presets" aria-label="常用组合">${SYMBOL_SETS_V83.map(s=>`<button type="button" data-v83-set="${s.id}">${s.label}</button>`).join('')}<button type="button" data-v83-clear>清空选择</button></div>
+   <div class="v83-batch-body"><section class="v83-batch-picker"><label>搜索可选标识<input type="search" data-v83-search placeholder="双人抬箱、叉车、team lift"></label>
+     <div class="v83-batch-options" data-v83-options></div><p class="v83-batch-hint">按勾选顺序排放，最多 8 个。带数值的标识请单独添加。</p></section>
+   <section class="v83-batch-layout" aria-label="组合尺寸与预览">
+     <div class="v83-batch-fields"><label>边长 (mm)<input type="number" name="size" min="10" max="100" step="0.1" value="30" required></label>
+     <label>间距 (mm)<input type="number" name="gap" min="0" max="30" step="0.1" value="4" required></label>
+     <label>每行数量<input type="number" name="columns" min="1" max="8" step="1" value="3" required></label></div>
+     <div class="v83-batch-preview" data-v83-preview></div><p class="v83-batch-hint" role="status" data-v83-status></p>
+   </section></div>
+   <p role="alert" data-v83-error></p>
+   <div class="v83-batch-footer"><button type="submit" class="primary" data-v83-apply disabled>插入组合</button></div>
+ </form>`);
+ d.classList.add('v83-batch-dialog');
+ const form=d.querySelector('form'),options=d.querySelector('[data-v83-options]'),preview=d.querySelector('[data-v83-preview]'),
+ status=d.querySelector('[data-v83-status]'),error=d.querySelector('[data-v83-error]'),apply=d.querySelector('[data-v83-apply]'),
+ search=d.querySelector('[data-v83-search]');
+ let selected=new Set();
+ const read=()=>({icons:[...selected],...Object.fromEntries(['size','gap','columns'].map(key=>[key,form.elements.namedItem(key).valueAsNumber]))});
+ const mm=n=>Number(n.toFixed(1));
+ function drawOptions(){
+  const items=searchHandlingSymbolsV82({search:search.value}).filter(s=>canBatchSymbolV83(s.id));
+  options.innerHTML=items.map(s=>`<label><input type="checkbox" data-v83-pick="${s.id}" ${selected.has(s.id)?'checked':''}><svg viewBox="0 0 40 40" aria-hidden="true">${handlingSvgV72({icon:s.id,w:40,h:40})}</svg><span>${esc(s.label)}</span></label>`).join('')||'<p class="v83-batch-hint">没有找到可选标识，请换一个关键词。</p>';
+ }
+ function refresh(){
+  apply.disabled=true;error.textContent='';status.textContent=`已选 ${selected.size} / ${MAX_BATCH_SYMBOLS_V83}`;
+  preview.textContent=selected.size?'填写尺寸后查看预览。':'请选择一个常用组合，或勾选标识。';
+  for(const box of options.querySelectorAll('[data-v83-pick]'))box.disabled=!box.checked&&selected.size>=MAX_BATCH_SYMBOLS_V83;
+  if(!selected.size)return;
+  try{
+   const config=read(),layout=symbolBatchLayoutV83(config);
+   preview.innerHTML=`<svg viewBox="0 0 ${layout.w} ${layout.h}" role="img" aria-label="组合预览：${esc(layout.cells.map(c=>handlingSymbolV72(c.icon).label).join('、'))}">${layout.cells.map(c=>`<g transform="translate(${c.x} ${c.y})">${handlingSvgV72(c)}</g>`).join('')}</svg>`;
+   status.textContent+=` · ${mm(layout.w)} × ${mm(layout.h)} mm`;
+   const target=plan(config);status.textContent+=` · ${target.panelLabel}`;apply.disabled=false;
+  }catch(e){error.textContent=e.message;}
+ }
+ for(const button of d.querySelectorAll('[data-v83-set]'))button.onclick=()=>{selected=new Set(SYMBOL_SETS_V83.find(s=>s.id===button.dataset.v83Set).icons);search.value='';drawOptions();refresh();};
+ d.querySelector('[data-v83-clear]').onclick=()=>{selected.clear();drawOptions();refresh();};
+ options.onchange=e=>{const id=e.target.dataset.v83Pick;if(!id)return;if(e.target.checked)selected.add(id);else selected.delete(id);refresh();};
+ search.oninput=()=>{drawOptions();refresh();};
+ for(const key of ['size','gap','columns'])form.elements.namedItem(key).oninput=refresh;
+ form.onsubmit=e=>{e.preventDefault();if(apply.disabled)return;try{insert(read());close(d);}catch(err){error.textContent=err.message;}};
+ d.addEventListener('close',()=>{if(!trigger.isConnected)document.querySelector(scope+' [data-v83-batch-open]')?.focus();},{once:true});
+ drawOptions();refresh();
+}
+
+export function mountSymbolLibraryV73(host,{search='',category='全部',onInsert,onFilter=()=>{},batch=null}={}){
  host.innerHTML=symbolLibraryMarkupV73({search,category});let query=search,group=category;
  const grid=host.querySelector('[data-symbol-grid]'),box=host.matches('[data-v73-box-symbols]');
+ if(batch){
+  host.querySelector('.v73-symbol-intro').insertAdjacentHTML('beforeend','<button type="button" class="v83-batch-open" data-v83-batch-open>标识组合排版</button>');
+  const trigger=host.querySelector('[data-v83-batch-open]');
+  trigger.onclick=()=>batchDialog(trigger,batch,box?'[data-v73-box-symbols]':'[data-v73-symbol-library]');
+ }
  const render=()=>{const items=searchHandlingSymbolsV82({search:query,category:group});
   host.querySelector('[data-symbol-count]').textContent=`${items.length} 个标识 · SVG 矢量`;
   grid.innerHTML=items.map(t=>`<article class="v73-symbol-tile"><button class="v72-symbol-card" data-symbol="${t.id}" ${box?`data-v58-mark="${t.id}"`:""} draggable="true" aria-label="添加${t.label}"><svg viewBox="0 0 40 40" aria-hidden="true">${handlingSvgV72({icon:t.id,w:40,h:40})}</svg>${t.addedIn?'<em class="v82-symbol-new">新增</em>':''}<span>${t.label}</span><small>${t.category}</small></button><button class="v73-symbol-details" data-symbol-details="${t.id}" aria-label="预览${t.label}" title="大图预览与参数">${iconV67('search',14)}<span>预览</span></button></article>`).join('')||'<div class="v73-symbol-empty"><b>没有找到标识</b><p>试试“两人抬箱”“叉车”或“温度”。</p><button data-symbol-clear>清除筛选</button></div>';

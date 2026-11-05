@@ -6,7 +6,7 @@ from fontTools import subset
 
 root = Path(__file__).resolve().parent.parent
 labels = ''.join((root / 'src' / p).read_text() for p in
-                 ['handlingArtworkV82.js', 'handlingSymbolsV72.js', 'symbolLibraryV73.js'])
+                 ['handlingArtworkV82.js', 'handlingSymbolsV72.js', 'symbolLibraryV73.js', 'symbolBatchV83.js'])
 target = root / 'vendor/fonts/boxstudio-ui-sc.woff'
 if '--check' in sys.argv:
     cmap = TTFont(target).getBestCmap()
